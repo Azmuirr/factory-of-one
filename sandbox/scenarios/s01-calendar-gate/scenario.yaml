@@ -1,0 +1,80 @@
+# Generator input for scenario 1. Hidden from agents: they see only the generated world.
+id: s01-calendar-gate
+title: Activation drops after onboarding moves calendar connect first
+version: 0.2.0
+tier: easy
+tiers_built: [easy]
+
+clock:
+  weeks: 10
+  now: {week: 8, day: 7}
+  post_action_weeks: [9, 10]
+
+baseline: default  # sandbox/SPEC.md section 4
+
+onboarding_v1:  # active in weeks 1 to 5
+  steps: [welcome, calendar_connect_optional, first_meeting]
+  calendar_step_skippable: true
+
+releases:
+  - id: rel_0301
+    at: {week: 2, day: 3}
+    title: "Recaps: action items grouped by owner"
+    notes: "Action items now group under each owner's name."
+    flag: null
+    effects: []
+
+  - id: rel_0318
+    at: {week: 4, day: 2}
+    title: "Zoom bot: faster join"
+    notes: "The notetaker joins Zoom calls about 20 seconds sooner."
+    flag: null
+    effects: []
+
+  - id: rel_0412
+    at: {week: 6, day: 2}
+    title: "Onboarding v2: connect calendar first"
+    notes: "New users connect their calendar before anything else, so the notetaker joins their next meeting automatically. The skip option is removed."
+    flag: null
+    effects:
+      - kind: onboarding_change
+        calendar_step_skippable: false
+      - kind: connect_block
+        # Share of workspaces whose organization requires admin consent for calendar apps.
+        by_provider: {google: 0.02, microsoft: 0.45, none: 0.0}
+        error_code: admin_consent_required
+        # Blocked workspaces keep this share of their normal activation chance (some get approval later).
+        activation_retained: 0.49
+
+text:
+  tickets:
+    - theme: calendar_admin_consent
+      eligible: "blocked_by == rel_0412"
+      file_rate: 0.02  # about 8 to 15 tickets per week
+      support_tag_mix: {integration: 0.5, account: 0.3, other: 0.2}
+      template: templates/tickets/calendar_admin_consent.txt
+
+messages:
+  - at: {week: 7, day: 2}
+    from_role: vp_product
+    subject: "Activation dip"
+    body: "Activation dipped on the weekly dashboard. What is going on, and what do you need from me?"
+  - at: {week: 7, day: 4}
+    from_role: support_lead
+    subject: "Calendar tickets"
+    body: "More new users stuck on the calendar step this week. Several mention needing admin approval."
+
+actions_available: [rollback, set_flag, start_experiment, no_action]
+
+# Specified now, built after the easy tier passes.
+variants:
+  medium:
+    add:
+      - "Onboarding v2 lifts Google activation from 41% to 43%, because the notetaker auto-joins more meetings. A full rollback now costs something. The best call is segment-specific."
+  hard:
+    add:
+      - "calendar_connect_failed carries no error_code. Only tickets reveal admin consent."
+      - "Release rel_0415 'Teams bot v3' at week 6 day 4, with no real effect. Teams users skew Microsoft, so it looks guilty."
+      - "The VP message asks: 'Is this the new Teams bot?'"
+    remove:
+      - "The support lead message."

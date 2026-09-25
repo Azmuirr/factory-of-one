@@ -4,17 +4,35 @@ Status: draft for review. No generator code exists yet.
 
 ## 1. The company
 
-Draftline is a fictional AI writing assistant for small teams. Workspaces of 1 to 50 people draft, rewrite, and summarize documents, then share or export them.
+**Minutewise** is a fictional AI meeting notetaker for teams. It joins calls, writes the recap and action items, and shares them with attendees. Its business model is based on public information about Otter.ai and Fathom (section 10). It uses no private data from either company.
+
+| Attribute | Minutewise |
+|---|---|
+| Motion | B2B product-led growth (PLG): self-serve signup, trial, seat expansion, sales for large teams |
+| Trial | Every new workspace gets a 14-day Team trial. No credit card |
+| After the trial | Pays for Team or Business, or drops to Free |
+| Viral loop | Shared recaps reach meeting attendees. Some attendees sign up (the `recap_link` channel) |
+| Sales handoff | A trial workspace with 10+ active users becomes a product-qualified lead (PQL) |
+| Second product (later) | Async video, launched as its own scenario. Every table carries a `product` field from day one |
+
+### Plans
+
+| Plan | Price per seat per month | Limits | Anchor |
+|---|---|---|---|
+| Free | $0 | 300 minutes a month, 30-minute meetings | Otter Basic |
+| Team | $19 monthly, $15 annual. 2-seat minimum | Unlimited meetings | Fathom Team |
+| Business | $30 monthly, $24 annual | Adds CRM sync, admin analytics | Between Otter Business and Fathom Business |
+| Enterprise | Custom | Single sign-on (SSO), sales-led | Both |
 
 ## 2. Rules
 
 | Rule | Why |
 |---|---|
-| Numbers come from a seeded causal model in code | Same seed, same world. Benchmarks are reproducible |
-| Text comes from templates in v1 | No API key needed to generate a world. Model-written text comes later, generated once and frozen per seed |
-| The world reacts | An action changes the causal model from the next simulated day. A rollback has to show up in the data |
+| Numbers come from a seeded causal model in code | Same seed, same world. No tokens spent |
+| Text comes from templates | No tokens at run time. About 30 variants per theme, written once and committed |
+| The world reacts | An action changes the causal model from the next simulated day |
 | Truth is separate | The generator writes `world/` for agents and `truth/` for the bench. No agent tool can read `truth/` or `sandbox/scenarios/` |
-| Real gaps stay in | Real companies have unlinked store reviews, noisy support tags, and silent churn. So does the sandbox |
+| Real gaps stay in | Noisy support tags, correlated dimensions, and immature cohorts are part of the data |
 
 ## 3. Clock
 
@@ -23,100 +41,136 @@ Draftline is a fictional AI writing assistant for small teams. Workspaces of 1 t
 | Run length | 10 simulated weeks |
 | Baseline | Weeks 1 to 5 |
 | Scenario events | Week 6 or later |
-| "Now" for agents | End of week 8. Agents see nothing after this point |
+| "Now" for agents | End of week 8 |
 | After actions | Weeks 9 and 10 are generated only after the loop records its actions |
-| Resolution | Generated per day. Timestamps to the second, in Coordinated Universal Time (UTC) |
+| Resolution | Generated per day. Timestamps in Coordinated Universal Time (UTC) |
 
 ## 4. Baseline numbers (please correct)
 
-| Parameter | Value | Note |
-|---|---|---|
-| New workspaces per day | 550 on average | About 3,850 per week |
-| Weekday factor | Mon 1.15, Tue 1.20, Wed 1.15, Thu 1.10, Fri 0.95, Sat 0.65, Sun 0.70 | Weekends run about 35% lower |
-| Weekly growth trend | +1% | |
-| Signup platform mix | Web 50%, desktop 15%, iOS 20%, Android 15% | Mobile is 35% |
-| Channel mix | Organic search 40%, paid social 25%, direct 20%, referral 15% | Paid social carries lower intent |
-| Segment mix | Solo 35%, small (2 to 10) 50%, mid (11 to 50) 15% | |
-| First-run screen load, median | Web 1.4s, desktop 1.1s, iOS 2.0s, Android 2.3s | |
-| 7-day activation target | Web 43%, desktop 45%, iOS 37%, Android 35%. Overall about 41% | The generator calibrates to these |
-| Support tickets | About 70 per week | Billing 20%, export 20%, AI quality 25%, login 20%, other 15% |
-| Store reviews | About 40 per week, mobile only | Average 4.2 stars |
+The scale matches an early-stage company, around Fathom's size in 2024, not Otter's today.
 
-**Activation** = a new workspace whose creator shares or exports a document within 7 days of signup. Generating a draft is not activation, because output alone doesn't show the user's job moved forward.
+| Parameter | Value | Basis |
+|---|---|---|
+| New workspaces per week | About 3,850 | Assumption. Enough volume to detect a 3-point drop in one week |
+| Weekday factor | Mon to Thu about 1.15, Fri 0.95, weekends 0.65 | Assumption: business product |
+| Channel mix | Organic search 35%, `recap_link` 25%, paid search 20%, direct 20% | Assumption |
+| Company size | Solo 30%, 2 to 10: 45%, 11 to 50: 18%, 51+: 7% | Assumption |
+| Calendar provider | Google 60%, Microsoft 35%, none 5% | Assumption |
+| Meeting platform | Depends on calendar: Google users mostly Meet and Zoom, Microsoft users mostly Teams and Zoom | Assumption. Creates a realistic confound |
+| 7-day activation | About 40% overall. Google 41%, Microsoft 39%, none 36% | Benchmark average is 36%, and the best PLG companies run 40% to 50% |
+| Trial to paid | About 11% of all trials. 25% if activated, 2% if not | Benchmark for no-card trials: 8% to 22%, median 14% |
+| Seats at conversion | 4 on average | Assumption |
+| Revenue per seat | About $17 a month, blending monthly and annual | Derived from the plan table |
+| Viral coefficient | About 0.6 new workspaces per activated workspace, arriving over the next 3 weeks | Assumption, set so `recap_link` holds at 25% of signups |
+| Support tickets | About 70 per week | Assumption. Themes: bot didn't join 25%, billing 20%, recap quality 20%, login 15%, other 20% |
+
+**Activation** means that within 7 days of signup, the workspace shares a recap of a real meeting (2 or more participants, 5 or more minutes) with at least 1 attendee. A recording alone doesn't count, because the value is a recap someone uses.
+
+At baseline this yields about 430 new paying workspaces and about $350K of new annual recurring revenue (ARR) per week.
 
 ## 5. Causal model (per new workspace)
 
 | Step | Rule |
 |---|---|
-| 1. Arrivals | Daily count = base × weekday factor × trend, plus Poisson noise |
-| 2. Attributes | Segment, channel, and platform drawn from the mix tables |
-| 3. Intent | A hidden score. Lower for paid social, higher for referral. Stored in `truth/` only |
-| 4. Load time | Log-normal around the platform median × every active release multiplier |
-| 5. First draft | P(draft within 7 days) = logistic(intent + segment effect − load penalty × log(load seconds)) |
-| 6. Value event | P(share or export within 7 days, given a draft) = base rate by platform and segment |
-| 7. Activation | Step 6 happened within 7 days of signup |
+| 1. Arrivals | Daily count = base × weekday factor × trend, plus Poisson noise. `recap_link` arrivals follow past activations |
+| 2. Attributes | Channel, company size, calendar provider, and meeting platform, drawn from the mix tables |
+| 3. Intent | A hidden score. Higher for `recap_link` and larger companies. Stored in `truth/` only |
+| 4. Onboarding | The workspace passes the onboarding steps active that day. Each step has a pass probability by segment |
+| 5. First meeting | P(recorded meeting within 7 days) = logistic(intent + size effect − onboarding friction) |
+| 6. Activation | P(recap shared, given a meeting) = base rate by company size |
+| 7. Trial outcome | At day 14: paid (plan, seats) or Free. Conversion depends on activation and team size |
+| 8. Viral | Each shared recap reaches outside attendees. A fraction sign up over the next 3 weeks |
 
-The load penalty is calibrated so that doubling mobile load time cuts mobile activation by about 25% relative, which moves overall activation by about 8%.
-
-Retention, revenue, and costs are not modeled yet. The scenario that first needs each one adds it.
+Retention after conversion, AI costs, and async video aren't modeled yet. The scenario that first needs each one adds it.
 
 ## 6. Actions (how the world reacts)
 
 | Action | Parameters | Effect from the next simulated day |
 |---|---|---|
-| `rollback` | release ID, platforms (optional) | Removes the release's effects on those platforms |
-| `set_flag` | flag, platform, percent | Exposes that share of new workspaces to the flagged change |
-| `start_experiment` | flag, split, platforms, primary metric | Random assignment, logged in `assignments` |
-| `no_action` | none | The world continues unchanged |
+| `rollback` | release ID, segment filter (optional) | Removes the release's effects for that segment |
+| `set_flag` | flag, segment filter, percent | Exposes that share of new workspaces to the flagged change |
+| `start_experiment` | flag, split, segment filter, primary metric | Random assignment, logged in `assignments` |
+| `no_action` | none | The world continues |
 
-Every action is written to `actions` with a timestamp, so the bench can score what the loop did and when.
+Every action is written to `actions` with a timestamp.
 
 ## 7. Data schema (`world/world.db`, SQLite)
 
-Shared codes, used by every table and all text metadata:
+### Shared codes
 
 | Code | Values |
 |---|---|
-| `platform` | `web`, `desktop`, `ios`, `android` |
-| `segment` | `solo`, `small`, `mid` |
-| `channel` | `organic`, `paid_social`, `direct`, `referral` |
+| `product` | `notes` (later: `video`) |
+| `channel` | `organic`, `recap_link`, `paid_search`, `direct` |
+| `company_size` | `solo`, `s2_10`, `s11_50`, `s51_plus` |
+| `calendar_provider` | `google`, `microsoft`, `none` |
+| `meeting_platform` | `zoom`, `meet`, `teams` |
+| `plan` | `trial`, `free`, `team`, `business`, `enterprise` |
 
 ### Tables agents can read
 
 | Table | Fields | Notes |
 |---|---|---|
-| `workspaces` | workspace_id, created_at, segment, channel, signup_platform | One row per signup |
+| `workspaces` | workspace_id, created_at, channel, company_size, calendar_provider, referrer_workspace_id | `referrer_workspace_id` is set for `recap_link` signups |
 | `users` | user_id, workspace_id, role, created_at | Scenario 1 creates only the creator |
-| `events` | event_id, ts, workspace_id, user_id, platform, name, props (JSON) | Names: `signup_completed`, `first_run_viewed` (props: load_ms), `draft_generated`, `doc_shared`, `doc_exported`, `session_started` |
-| `releases` | release_id, ts, title, notes, platforms, flag | Written release notes, as an engineer would post them |
-| `flags` | flag, platform, percent, ts | Flag state history |
+| `events` | event_id, ts, workspace_id, user_id, product, name, props (JSON) | See the event list below |
+| `subscriptions` | workspace_id, ts, plan, seats, billing, mrr | One row per plan change |
+| `releases` | release_id, ts, title, notes, flag | Release notes, as an engineer would post them |
+| `flags` | flag, segment_filter, percent, ts | Flag state history |
 | `assignments` | workspace_id, experiment_id, arm, ts | Empty until an experiment starts |
-| `tickets` | ticket_id, created_at, workspace_id, user_id, platform, subject, body, support_tag | Carries workspace IDs, so it links to usage |
-| `reviews` | review_id, created_at, store, platform, rating, body | **No workspace ID.** Real app stores don't link reviews to accounts |
+| `tickets` | ticket_id, created_at, workspace_id, user_id, subject, body, support_tag | Linked to usage by workspace ID |
 | `messages` | message_id, ts, from_role, subject, body | Stakeholder messages in shared channels only |
 | `actions` | action_id, ts, name, params (JSON), decided_by | Written by the loop, not the generator |
+
+### Events
+
+| Event | Props |
+|---|---|
+| `signup_completed` | none |
+| `onboarding_step_viewed` | step |
+| `calendar_connect_started` | provider |
+| `calendar_connect_completed` | provider |
+| `calendar_connect_failed` | provider, error_code |
+| `meeting_recorded` | meeting_platform, duration_min, participants |
+| `recap_shared` | recipients, external_recipients |
+| `trial_ended` | outcome |
 
 ### Hidden tables (`truth/truth.db`, bench only)
 
 | Table | Fields |
 |---|---|
-| `latents` | workspace_id, intent, true_load_ms, releases_applied |
-| `planted` | scenario_id, cause, expected effect by segment and platform |
+| `latents` | workspace_id, intent, blocked_by, releases_applied |
+| `planted` | scenario_id, cause, expected effect by segment |
 
 ## 8. Deferred until a scenario needs it
 
 | Item | First needed by |
 |---|---|
-| Pricing, plans, revenue | Scenario 3 |
-| Token and infrastructure costs | Scenario 3 |
-| Invited members and retention | Scenario 4 |
+| Pricing experiment mechanics | Scenario 2 |
+| AI cost per meeting minute | Scenario 3 |
+| Retention and seat expansion after conversion | Scenario 4 |
 | Interview transcripts | Scenario 5 |
 | Partner team dependencies | Scenario 6 |
-| PM team artifacts (updates, specs, review comments) | Scenarios 7 to 9 |
+| PM team artifacts | Scenarios 7 to 9 |
 | Private messages | Scenario 10 |
+| Async video launch | Its own scenario |
 
 ## 9. Questions for Amir
 
-1. Are the baseline numbers in section 4 believable for a small-team writing tool?
-2. The brief requires shared IDs between usage and customer text. Tickets carry them. Store reviews can't, because real stores don't. Accept the gap?
-3. Activation means share or export within 7 days. Agree?
+1. Are the baseline numbers in section 4 believable?
+2. Is "a recap shared with an attendee within 7 days" the right activation event?
+3. Is the name Minutewise fine?
+
+## 10. Public sources
+
+Figures below are as published. Third-party estimates are labeled.
+
+| Fact | Source |
+|---|---|
+| Otter passed $100M ARR in March 2025, with under 200 employees, over 25M users, and over 1B meetings processed | [Otter.ai blog](https://otter.ai/blog/otter-ai-breaks-100m-arr-barrier-and-transforms-business-meetings-launching-industry-first-ai-meeting-agent-suite) |
+| Otter plans: Basic free (300 minutes, 30-minute meetings), Pro, Business, Enterprise | [Otter.ai pricing](https://otter.ai/pricing), read 2026-09-24 |
+| Fathom plans: Free, Premium, Team ($19 monthly, $15 annual, 2-seat minimum), Business ($34 monthly, $25 annual), Enterprise | [Fathom pricing](https://www.fathom.ai/pricing), read 2026-09-24 |
+| Fathom at about $30M ARR in 2025, up from $10M in 2024 | [GetLatka](https://getlatka.com/companies/fathom.ai), third-party estimate |
+| Superhuman acquired Fathom in September 2026 | [TechCrunch](https://techcrunch.com/2026/09/14/superhuman-acquires-yc-backed-notetaker-fathom-as-productivity-platforms-push-for-agentic-work/) |
+| SaaS activation averages 36% (median 30%) across 500+ products | [Lenny's Newsletter](https://www.lennysnewsletter.com/p/what-is-a-good-activation-rate) |
+| No-card trial to paid: 8% to 22%, median 14% | [Benchmark roundup](https://www.growthspreeofficial.com/blogs/b2b-saas-trial-to-paid-conversion-rate-benchmarks-2026-by-trial-type-acv-length-credit-card), secondary source. Verify before citing publicly |

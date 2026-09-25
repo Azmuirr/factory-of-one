@@ -1,0 +1,62 @@
+# Grading key for scenario 1. Only the bench reads this file.
+scenario: s01-calendar-gate
+version: 0.2.0
+
+cause:
+  release: rel_0412
+  mechanism: "Onboarding v2 made calendar connect mandatory. About 45% of Microsoft calendar workspaces need admin consent, so they get stuck."
+  affected:
+    segment: {calendar_provider: microsoft}
+    funnel_step: "calendar_connect_started -> calendar_connect_completed"
+  onset: {week: 6, day: 2}
+  size:
+    microsoft_activation_7d: {before: 0.39, after: 0.30}
+    overall_activation_7d: {before: 0.40, after: 0.37, relative_change: -0.08}
+    new_paid_workspaces_per_week: {before: 431, after: 402}
+    new_arr_lost_per_week_usd: 24000
+  secondary_effect: "Fewer activations mean fewer shared recaps, so recap_link signups start dipping 1 to 3 weeks later."
+
+expected_findings:
+  - id: F1
+    finding: "Localizes the drop to Microsoft calendar workspaces, not to Teams as a meeting platform."
+  - id: F2
+    finding: "Ties the onset to rel_0412."
+  - id: F3
+    finding: "Names admin consent on the mandatory calendar step as the mechanism."
+  - id: F4
+    finding: "Cites tickets from 3 or more workspaces."
+  - id: F5
+    finding: "Computes activation on mature cohorts only (7 full days)."
+  - id: F6
+    finding: "Bonus: sizes the cost in revenue, or flags the delayed viral-loop effect."
+
+decision:
+  correct:
+    - "Restore the skip option for Microsoft calendar workspaces (or roll back v2 for them), then retest v2 behind a flag with a fallback when consent is required."
+    - "Roll back v2 for everyone, then retest behind a flag with the fallback."
+  partial:
+    - "Roll back without a retest plan."
+  wrong:
+    - "No action by the end of week 8."
+    - "Blame the Teams bot, channel mix, or seasonality."
+    - "Ship another onboarding change first."
+
+outcome_if_correct:
+  leading: "Microsoft calendar connect completion back to baseline within 1 day."
+  lagging: "Microsoft 7-day activation within 2 points of 0.39 for cohorts that start after the fix."
+  observation_lag_days: 7
+
+traps_in_data:
+  - "Cohorts from the last 7 days are immature."
+  - "Weekend signups run about 35% lower."
+  - "Microsoft calendar users skew toward Teams, so a meeting-platform slice points at Teams."
+  - "Support tags are noisy: only half of consent tickets are tagged integration."
+  - "Timestamps are UTC."
+
+bench_score:
+  - found_cause: "F1, F2, and F3 present"
+  - decided: "correct, partial, or wrong, per the lists above"
+  - detection_latency_days: "from onset to the first decision packet naming the cause"
+  - pm_minutes: "proxy from words read and decisions made at gates"
+  - agent_cost_usd: "from traces"
+  - false_alarms: "claims about causes not in this file"
