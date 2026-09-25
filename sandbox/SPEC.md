@@ -4,13 +4,13 @@ Status: draft for review. No generator code exists yet.
 
 ## 1. The company
 
-**Minutewise** is a fictional AI meeting notetaker for teams. It joins calls, writes the recap and action items, and shares them with attendees. Its business model is based on public information about Otter.ai and Fathom (section 10). It uses no private data from either company.
+**Tallybird** is a fictional AI meeting notetaker for teams. It joins calls, writes the recap and action items, and shares them with attendees. Its business model is based on public information about Otter.ai and Fathom (section 10). It uses no private data from either company.
 
-| Attribute | Minutewise |
+| Attribute | Tallybird |
 |---|---|
 | Motion | B2B product-led growth (PLG): self-serve signup, trial, seat expansion, sales for large teams |
 | Trial | Every new workspace gets a 14-day Team trial. No credit card |
-| After the trial | Pays for Team or Business, or drops to Free |
+| After the trial | Solo workspaces can buy Pro. Teams buy Team or Business. Everyone else drops to Free |
 | Viral loop | Shared recaps reach meeting attendees. Some attendees sign up (the `recap_link` channel) |
 | Sales handoff | A trial workspace with 10+ active users becomes a product-qualified lead (PQL) |
 | Second product (later) | Async video, launched as its own scenario. Every table carries a `product` field from day one |
@@ -20,6 +20,7 @@ Status: draft for review. No generator code exists yet.
 | Plan | Price per seat per month | Limits | Anchor |
 |---|---|---|---|
 | Free | $0 | 300 minutes a month, 30-minute meetings | Otter Basic |
+| Pro | $20 monthly, $16 annual. 1 seat | Unlimited meetings, for solo users | Fathom Premium |
 | Team | $19 monthly, $15 annual. 2-seat minimum | Unlimited meetings | Fathom Team |
 | Business | $30 monthly, $24 annual | Adds CRM sync, admin analytics | Between Otter Business and Fathom Business |
 | Enterprise | Custom | Single sign-on (SSO), sales-led | Both |
@@ -45,9 +46,9 @@ Status: draft for review. No generator code exists yet.
 | After actions | Weeks 9 and 10 are generated only after the loop records its actions |
 | Resolution | Generated per day. Timestamps in Coordinated Universal Time (UTC) |
 
-## 4. Baseline numbers (please correct)
+## 4. Baseline numbers
 
-The scale matches an early-stage company, around Fathom's size in 2024, not Otter's today.
+The scale matches about where Fathom was in 2025, not Otter today. Reasoning for each choice: [docs/decisions.md](../docs/decisions.md).
 
 | Parameter | Value | Basis |
 |---|---|---|
@@ -59,12 +60,12 @@ The scale matches an early-stage company, around Fathom's size in 2024, not Otte
 | Meeting platform | Depends on calendar: Google users mostly Meet and Zoom, Microsoft users mostly Teams and Zoom | Assumption. Creates a realistic confound |
 | 7-day activation | About 40% overall. Google 41%, Microsoft 39%, none 36% | Benchmark average is 36%, and the best PLG companies run 40% to 50% |
 | Trial to paid | About 11% of all trials. 25% if activated, 2% if not | Benchmark for no-card trials: 8% to 22%, median 14% |
-| Seats at conversion | 4 on average | Assumption |
-| Revenue per seat | About $17 a month, blending monthly and annual | Derived from the plan table |
+| Paid mix | 25% of new paid workspaces are solo on Pro (1 seat). Teams average 5 seats | Assumption |
+| Revenue per paid workspace | About $68 a month ($816 a year), blending monthly and annual billing | Derived from the plan table and paid mix |
 | Viral coefficient | About 0.6 new workspaces per activated workspace, arriving over the next 3 weeks | Assumption, set so `recap_link` holds at 25% of signups |
 | Support tickets | About 70 per week | Assumption. Themes: bot didn't join 25%, billing 20%, recap quality 20%, login 15%, other 20% |
 
-**Activation** means that within 7 days of signup, the workspace shares a recap of a real meeting (2 or more participants, 5 or more minutes) with at least 1 attendee. A recording alone doesn't count, because the value is a recap someone uses.
+**Activation** means that within 7 days of signup, the workspace shares a recap of a real meeting (2 or more participants, 5 or more minutes) with at least 1 attendee. A recording alone doesn't count, because the value is a recap someone uses. Known weakness: it undercounts solo users who keep notes private. See decision D3.
 
 At baseline this yields about 430 new paying workspaces and about $350K of new annual recurring revenue (ARR) per week.
 
@@ -105,7 +106,7 @@ Every action is written to `actions` with a timestamp.
 | `company_size` | `solo`, `s2_10`, `s11_50`, `s51_plus` |
 | `calendar_provider` | `google`, `microsoft`, `none` |
 | `meeting_platform` | `zoom`, `meet`, `teams` |
-| `plan` | `trial`, `free`, `team`, `business`, `enterprise` |
+| `plan` | `trial`, `free`, `pro`, `team`, `business`, `enterprise` |
 
 ### Tables agents can read
 
@@ -155,11 +156,9 @@ Every action is written to `actions` with a timestamp.
 | Private messages | Scenario 10 |
 | Async video launch | Its own scenario |
 
-## 9. Questions for Amir
+## 9. Decisions
 
-1. Are the baseline numbers in section 4 believable?
-2. Is "a recap shared with an attendee within 7 days" the right activation event?
-3. Is the name Minutewise fine?
+Company model, activation event, name, and scale are decided in [docs/decisions.md](../docs/decisions.md), with the options considered and what would change each one.
 
 ## 10. Public sources
 
