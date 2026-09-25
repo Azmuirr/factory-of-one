@@ -1,0 +1,6 @@
+- at: {week: 8, day: 7}
+  name: rollback
+  params:
+    release_id: rel_0412
+    segment: {calendar_provider: [microsoft]}
+  decided_by: pm

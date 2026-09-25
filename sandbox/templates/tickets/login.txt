@@ -1,0 +1,14 @@
+Can't log in
+The login link in my email expired before I clicked it. Now I can't get a new one.
+---
+Locked out
+I changed my email address and now I'm locked out of my workspace.
+---
+Password reset not arriving
+Reset emails aren't arriving. Checked spam too.
+---
+Two accounts
+I accidentally created two accounts with different emails. Can you merge them?
+---
+Invite link not working
+A teammate invited me but the invite link says it's invalid.

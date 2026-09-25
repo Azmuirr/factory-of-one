@@ -1,0 +1,17 @@
+Recap missed action items
+The recap from my {platform} call missed two action items we agreed on. The transcript has them. Why didn't the summary?
+---
+Wrong speaker names
+The transcript mixes up who said what. Two people are labeled as the same person.
+---
+Summary too long
+The recaps are too long for our team to read. Can we get a shorter version?
+---
+Accents not transcribed well
+Transcription quality is poor for a colleague with a strong accent. Whole sentences come out wrong.
+---
+Recap in wrong language
+Our meeting was in Spanish and the recap came out in English. Is there a setting for this?
+---
+Action items assigned to wrong person
+The recap assigned my action item to someone else on the call. We had to fix it by hand.

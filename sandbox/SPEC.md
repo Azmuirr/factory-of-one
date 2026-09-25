@@ -1,6 +1,6 @@
 # Sandbox spec: world model and data schema
 
-Status: draft for review. No generator code exists yet.
+Status: implemented for scenario 1, easy tier. Run it with `python -m sandbox.generator`.
 
 ## 1. The company
 
@@ -30,7 +30,7 @@ Status: draft for review. No generator code exists yet.
 | Rule | Why |
 |---|---|
 | Numbers come from a seeded causal model in code | Same seed, same world. No tokens spent |
-| Text comes from templates | No tokens at run time. About 30 variants per theme, written once and committed |
+| Text comes from templates | No tokens at run time. 5 to 10 variants per ticket theme in `sandbox/templates/`, written once and committed |
 | The world reacts | An action changes the causal model from the next simulated day |
 | Truth is separate | The generator writes `world/` for agents and `truth/` for the bench. No agent tool can read `truth/` or `sandbox/scenarios/` |
 | Real gaps stay in | Noisy support tags, correlated dimensions, and immature cohorts are part of the data |
@@ -52,35 +52,36 @@ The scale matches about where Fathom was in 2025, not Otter today. Reasoning for
 
 | Parameter | Value | Basis |
 |---|---|---|
-| New workspaces per week | About 3,850 | Assumption. Enough volume to detect a 3-point drop in one week |
+| New workspaces per week | About 3,900 (3,944 measured on seed 1) | Assumption. Enough volume to detect a 3-point drop in one week |
 | Weekday factor | Mon to Thu about 1.15, Fri 0.95, weekends 0.65 | Assumption: business product |
 | Channel mix | Organic search 35%, `recap_link` 25%, paid search 20%, direct 20% | Assumption |
 | Company size | Solo 30%, 2 to 10: 45%, 11 to 50: 18%, 51+: 7% | Assumption |
 | Calendar provider | Google 60%, Microsoft 35%, none 5% | Assumption |
+| Orgs requiring admin consent for calendar apps | Google 2%, Microsoft 45% | Assumption. In onboarding v1 these users hit the error, then skip the step |
+| Calendar connect attempted in v1 (step skippable) | Google 75%, Microsoft 65% | Assumption |
 | Meeting platform | Depends on calendar: Google users mostly Meet and Zoom, Microsoft users mostly Teams and Zoom | Assumption. Creates a realistic confound |
 | 7-day activation | About 40% overall. Google 41%, Microsoft 39%, none 36% | Benchmark average is 36%, and the best PLG companies run 40% to 50% |
 | Trial to paid | About 11% of all trials. 25% if activated, 2% if not | Benchmark for no-card trials: 8% to 22%, median 14% |
-| Paid mix | 25% of new paid workspaces are solo on Pro (1 seat). Teams average 5 seats | Assumption |
-| Revenue per paid workspace | About $68 a month ($816 a year), blending monthly and annual billing | Derived from the plan table and paid mix |
-| Viral coefficient | About 0.6 new workspaces per activated workspace, arriving over the next 3 weeks | Assumption, set so `recap_link` holds at 25% of signups |
+| Paid mix | Measured: 28% Pro (solo, 1 seat), 65% Team, 7% Business. Team averages 5.2 seats | Assumption, checked against a seed-1 run |
+| Revenue per paid workspace | About $73 a month ($877 a year), blending monthly and annual billing | Measured on seed 1 |
+| Viral coefficient | About 0.67 new workspaces per activated workspace, arriving over the next 3 weeks | Assumption, set so `recap_link` holds at 25% of signups |
 | Support tickets | About 70 per week | Assumption. Themes: bot didn't join 25%, billing 20%, recap quality 20%, login 15%, other 20% |
 
 **Activation** means that within 7 days of signup, the workspace shares a recap of a real meeting (2 or more participants, 5 or more minutes) with at least 1 attendee. A recording alone doesn't count, because the value is a recap someone uses. Known weakness: it undercounts solo users who keep notes private. See decision D3.
 
-At baseline this yields about 430 new paying workspaces and about $350K of new annual recurring revenue (ARR) per week.
+At baseline this yields about 440 new paying workspaces and about $385K of new annual recurring revenue (ARR) per week.
 
 ## 5. Causal model (per new workspace)
 
 | Step | Rule |
 |---|---|
-| 1. Arrivals | Daily count = base × weekday factor × trend, plus Poisson noise. `recap_link` arrivals follow past activations |
-| 2. Attributes | Channel, company size, calendar provider, and meeting platform, drawn from the mix tables |
-| 3. Intent | A hidden score. Higher for `recap_link` and larger companies. Stored in `truth/` only |
-| 4. Onboarding | The workspace passes the onboarding steps active that day. Each step has a pass probability by segment |
-| 5. First meeting | P(recorded meeting within 7 days) = logistic(intent + size effect − onboarding friction) |
-| 6. Activation | P(recap shared, given a meeting) = base rate by company size |
-| 7. Trial outcome | At day 14: paid (plan, seats) or Free. Conversion depends on activation and team size |
-| 8. Viral | Each shared recap reaches outside attendees. A fraction sign up over the next 3 weeks |
+| 1. Arrivals | Daily count = base × weekday factor × trend, plus Poisson noise. `recap_link` arrivals follow activations from the past 21 days |
+| 2. Attributes | Channel, company size, calendar provider, meeting platform, and whether the org requires admin consent |
+| 3. Base chance | P(activate) = provider base rate × channel multiplier × size multiplier, normalized to the provider base rate. Stored in `truth/` only |
+| 4. Onboarding | The workspace runs the onboarding active at signup. A release effect can remove the skip option or block a step |
+| 5. Activation | One uniform draw against the base chance, reduced if a step blocked the workspace. Activated workspaces record a real meeting and share its recap within 7 days |
+| 6. Near misses | Non-activated workspaces may record a test (1 participant), record without sharing, or share after day 7. None count |
+| 7. Trial outcome | At day 14: paid (plan, seats, billing) or Free. 25% if activated, 2% if not |
 
 Retention after conversion, AI costs, and async video aren't modeled yet. The scenario that first needs each one adds it.
 
@@ -89,8 +90,8 @@ Retention after conversion, AI costs, and async video aren't modeled yet. The sc
 | Action | Parameters | Effect from the next simulated day |
 |---|---|---|
 | `rollback` | release ID, segment filter (optional) | Removes the release's effects for that segment |
-| `set_flag` | flag, segment filter, percent | Exposes that share of new workspaces to the flagged change |
-| `start_experiment` | flag, split, segment filter, primary metric | Random assignment, logged in `assignments` |
+| `set_flag` | flag, segment filter, percent | Exposes that share of new workspaces to the flagged change. Built with scenario 2 |
+| `start_experiment` | flag, split, segment filter, primary metric | Random assignment, logged in `assignments`. Built with scenario 2 |
 | `no_action` | none | The world continues |
 
 Every action is written to `actions` with a timestamp.
@@ -129,11 +130,12 @@ Every action is written to `actions` with a timestamp.
 |---|---|
 | `signup_completed` | none |
 | `onboarding_step_viewed` | step |
+| `onboarding_step_skipped` | step |
 | `calendar_connect_started` | provider |
 | `calendar_connect_completed` | provider |
-| `calendar_connect_failed` | provider, error_code |
-| `meeting_recorded` | meeting_platform, duration_min, participants |
-| `recap_shared` | recipients, external_recipients |
+| `calendar_connect_failed` | provider, error_code (`admin_consent_required` or `user_cancelled`) |
+| `meeting_recorded` | meeting_id, meeting_platform, duration_min, participants |
+| `recap_shared` | meeting_id, recipients, external_recipients |
 | `trial_ended` | outcome |
 
 ### Hidden tables (`truth/truth.db`, bench only)

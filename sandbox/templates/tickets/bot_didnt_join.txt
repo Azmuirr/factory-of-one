@@ -1,0 +1,17 @@
+Notetaker never joined
+The Tallybird bot didn't join my {platform} call this morning. It was on my calendar. Can you check what happened?
+---
+Bot missed my meeting
+Had an important client call on {platform} and there's no recording. The bot showed as scheduled but never joined.
+---
+Bot joined late
+The notetaker joined about 10 minutes into the call, so the recap is missing the start. This was on {platform}.
+---
+No recording for yesterday
+Two of my {platform} meetings from yesterday have no recap. Others worked fine. Not sure what's different about those two.
+---
+Bot stuck in waiting room
+The notetaker sat in the {platform} waiting room the whole call. Nobody saw it to let it in. Can it join automatically?
+---
+Recording missing
+Where is my recording from the {platform} call at 2pm? The meeting happened but Tallybird shows nothing.

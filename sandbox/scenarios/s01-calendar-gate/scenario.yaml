@@ -40,8 +40,7 @@ releases:
       - kind: onboarding_change
         calendar_step_skippable: false
       - kind: connect_block
-        # Share of workspaces whose organization requires admin consent for calendar apps.
-        by_provider: {google: 0.02, microsoft: 0.45, none: 0.0}
+        # Orgs that require admin consent (SPEC section 4) could skip the step in v1. In v2 they are stuck.
         error_code: admin_consent_required
         # Blocked workspaces keep this share of their normal activation chance (some get approval later).
         activation_retained: 0.49

@@ -1,0 +1,29 @@
+Stuck on the calendar step
+I just signed up and the setup won't let me past connecting {provider}. It says I need admin approval. Is there a way to skip this for now?
+---
+Need admin approval??
+Trying to connect {provider} and it says my organization requires an administrator to approve the app. I'm not the admin. Can I still try Tallybird without this?
+---
+Can't finish signup
+Your onboarding is broken. I click connect, it fails, and there is no other button. I wanted to test it on a {platform} call this afternoon.
+---
+Calendar permissions error
+Getting "admin consent required" when I connect {provider}. Our IT team takes a week to approve new apps. Any workaround so I can use the trial meanwhile?
+---
+Trial not usable
+Signed up for the trial yesterday. I can't get past the first screen because my company blocks calendar apps. The trial clock is running and I haven't used it once.
+---
+How do I skip calendar connect?
+Is there a way to record a meeting without connecting my calendar? The {provider} step keeps failing with a permissions message.
+---
+Setup loop
+Every time I log in it sends me back to connect my calendar, and every time {provider} says I need approval from my admin. Pretty frustrating first experience.
+---
+Is the app down?
+Nothing works after signup. Connect calendar just errors out. Is there an outage? I'm on {platform} most of the day.
+---
+Asked IT, waiting
+Our admin has to approve calendar access before I can use this. Until then I'm stuck on setup. Could you let me in without it? I only need it for a couple of {platform} calls.
+---
+Onboarding blocked
+Connect {provider} fails with an admin approval message. A colleague signed up last month and says she didn't have to do this step. Did something change?

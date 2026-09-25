@@ -1,0 +1,14 @@
+Feature request: CRM export
+Can recaps go straight into our CRM? Copying them over by hand takes a while.
+---
+Data retention question
+How long do you keep our recordings, and can we set that ourselves?
+---
+Security questionnaire
+Our security team needs you to fill in a vendor questionnaire before we roll this out further.
+---
+Delete a recording
+How do I permanently delete a recording that shouldn't have been made?
+---
+Mobile app?
+Is there a mobile app for recording in-person meetings?

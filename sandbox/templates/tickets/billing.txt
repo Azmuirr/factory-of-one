@@ -1,0 +1,17 @@
+Charged twice
+I see two charges this month for our Team plan. Please refund the duplicate.
+---
+Change billing to annual
+We'd like to switch to annual billing. How do we do that without losing our recordings?
+---
+Invoice needs company name
+Our finance team needs the invoice to show our legal company name and VAT number. Can you update it?
+---
+Remove a seat
+One person left the team. How do I remove their seat so we stop paying for it?
+---
+Card declined
+Our card was declined at renewal. I updated it, but the workspace still says payment failed.
+---
+Pricing question
+If I add 3 more people halfway through the month, how is that billed?

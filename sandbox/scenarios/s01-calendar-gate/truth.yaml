@@ -12,8 +12,8 @@ cause:
   size:
     microsoft_activation_7d: {before: 0.39, after: 0.30}
     overall_activation_7d: {before: 0.40, after: 0.37, relative_change: -0.08}
-    new_paid_workspaces_per_week: {before: 431, after: 402}
-    new_arr_lost_per_week_usd: 24000
+    new_paid_workspaces_per_week: {before: 440, after: 410}
+    new_arr_lost_per_week_usd: 27000  # expected from the model; seed 1 measures about 28000
   secondary_effect: "Fewer activations mean fewer shared recaps, so recap_link signups start dipping 1 to 3 weeks later."
 
 expected_findings:

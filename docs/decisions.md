@@ -53,7 +53,7 @@ Each entry records the options, the choice, and what would reverse it. The reaso
 
 ## D5. Baseline scale
 
-**Choice:** about 3,850 trials a week, 40% activation, 11% trial to paid, about $350K of new annual recurring revenue (ARR) a week. That's about $18M of new ARR a year, consistent with a company near Fathom's reported 2025 scale (about $30M ARR, a third-party estimate).
+**Choice:** about 3,900 trials a week, 40% activation, 11% trial to paid, about $385K of new annual recurring revenue (ARR) a week. That's about $20M of new ARR a year, consistent with a company near Fathom's reported 2025 scale (about $30M ARR, a third-party estimate).
 
 | Check | Result |
 |---|---|
