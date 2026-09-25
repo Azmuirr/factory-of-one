@@ -1,9 +1,0 @@
-Metadata-Version: 2.4
-Name: factory-of-one
-Version: 0.1.0
-Requires-Python: >=3.10
-Requires-Dist: numpy>=1.26
-Requires-Dist: pyyaml>=6
-Requires-Dist: jsonschema>=4.18
-Provides-Extra: dev
-Requires-Dist: pytest>=8; extra == "dev"
