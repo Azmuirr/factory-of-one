@@ -1,0 +1,73 @@
+# Registered metrics. An answer from a metric listed here is "validated".
+# Anything else goes through the warehouse and is labeled "exploratory".
+# Adding a metric is a typed change: a catalog row, a handler, and a test.
+version: 0.1.0
+
+families:
+  activation_funnel:
+    description: Signup to first shared recap, per signup cohort
+    handler: cohort_rate
+    metrics:
+      activation_rate_7d:
+        description: Share of new workspaces that share a recap of a real meeting within 7 days of signup
+        numerator: Workspaces with recap_shared for a meeting with 2+ participants and 5+ minutes, within 7 days of signup
+        denominator: Workspaces that signed up in the period
+        unit: rate
+        window_days: 7
+        dimensions: [calendar_provider, channel, company_size]
+        related: [calendar_connect_rate_1d, first_meeting_rate_7d, trial_to_paid_rate]
+      calendar_connect_rate_1d:
+        description: Share of workspaces that saw the calendar step and connected within 1 day
+        numerator: Workspaces with calendar_connect_completed within 1 day of signup
+        denominator: Workspaces with onboarding_step_viewed where step = calendar_connect
+        unit: rate
+        window_days: 1
+        dimensions: [calendar_provider, channel, company_size]
+        related: [activation_rate_7d]
+      first_meeting_rate_7d:
+        description: Share of new workspaces that record a real meeting within 7 days
+        numerator: Workspaces with meeting_recorded (2+ participants, 5+ minutes) within 7 days of signup
+        denominator: Workspaces that signed up in the period
+        unit: rate
+        window_days: 7
+        dimensions: [calendar_provider, channel, company_size]
+        related: [activation_rate_7d, calendar_connect_rate_1d]
+
+  conversion:
+    description: Trial outcomes, per signup cohort
+    handler: cohort_rate
+    metrics:
+      trial_to_paid_rate:
+        description: Share of trials that end on a paid plan
+        numerator: Workspaces with trial_ended where outcome = paid
+        denominator: Workspaces whose trial ended
+        unit: rate
+        window_days: 14
+        dimensions: [calendar_provider, channel, company_size]
+        related: [activation_rate_7d, new_mrr]
+      new_mrr:
+        description: Monthly recurring revenue added by trials that converted
+        numerator: Sum of mrr on the first paid subscription row
+        denominator: null
+        unit: usd_per_month
+        window_days: 14
+        dimensions: [calendar_provider, channel, company_size, plan]
+        related: [trial_to_paid_rate]
+
+  volume:
+    description: Counts per day or week
+    handler: count
+    metrics:
+      new_workspaces:
+        description: Workspaces created
+        numerator: Rows in workspaces by created_at
+        denominator: null
+        unit: count
+        window_days: 0
+        dimensions: [calendar_provider, channel, company_size]
+        related: [activation_rate_7d]
+
+rules:
+  maturity: A cohort counts only when window_days have fully elapsed before the query's "now". Immature cohorts are excluded and reported as excluded
+  dimensions: Only dimensions listed on a metric are allowed. Others return a rejection with code dimension_not_allowed
+  unknown_metric: A metric not in this file returns a rejection with code metric_not_registered

@@ -1,0 +1,45 @@
+# Shared vocabulary. Every tool, metric, and ledger segment uses these ids.
+# Aliases let the model map a phrase to a dimension; code rejects anything not listed.
+version: 0.1.0
+
+dimensions:
+  calendar_provider:
+    description: Calendar the workspace creator uses
+    values: [google, microsoft, none]
+    aliases: {google: [google calendar, gcal, gmail users], microsoft: [outlook, microsoft 365, office 365, m365], none: [no calendar]}
+    source: workspaces.calendar_provider
+    grain: workspace
+
+  channel:
+    description: How the workspace arrived
+    values: [organic, recap_link, paid_search, direct]
+    aliases: {organic: [seo, organic search], recap_link: [viral, referral, shared recap], paid_search: [paid, ads, sem]}
+    source: workspaces.channel
+    grain: workspace
+
+  company_size:
+    description: Size of the company the workspace belongs to
+    values: [solo, s2_10, s11_50, s51_plus]
+    aliases: {solo: [individual, 1 person], s2_10: [small team, 2 to 10], s11_50: [mid, 11 to 50], s51_plus: [large, 51 plus, enterprise-ish]}
+    source: workspaces.company_size
+    grain: workspace
+
+  meeting_platform:
+    description: Platform of a recorded meeting. A meeting attribute, not a workspace attribute
+    values: [zoom, meet, teams]
+    aliases: {meet: [google meet], teams: [microsoft teams, ms teams]}
+    source: events.props.meeting_platform where name = meeting_recorded
+    grain: meeting
+    warning: Correlated with calendar_provider. Slicing activation by it attributes workspace outcomes to one meeting's platform
+
+  plan:
+    description: Subscription plan at a point in time
+    values: [trial, free, pro, team, business, enterprise]
+    source: subscriptions.plan
+    grain: workspace_at_time
+
+periods:
+  timezone: UTC
+  week_starts: monday
+  grains: [day, week]
+  cohort: Workspaces are grouped by signup date. A cohort is mature once its metric's window has fully elapsed

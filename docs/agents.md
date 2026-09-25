@@ -1,0 +1,142 @@
+# Agents
+
+8 agents run one loop. You touch 3 gates. Every agent writes to one shared ledger.
+
+```
+ SENSE → FRAME → [DECIDE] → BUILD → PROVE → [CALL] → TELL → LEARN
+ [ ] = your gate. TELL also needs your approval before anything is sent.
+```
+
+## Rules for every agent
+
+| Rule | Meaning |
+|---|---|
+| Code owns what a test can check | Numbers, statistics, thresholds, consistency, privacy filters |
+| The model owns intent, planning, and narrative | Which question to ask, what to try, how to explain it |
+| Agents propose, you apply | Tools can queue an action or a draft. Only a human gate executes it |
+| Stop, don't guess | Missing data becomes `Unknown` or an escalation, never a filled gap |
+| One vocabulary | Every claim is a fact, hard constraint, assumption, or unknown (Elon Mode reality ledger). Evidence carries a "Does NOT prove" line |
+| Truth is unreachable | No tool can read the answer key |
+
+## Artifacts passed between agents
+
+| Artifact | Made by | Used by |
+|---|---|---|
+| Signal card: what changed | Signal | Chief |
+| Decision packet: cause, size, cheapest test, recommendation, what would change it | Signal, sized by Bet | You, at Decide |
+| Bet entry: prediction, confidence, kill trigger, review date | You, helped by Bet | Retro |
+| Action spec: rollback, flag, experiment | Builder | The simulated company |
+| Build: code change, design, prototype, video | Builder | Quality, you |
+| Verdict: did it work | Signal (script) | You, at Call |
+| Review: SHIP, FIX, PROVE, DELETE, or STOP | Quality | The artifact's owner |
+| Readout: one decision per audience | Comms | You, at Tell |
+| Commitment: owner, task, due date | Chief | Chief |
+| Patch: skill change plus a new eval case | Retro | You approve |
+
+## 1. Chief: chief of staff
+
+| Mode | Does | Code owns | Model owns |
+|---|---|---|---|
+| Daily brief | One page: what needs you today, what's at risk, what can wait | Pulls from every tool, deadlines, your time budget | Picks the top 3, writes the page |
+| Inbox triage | Act now, delegate, answer later, ignore | Sender weight from the org chart, deadline detection | The call and a draft reply |
+| Slack triage | The same for channels and DMs | Mentions, threads unanswered for 24 hours | Which threads need you |
+| Calendar review | Prep notes, conflicts, meetings with no agenda | Conflicts, back-to-backs, focus-time math | What to prepare, what to decline |
+| Commitments | Tracks every promise from every transcribed meeting | Due and overdue checks, reminders | Pulling commitments from transcripts |
+| Loop runner | Moves bets through stations, caps open bets at 3, names the bottleneck | All of it | Wording escalations |
+
+Tools: `slack`, `mail`, `calendar`, `transcripts`, `tracker`, `directory`, `field_requests`, `ledger`. Model: a small model for the brief. Gate: escalations.
+Scored on: the right top 3 in the brief, commitments caught, detection latency, bottleneck named (scenario 7).
+
+## 2. Signal: all quantitative and qualitative knowledge
+
+One front door. You ask one question and get one answer.
+
+| Part | Holds | Tools |
+|---|---|---|
+| Quant sub-agent | Metrics, funnels, experiments, verdicts | `metrics` (validated), `warehouse` (exploratory, labeled), `dashboards`, `experiments`, `monitoring`, `billing` |
+| Qual sub-agent | Tickets, transcripts, research, surveys, customer threads | `support`, `transcripts`, `research`, `surveys`, `slack`, web search |
+| Signal lead | Combines both through the triangulation script, grades confidence, writes the answer | The two sub-agents only |
+
+Code owns: every number, cohort maturity, triangulation, confidence grades, the verdict script. Model owns: which slice to check next, grouping text into themes, the written diagnosis. Gate: none.
+Scored on: planted findings found, false causes claimed, 0 invented numbers or quotes, the same answer across 10 runs.
+
+## 3. Bet: investment analyst
+
+Turns a problem into a bet using Signal plus docs, stakeholder opinions, tracker history, field requests, and the market. Opinions are logged as assumptions with a source, never as facts.
+
+Tools: Signal, `docs`, `slack`, `mail`, `tracker`, `field_requests`, `crm`, `costs`, web search. Code owns: expected value, cost per successful outcome, whether a test can finish before its review date. Model owns: the cheapest-test ladder, the pre-mortem. Gate: Decide.
+Scored on: size within range of the answer key, cheapest valid test chosen, kill trigger set.
+
+## 4. Builder: engineer and designer
+
+| Output | Tools |
+|---|---|
+| MVP in code, behind a flag, with tests | `github`, test runner, `flags` |
+| Design using the Tallybird design system | `design`, screenshots |
+| Clickable prototype with an honesty label (live, mocked, hardcoded) | Playwright clicks every control |
+| Video walkthrough, on request | Playwright recording, captions |
+
+Code owns: the action spec matches the allowed action list, 0 dead clicks, the honesty label, tests pass. Model owns: designing the change and the demo. Gate: Call.
+Scored on: the build matches the approved decision, gates pass, time to a shareable link.
+
+## 5. Quality: reviewer
+
+Two passes on every artifact before it reaches you.
+
+| Pass | Checks |
+|---|---|
+| Correctness (code) | Numbers match `metrics`, quotes match the source word for word, required fields present, no private data |
+| Elon Mode review | Outcome and acceptance bar, strongest counterexample, the 5-step algorithm, the required proof tier. Returns SHIP, FIX, PROVE, DELETE, or STOP with at most 3 findings |
+
+Tools: read-only `metrics`, `support`, `transcripts`, `github`, `design`. Gate: you define the bar.
+Scored on: planted defects caught, unnecessary flags raised.
+
+## 6. Comms: communicator
+
+One decision, rendered up, down, and across with identical facts. Up: bad news first, options, a decide-by date. Down: every change carries its reason. Across: every ask has a date and an owner.
+
+Tools: `ledger`, `slack` and `mail` drafts. Code owns: blocks sending if any number differs between versions. Gate: Tell.
+
+## 7. Coach: people partner
+
+Prepares you for 1:1s, feedback, and hiring. Runs only when you start it.
+
+Hard lines:
+1. It never rates, ranks, or decides anything about a person.
+2. It reads your own messages and shared spaces only. Never other people's private messages. No activity tracking.
+3. Each PM can see everything the agents hold about them.
+4. It never delivers feedback. It prepares you.
+
+Tools: `calendar`, `transcripts`, `docs`, `directory`. Gate: every people call.
+
+## 8. Retro: coach for the factory
+
+Runs at the end of every simulated week. It never sees the answer key, so it learns only from what a real company could observe.
+
+| Step | Does |
+|---|---|
+| 1. Score predictions | Prediction versus measured outcome, Brier score |
+| 2. Enforce kills | Bets past review date, kill triggers fired |
+| 3. Find patterns | Quality rejections, your overrides, questions Signal couldn't answer, the slowest station |
+| 4. Propose a patch | A skill change plus a new eval case that reproduces the failure |
+| 5. You approve | The eval harness runs. The version goes up only with the failure linked |
+| 6. Elon Mode on the factory | What to delete, which manual task has earned automation |
+
+Output: a 5-line weekly note. Tools: `ledger`, eval history, scripts for Brier score, overdue bets, and rejection frequency.
+
+## The eval harness (code, not an agent)
+
+| Part | Does |
+|---|---|
+| Runner | Runs an agent or the loop on a seed in a fresh session and records a trace |
+| Code graders | Findings versus the answer key, exact numbers and quotes, forbidden tools, privacy, budget, stopping |
+| Model judge | A different vendor's model scores prose against a rubric, after agreeing with 2 human graders |
+| PM minutes | Words read plus decisions made at each gate |
+| Levels | Unit and agent evals on every push, full loop nightly, held-out scenarios monthly |
+| Gate | No agent change ships without a linked failure, a new case, and passing evals |
+
+## v1 scope (scenario 1)
+
+| Built | Later |
+|---|---|
+| Chief (all modes), Signal (both sub-agents), Builder (MVP, design, prototype), Quality (both passes), Bet's sizing script, eval harness levels 1 to 3 | Bet agent, Comms, Coach, Retro, video, held-out scenarios |

@@ -1,0 +1,6 @@
+numpy>=1.26
+pyyaml>=6
+jsonschema>=4.18
+
+[dev]
+pytest>=8

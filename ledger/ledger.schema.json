@@ -1,0 +1,256 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Azmuirr/factory-of-one/ledger/ledger.schema.json",
+  "title": "Ledger entry",
+  "description": "One artifact passed between agents or gates. The ledger is append-only JSON Lines.",
+  "type": "object",
+  "required": ["id", "type", "ts", "author", "refs", "payload"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {"type": "string", "pattern": "^(sig|pkt|bet|act|bld|ver|rev|call|rdo|cmt|pch)_[a-z0-9]{4,}$"},
+    "type": {"enum": ["signal_card", "decision_packet", "bet", "action", "build", "verdict", "review", "call", "readout", "commitment", "patch"]},
+    "ts": {"type": "string", "format": "date-time", "description": "Simulated time, UTC"},
+    "author": {
+      "type": "object",
+      "required": ["kind", "name"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": {"enum": ["agent", "human"]},
+        "name": {"type": "string", "minLength": 1},
+        "version": {"type": "string"}
+      }
+    },
+    "refs": {"type": "array", "items": {"$ref": "#/$defs/id_ref"}},
+    "payload": {"type": "object"}
+  },
+  "allOf": [
+    {"if": {"properties": {"type": {"const": "signal_card"}}}, "then": {"properties": {"id": {"pattern": "^sig_"}, "payload": {"$ref": "#/$defs/signal_card"}}}},
+    {"if": {"properties": {"type": {"const": "decision_packet"}}}, "then": {"properties": {"id": {"pattern": "^pkt_"}, "payload": {"$ref": "#/$defs/decision_packet"}}}},
+    {"if": {"properties": {"type": {"const": "bet"}}}, "then": {"properties": {"id": {"pattern": "^bet_"}, "author": {"$ref": "#/$defs/human"}, "payload": {"$ref": "#/$defs/bet"}}}},
+    {"if": {"properties": {"type": {"const": "action"}}}, "then": {"properties": {"id": {"pattern": "^act_"}, "payload": {"$ref": "#/$defs/action"}}}},
+    {"if": {"properties": {"type": {"const": "build"}}}, "then": {"properties": {"id": {"pattern": "^bld_"}, "payload": {"$ref": "#/$defs/build"}}}},
+    {"if": {"properties": {"type": {"const": "verdict"}}}, "then": {"properties": {"id": {"pattern": "^ver_"}, "payload": {"$ref": "#/$defs/verdict"}}}},
+    {"if": {"properties": {"type": {"const": "review"}}}, "then": {"properties": {"id": {"pattern": "^rev_"}, "payload": {"$ref": "#/$defs/review"}}}},
+    {"if": {"properties": {"type": {"const": "call"}}}, "then": {"properties": {"id": {"pattern": "^call_"}, "author": {"$ref": "#/$defs/human"}, "payload": {"$ref": "#/$defs/call"}}}},
+    {"if": {"properties": {"type": {"const": "readout"}}}, "then": {"properties": {"id": {"pattern": "^rdo_"}, "payload": {"$ref": "#/$defs/readout"}}}},
+    {"if": {"properties": {"type": {"const": "commitment"}}}, "then": {"properties": {"id": {"pattern": "^cmt_"}, "payload": {"$ref": "#/$defs/commitment"}}}},
+    {"if": {"properties": {"type": {"const": "patch"}}}, "then": {"properties": {"id": {"pattern": "^pch_"}, "payload": {"$ref": "#/$defs/patch"}}}}
+  ],
+  "$defs": {
+    "id_ref": {"type": "string", "pattern": "^(sig|pkt|bet|act|bld|ver|rev|call|rdo|cmt|pch)_[a-z0-9]{4,}$"},
+    "human": {"type": "object", "properties": {"kind": {"const": "human"}}},
+    "segment": {
+      "type": "object",
+      "description": "Dimension filters, keyed by catalogs/dimensions.yaml ids",
+      "additionalProperties": {"type": "array", "items": {"type": "string"}, "minItems": 1}
+    },
+    "period": {
+      "type": "object",
+      "required": ["start", "end"],
+      "additionalProperties": false,
+      "properties": {"start": {"type": "string", "format": "date"}, "end": {"type": "string", "format": "date"}}
+    },
+    "evidence": {
+      "type": "object",
+      "required": ["source", "ref"],
+      "additionalProperties": false,
+      "properties": {
+        "source": {"type": "string", "description": "Tool name, for example metrics or support"},
+        "ref": {"type": "string", "description": "Record ID or the exact tool query"},
+        "quote": {"type": "string", "description": "Exact text from the source. Quality checks it word for word"},
+        "value": {"type": "number"}
+      }
+    },
+    "claim": {
+      "type": "object",
+      "required": ["text", "class", "evidence", "does_not_prove"],
+      "additionalProperties": false,
+      "properties": {
+        "text": {"type": "string", "minLength": 1},
+        "class": {"enum": ["fact", "hard_constraint", "assumption", "unknown"]},
+        "evidence": {"type": "array", "items": {"$ref": "#/$defs/evidence"}},
+        "does_not_prove": {"type": "string", "minLength": 1}
+      },
+      "if": {"properties": {"class": {"const": "fact"}}},
+      "then": {"properties": {"evidence": {"minItems": 1}}}
+    },
+    "signal_card": {
+      "type": "object",
+      "required": ["headline", "metric", "before", "after", "change", "confidence"],
+      "additionalProperties": false,
+      "properties": {
+        "headline": {"type": "string", "minLength": 1},
+        "metric": {"type": "string"},
+        "segment": {"$ref": "#/$defs/segment"},
+        "before": {"type": "object", "required": ["period", "value"], "properties": {"period": {"$ref": "#/$defs/period"}, "value": {"type": "number"}}},
+        "after": {"type": "object", "required": ["period", "value"], "properties": {"period": {"$ref": "#/$defs/period"}, "value": {"type": "number"}}},
+        "change": {"type": "object", "required": ["absolute", "relative"], "properties": {"absolute": {"type": "number"}, "relative": {"type": "number"}}},
+        "confidence": {"enum": ["validated", "exploratory"]}
+      }
+    },
+    "decision_packet": {
+      "type": "object",
+      "required": ["question", "cause", "size", "cheapest_test", "recommendation", "would_change_if"],
+      "additionalProperties": false,
+      "properties": {
+        "question": {"type": "string"},
+        "cause": {"type": "array", "items": {"$ref": "#/$defs/claim"}, "minItems": 1},
+        "ruled_out": {"type": "array", "items": {"$ref": "#/$defs/claim"}},
+        "size": {
+          "type": "object",
+          "required": ["metric", "value", "unit", "method"],
+          "properties": {"metric": {"type": "string"}, "value": {"type": "number"}, "unit": {"type": "string"}, "method": {"type": "string"}}
+        },
+        "cheapest_test": {"type": "string"},
+        "recommendation": {"type": "string"},
+        "would_change_if": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+        "unknowns": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "bet": {
+      "type": "object",
+      "required": ["hypothesis", "prediction", "confidence", "kill_trigger", "review_date"],
+      "additionalProperties": false,
+      "properties": {
+        "hypothesis": {"type": "string"},
+        "prediction": {
+          "type": "object",
+          "required": ["metric", "expected", "by"],
+          "properties": {
+            "metric": {"type": "string"},
+            "segment": {"$ref": "#/$defs/segment"},
+            "expected": {"type": "number"},
+            "tolerance": {"type": "number"},
+            "by": {"type": "string", "format": "date"}
+          }
+        },
+        "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+        "kill_trigger": {"type": "string"},
+        "review_date": {"type": "string", "format": "date"}
+      }
+    },
+    "action": {
+      "type": "object",
+      "required": ["name", "params", "status"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {"enum": ["rollback", "set_flag", "start_experiment", "no_action"]},
+        "params": {"type": "object"},
+        "status": {"enum": ["proposed", "approved", "applied", "rejected"]}
+      }
+    },
+    "build": {
+      "type": "object",
+      "required": ["kind", "location", "honesty_label", "checks"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": {"enum": ["mvp", "design", "prototype", "video"]},
+        "location": {"type": "string"},
+        "honesty_label": {"enum": ["live", "mocked", "hardcoded"]},
+        "checks": {
+          "type": "object",
+          "properties": {"tests_passed": {"type": "boolean"}, "dead_clicks": {"type": "integer", "minimum": 0}}
+        }
+      }
+    },
+    "verdict": {
+      "type": "object",
+      "required": ["metric", "before", "after", "outcome", "method", "does_not_prove"],
+      "additionalProperties": false,
+      "properties": {
+        "metric": {"type": "string"},
+        "segment": {"$ref": "#/$defs/segment"},
+        "before": {"type": "number"},
+        "after": {"type": "number"},
+        "outcome": {"enum": ["improved", "no_change", "worse", "inconclusive"]},
+        "method": {"type": "string"},
+        "does_not_prove": {"type": "string", "minLength": 1}
+      }
+    },
+    "finding": {
+      "type": "object",
+      "required": ["claim", "evidence", "impact", "smallest_action", "proof_required", "severity"],
+      "additionalProperties": false,
+      "properties": {
+        "claim": {"type": "string"},
+        "evidence": {"type": "string"},
+        "impact": {"type": "string"},
+        "smallest_action": {"type": "string"},
+        "proof_required": {"type": "string"},
+        "severity": {"enum": ["safety", "correctness", "data_loss", "user_outcome", "proof_gap", "cost", "maintainability"]}
+      }
+    },
+    "review": {
+      "type": "object",
+      "required": ["verdict", "correctness", "findings"],
+      "additionalProperties": false,
+      "properties": {
+        "verdict": {"enum": ["SHIP", "FIX", "PROVE", "DELETE", "STOP"]},
+        "correctness": {
+          "type": "object",
+          "required": ["numbers", "quotes", "fields", "privacy"],
+          "properties": {
+            "numbers": {"enum": ["pass", "fail", "n/a"]},
+            "quotes": {"enum": ["pass", "fail", "n/a"]},
+            "fields": {"enum": ["pass", "fail"]},
+            "privacy": {"enum": ["pass", "fail"]}
+          }
+        },
+        "findings": {"type": "array", "items": {"$ref": "#/$defs/finding"}}
+      }
+    },
+    "call": {
+      "type": "object",
+      "required": ["decision", "rationale"],
+      "additionalProperties": false,
+      "properties": {
+        "decision": {"enum": ["ship", "kill", "iterate"]},
+        "rationale": {"type": "string"}
+      }
+    },
+    "readout": {
+      "type": "object",
+      "required": ["versions", "numbers"],
+      "additionalProperties": false,
+      "properties": {
+        "versions": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["audience", "text"],
+            "properties": {"audience": {"enum": ["up", "down", "across"]}, "text": {"type": "string"}}
+          }
+        },
+        "numbers": {
+          "type": "array",
+          "items": {"type": "object", "required": ["label", "value"], "properties": {"label": {"type": "string"}, "value": {"type": "number"}}}
+        }
+      }
+    },
+    "commitment": {
+      "type": "object",
+      "required": ["owner", "task", "due", "source", "status"],
+      "additionalProperties": false,
+      "properties": {
+        "owner": {"type": "string"},
+        "task": {"type": "string"},
+        "due": {"type": "string", "format": "date"},
+        "source": {"$ref": "#/$defs/evidence"},
+        "status": {"enum": ["open", "done", "overdue"]}
+      }
+    },
+    "patch": {
+      "type": "object",
+      "required": ["target", "change", "failure", "eval_case", "status"],
+      "additionalProperties": false,
+      "properties": {
+        "target": {"type": "string", "description": "Path to the skill or script"},
+        "change": {"type": "string"},
+        "failure": {"type": "string", "description": "The observed failure this fixes"},
+        "eval_case": {"type": "string", "description": "Path to the new eval case that reproduces it"},
+        "status": {"enum": ["proposed", "approved", "rejected"]}
+      }
+    }
+  }
+}

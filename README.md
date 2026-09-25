@@ -14,3 +14,13 @@ python -m pytest
 ```
 
 This builds 8 weeks of data for Tallybird, a fictional AI meeting notetaker, with one problem hidden inside. See [sandbox/SPEC.md](sandbox/SPEC.md).
+
+## Design
+
+| Doc | What it covers |
+|---|---|
+| [docs/agents.md](docs/agents.md) | The 8 agents, their modes, what code owns versus the model, gates, and scoring |
+| [docs/tools.md](docs/tools.md) | The simulated workplace tools each agent uses |
+| [ledger/ledger.schema.json](ledger/ledger.schema.json) | Every artifact agents pass to each other. [Example: one full loop](ledger/examples/s01-happy-path.jsonl) |
+| [catalogs/](catalogs/) | Registered metrics and shared dimensions |
+| [docs/decisions.md](docs/decisions.md) | Choices made, options rejected, and what would reverse each one |
