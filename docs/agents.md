@@ -86,7 +86,7 @@ Two passes on every artifact before it reaches you.
 | Pass | Checks |
 |---|---|
 | Correctness (code) | Numbers match `metrics`, quotes match the source word for word, required fields present, no private data |
-| Elon Mode review | Outcome and acceptance bar, strongest counterexample, the 5-step algorithm, the required proof tier. Returns SHIP, FIX, PROVE, DELETE, or STOP with at most 3 findings |
+| Elon Mode review ([skills/elon-mode](../skills/elon-mode/SKILL.md), by Amir Zur) | Outcome and acceptance bar, strongest counterexample, the 5-step algorithm, the required proof tier. Returns SHIP, FIX, PROVE, DELETE, or STOP with at most 3 findings |
 
 Tools: read-only `metrics`, `support`, `transcripts`, `github`, `design`. Gate: you define the bar.
 Scored on: planted defects caught, unnecessary flags raised.
