@@ -120,4 +120,22 @@ grading:
       - {owner: p_sup, due: "2026-03-02", keyword: tag}
       - {owner: p_sales, due: "2026-03-02", keyword: call}
       - {owner: p_me, due: "2026-03-02", keyword: workaround}
+      - {owner: p_me, due: "2026-02-27", keyword: security}   # promised in sent mail, now overdue
+      - {owner: p_me, due: "2026-03-05", keyword: budget}     # promised in sent mail
     private_text: "felt rushed"
+    open_loops:
+      waiting_on_others: ["mail:s_001", "mail:s_004"]
+      answered: ["mail:s_002"]
+      my_promises: ["mail:s_006"]
+    meeting_prep:
+      key_meetings: ["cal:e_002", "cal:e_004", "cal:e_005"]   # at least 2 prepared
+      must_link: {"cal:e_005": ["mail:s_006"]}                 # the overdue promise to the customer
+    starved_goals: [g2]
+    followups: ["tr:tr_001", "tr:tr_003"]
+    conflict: ["cal:e_004", "cal:e_005"]
+    stale: [p_cto]
+    not_stale: [p_vp]
+    voice: {signoff: "Thanks, S.", max_words: 60, banned_openings: [hi, hello, hope, dear]}
+    weekly:
+      as_of: "2026-02-27T17:00:00Z"
+      starved_goals: [g2]

@@ -10,13 +10,44 @@ The agents never name a tool. They name capabilities, such as `support.search` o
 4. Add your vendors' MCP servers under `servers`. Put credentials in environment variables and reference them as `${NAME}`.
 5. Map each capability to one of those servers' tools: `mcp__<server>__<tool>`. Map read tools only.
 
+## Schedule Chief
+
+Chief has four modes. Run each on a schedule so the brief is waiting for you.
+
+macOS or Linux, with `crontab -e`:
+
+```text
+30 7 * * 1-5  cd /path/to/factory-of-one && .venv/bin/python -m factory.chief --mode morning
+0 12 * * 1-5  cd /path/to/factory-of-one && .venv/bin/python -m factory.chief --mode midday
+0 18 * * 1-5  cd /path/to/factory-of-one && .venv/bin/python -m factory.chief --mode evening
+0 16 * * 5    cd /path/to/factory-of-one && .venv/bin/python -m factory.chief --mode weekly
+```
+
+Windows, in PowerShell:
+
+```powershell
+schtasks /Create /SC WEEKLY /D MON,TUE,WED,THU,FRI /ST 07:30 /TN "Chief morning" `
+  /TR "cmd /c cd /d C:\path\to\factory-of-one && .venv\Scripts\python -m factory.chief --mode morning"
+```
+
+Chief posts its note to your own private channel through `notify.self`. In the sandbox that note lands in the run folder's `outbox.jsonl`. In a live install, map `notify.self` to a direct message to yourself.
+
+Teach Chief when it gets something wrong:
+
+```bash
+python -m factory.chief.correct --ref mail:m_004 --label answer_later --reason "Budget asks are never urgent"
+python -m factory.chief.correct --note "Never say 'circle back'."
+```
+
+The rules land in `lessons/chief.yaml` for your install and load on every run.
+
 ## Rules the install cannot change
 
 | Rule | How it is enforced |
 |---|---|
 | Numbers are computed by code | `metrics.*` stays on the factory's own server, over your warehouse and your catalog |
 | An agent gets only the tools its capabilities map to | The runner allows exactly those tools. A Slack server's "post message" is blocked unless you map it |
-| Anything that writes goes through a human gate | Write capabilities are `propose` only |
+| Anything that writes goes through a human gate | Write capabilities are `propose` only. The one exception is `self`: a note to the PM's own private channel |
 | No agent reads the eval answer keys | Agents have no file or shell tools |
 
 ## What is not built yet

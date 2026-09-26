@@ -28,6 +28,7 @@ class Task:
     graders: list[Grader]
     setup: list[dict] = field(default_factory=list)
     reference: str | None = None
+    env: dict = field(default_factory=dict)
 
 
 @dataclass
@@ -73,6 +74,6 @@ def load_suite(agent: str) -> Suite:
         graders = [Grader(**g) if isinstance(g, dict) else Grader("code", g) for g in t["graders"]]
         tasks.append(Task(
             id=t["id"], kind=t["kind"], scenario=t["scenario"], seed=t.get("seed", defaults.get("seed", 1)),
-            prompt=t["prompt"], graders=graders, setup=t.get("setup", []), reference=t.get("reference"),
+            prompt=t["prompt"], graders=graders, setup=t.get("setup", []), reference=t.get("reference"), env=t.get("env", {}),
         ))
     return Suite(agent=raw["agent"], version=raw["version"], trials=defaults.get("trials", 3), tasks=tasks)

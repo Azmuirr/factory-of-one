@@ -1,0 +1,23 @@
+# The PM's goals and stakeholder cadence. Chief ranks work by these and checks the calendar against them.
+quarter: 2026-Q1
+goals:
+  - id: g1
+    title: Recover 7-day activation to 40%
+    weight: 0.5
+    keywords: [activation, onboarding, consent, readout, v2, calendar step]
+  - id: g2
+    title: Launch the Business plan with SSO by the end of Q2
+    weight: 0.3
+    keywords: [sso, business plan, pricing, platform]
+  - id: g3
+    title: Hire a senior PM
+    weight: 0.2
+    keywords: [interview, candidate, hiring, take-home]
+
+# How often the PM wants direct contact with each person, in days.
+stakeholders:
+  - {person: p_vp, every_days: 7}
+  - {person: p_ceo, every_days: 14}
+  - {person: p_cto, every_days: 7}
+  - {person: p_ppm, every_days: 7}
+  - {person: p_cust, every_days: 14}

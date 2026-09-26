@@ -1,0 +1,4 @@
+# Rules learned from the PM's corrections. Add one with: python -m factory.chief correct
+labels:
+  - {sender: p_ppm, label: delegate, reason: "Omar's asks go to Nina first; she owns Platform coordination."}
+notes: []

@@ -1,5 +1,6 @@
 # The capability vocabulary. Skills name capabilities, never tools. Each install maps capabilities to its real tools.
-# access: read, or propose (queues something for a human gate). Nothing here sends, changes, or deletes on its own.
+# access: read; propose (queues something for a human gate); or self (writes only to the PM's own private channel).
+# Nothing here sends to other people, changes, or deletes on its own.
 version: 0.1.0
 
 capabilities:
@@ -75,6 +76,36 @@ capabilities:
   tracker.search:
     description: Tracker issues by keyword or status
     access: read
+  mail.sent:
+    description: Mail the PM sent, with whether each got an answer
+    access: read
+  loops.list:
+    description: Open loops (waiting on the PM, waiting on others, and the PM's own promises) with days open
+    access: read
+  people.history:
+    description: The PM's recent direct contact with one person
+    access: read
+  people.stale:
+    description: Stakeholders past the contact cadence the PM set
+    access: read
+  calendar.context:
+    description: Prep for one meeting (attendees, last contact, open loops and promises involving them, related past meetings)
+    access: read
+  calendar.free:
+    description: The PM's free slots on a day, for proposing a new time
+    access: read
+  goals.get:
+    description: The PM's goals with weights, and stakeholder cadences
+    access: read
+  goals.time:
+    description: Meeting hours per goal in a period, with starved goals flagged
+    access: read
+  voice.samples:
+    description: Recent messages the PM wrote, to match their voice
+    access: read
+  notify.self:
+    description: Post a short note to the PM's own private channel
+    access: self
   commitments.due:
     description: Open commitments from the ledger, sorted into overdue, due today, and upcoming
     access: read

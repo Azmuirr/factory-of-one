@@ -1,15 +1,15 @@
 agent: chief
-version: 0.1.0
+version: 0.3.0
 defaults:
   trials: 3
   seed: 1
 
 tasks:
-  - id: daily-brief-s01
+  - id: morning-brief-s01
     kind: capability
     scenario: s01-calendar-gate
     reference: agents/chief/evals/fixtures/reference-brief.jsonl
-    prompt: Good morning. It is Monday 2026-03-02. Write today's brief.
+    prompt: Good morning. It is Monday 2026-03-02. Write the morning brief.
     graders:
       - brief_top_themes
       - brief_triage
@@ -17,5 +17,24 @@ tasks:
       - brief_calendar_flags
       - brief_replies
       - commitments_extracted
+      - brief_open_loops
+      - brief_meeting_prep
+      - brief_goal_check
+      - brief_followups
+      - brief_reschedule
+      - drafts_in_voice
+      - brief_stale
+      - notified_self
+      - respects_lessons
       - private_never_shown
       - {type: code, name: tools_within_allowlist, params: {servers: [workplace, ledger]}}
+
+  - id: weekly-review-s01
+    kind: capability
+    scenario: s01-calendar-gate
+    reference: agents/chief/evals/fixtures/reference-weekly.jsonl
+    env: {FACTORY_AS_OF: "2026-02-27T17:00:00Z"}
+    prompt: It is Friday 2026-02-27, 17:00. Write the weekly review.
+    graders:
+      - weekly_review
+      - private_never_shown

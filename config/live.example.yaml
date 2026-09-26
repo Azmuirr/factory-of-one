@@ -4,6 +4,8 @@
 mode: live
 company: company/<your-company>/context.md
 catalogs: company/<your-company>/catalogs
+goals: company/<your-company>/goals.yaml
+lessons: company/<your-company>/lessons
 
 servers:
   metrics:   {command: "{python}", args: [-m, factory.servers.metrics_server]}   # needs a warehouse adapter (planned)
@@ -24,6 +26,7 @@ server_env:
   FACTORY_AGENT: "{agent}"
   FACTORY_DEMOS: "{demos}"
   FACTORY_CATALOGS: "{catalogs}"
+  FACTORY_GOALS: "{goals}"
 
 # capability: mcp__<server name above>__<that server's tool name>
 capabilities:
@@ -51,6 +54,16 @@ capabilities:
   transcripts.read: mcp__meetings__<read transcript tool>
   directory.lookup: mcp__chat__<user lookup tool>
   tracker.search: mcp__tracker__<search issues tool>
+  mail.sent: mcp__mail__<list sent mail tool>
+  loops.list: mcp__workplace__open_loops          # factory server over your mail and chat (planned adapter)
+  people.history: mcp__workplace__people_history
+  people.stale: mcp__workplace__stale_stakeholders
+  calendar.context: mcp__workplace__meeting_context
+  calendar.free: mcp__calendar__<free/busy tool>
+  goals.get: mcp__workplace__goals_get
+  goals.time: mcp__workplace__time_by_goal
+  voice.samples: mcp__mail__<list sent mail tool>
+  notify.self: mcp__chat__<post to your own direct message or private channel>
   commitments.due: mcp__ledger__commitments_due
   ledger.write: mcp__ledger__write_entry
   ledger.read: mcp__ledger__read_entries

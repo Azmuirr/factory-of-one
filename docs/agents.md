@@ -37,17 +37,26 @@ Tool names below describe capabilities. Each install maps capabilities to real t
 
 ## 1. Chief: chief of staff
 
-| Mode | Does | Code owns | Model owns |
-|---|---|---|---|
-| Daily brief | One page: what needs you today, what's at risk, what can wait | Pulls from every tool, deadlines, your time budget | Picks the top 3, writes the page |
-| Inbox triage | Act now, delegate, answer later, ignore | Sender weight from the org chart, deadline detection | The call and a draft reply |
-| Slack triage | The same for channels and DMs | Mentions, threads unanswered for 24 hours | Which threads need you |
-| Calendar review | Prep notes, conflicts, meetings with no agenda | Conflicts, back-to-backs, focus-time math | What to prepare, what to decline |
-| Commitments | Tracks every promise from every transcribed meeting | Due and overdue checks, reminders | Pulling commitments from transcripts |
-| Loop runner | Moves bets through stations, caps open bets at 3, names the bottleneck | All of it | Wording escalations |
+Protects the PM's attention and keeps promises from slipping. Reads mail, chat, calendar, transcripts, and the tracker. Sends nothing except one short note to the PM's own private channel.
 
-Capabilities: `mail.*`, `chat.*`, `calendar.list`, `transcripts.*`, `directory.lookup`, `tracker.search`, `commitments.due`, `ledger.*`. The sandbox serves them from a simulated workplace; a live install maps them to real mail, chat, calendar, and tracker servers. Code owns sender weight, suspicious senders, calendar conflicts, missing agendas, focus time, and unanswered hours. The workplace never serves direct messages the PM is not in. Run it with `python -m factory.chief`. Gate: escalations.
-Scored on: the right top 3 in the brief, commitments caught, detection latency, bottleneck named (scenario 7).
+| Capability | Code owns | Chief owns |
+|---|---|---|
+| Daily brief: top 3 tied to goals, at risk, can wait | Sender weight, deadline hints, focus minutes | The ranking and the why |
+| Inbox and chat triage | Replied or not, unanswered hours, lookalike senders | The label, and what needs the PM |
+| Suggested replies in the PM's voice | Writing samples; a style check in evals | The drafts. Never sent by an agent |
+| One-click links | Every link built from the item's id | Nothing: links cannot be invented |
+| Open loops: waiting on the PM, waiting on others, the PM's own promises | Unanswered requests, days open, "I'll ..." in the PM's messages | Which loops matter, and nudge drafts |
+| Commitments from meetings and mail | Due and overdue sorting | Pulling them out, quoting the source |
+| Meeting prep | Attendees, last contact, open loops and promises with them, related meetings | Purpose, context, and the ask |
+| Calendar: conflicts, missing agendas, unsolicited invites, reschedule proposals | Conflicts, free slots, and a check that a proposed time is free | Which meeting to move |
+| Goal alignment | Meeting hours per goal, starved goals | Tying work to goals |
+| Meeting follow-ups | | Drafts that restate who does what by when |
+| Stakeholder staleness | Days since direct contact against the PM's cadence | What to say |
+| Modes: morning, midday, evening, weekly review | An "as of" time; each mode's window | The content per mode |
+| Learning from corrections | `python -m factory.chief.correct` saves a rule; rules load on every run; evals check them | Following them |
+
+Run it with `python -m factory.chief --mode morning|midday|evening|weekly`. Scheduling: [install.md](install.md#schedule-chief). Gate: escalations.
+Scored on: 16 graders on a planted Monday (top themes, triage, needs you, calendar flags, replies, commitments, open loops, meeting prep, goals, follow-ups, reschedule, voice, staleness, one note to self, learned rules, privacy), plus a weekly review graded on Friday.
 
 ## 2. Signal: all quantitative and qualitative knowledge
 

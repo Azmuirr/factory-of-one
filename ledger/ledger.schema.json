@@ -1048,7 +1048,7 @@
       "properties": {
         "ref": {
           "type": "string",
-          "pattern": "^(mail|chat|cal|trk|cmt):[A-Za-z0-9_-]+$"
+          "pattern": "^(mail|chat|cal|trk|cmt|tr):[A-Za-z0-9_-]+$"
         },
         "why": {
           "type": "string"
@@ -1063,6 +1063,10 @@
         "url": {
           "type": "string",
           "description": "Permalink copied from the tool result, when the source system provides one"
+        },
+        "goal": {
+          "type": "string",
+          "description": "The goal id this item serves"
         }
       }
     },
@@ -1070,10 +1074,8 @@
       "type": "object",
       "required": [
         "date",
-        "top",
-        "triage",
-        "needs_you",
-        "calendar"
+        "mode",
+        "top"
       ],
       "additionalProperties": false,
       "properties": {
@@ -1099,7 +1101,7 @@
           "type": "array",
           "items": {
             "type": "string",
-            "pattern": "^(mail|chat|cal|trk|cmt):[A-Za-z0-9_-]+$"
+            "pattern": "^(mail|chat|cal|trk|cmt|tr):[A-Za-z0-9_-]+$"
           }
         },
         "triage": {
@@ -1169,6 +1171,11 @@
               },
               "suggestion": {
                 "type": "string"
+              },
+              "proposed_time": {
+                "type": "string",
+                "format": "date-time",
+                "description": "A new start time in a free slot, for a conflict"
               }
             }
           }
@@ -1176,6 +1183,211 @@
         "focus_minutes": {
           "type": "integer",
           "minimum": 0
+        },
+        "mode": {
+          "enum": [
+            "morning",
+            "midday",
+            "evening",
+            "weekly"
+          ]
+        },
+        "meeting_prep": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "ref",
+              "purpose",
+              "ask"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "ref": {
+                "type": "string",
+                "pattern": "^cal:"
+              },
+              "purpose": {
+                "type": "string"
+              },
+              "context": {
+                "type": "string"
+              },
+              "open_loops": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^(mail|chat|cal|trk|cmt|tr):[A-Za-z0-9_-]+$"
+                }
+              },
+              "ask": {
+                "type": "string",
+                "description": "What the PM needs out of the meeting"
+              },
+              "url": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "open_loops": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "waiting_on_me": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/loop_item"
+              }
+            },
+            "waiting_on_others": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/loop_item"
+              }
+            },
+            "my_promises": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/loop_item"
+              }
+            }
+          }
+        },
+        "goal_check": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "goal",
+              "hours",
+              "status"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "goal": {
+                "type": "string"
+              },
+              "hours": {
+                "type": "number"
+              },
+              "status": {
+                "enum": [
+                  "on_track",
+                  "starved",
+                  "over"
+                ]
+              },
+              "note": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "followups": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "ref",
+              "to",
+              "draft_reply"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "ref": {
+                "type": "string",
+                "pattern": "^tr:"
+              },
+              "to": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "draft_reply": {
+                "type": "string"
+              },
+              "url": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "stale": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "person",
+              "days_since",
+              "suggestion"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "person": {
+                "type": "string"
+              },
+              "days_since": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "suggestion": {
+                "type": "string"
+              },
+              "draft_reply": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "done": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^(mail|chat|cal|trk|cmt|tr):[A-Za-z0-9_-]+$"
+          },
+          "description": "Weekly: what got done, with evidence"
+        },
+        "changes": {
+          "type": "array",
+          "maxItems": 3,
+          "items": {
+            "type": "string"
+          },
+          "description": "Weekly: at most 3 changes for next week"
+        }
+      }
+    },
+    "loop_item": {
+      "type": "object",
+      "required": [
+        "ref",
+        "who",
+        "what"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "ref": {
+          "type": "string",
+          "pattern": "^(mail|chat|cal|trk|cmt|tr):[A-Za-z0-9_-]+$"
+        },
+        "who": {
+          "type": "string"
+        },
+        "what": {
+          "type": "string"
+        },
+        "days": {
+          "type": "number"
+        },
+        "url": {
+          "type": "string"
+        },
+        "draft_reply": {
+          "type": "string"
         }
       }
     }

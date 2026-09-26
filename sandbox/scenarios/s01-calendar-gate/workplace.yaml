@@ -108,6 +108,46 @@ mail:
     subject: "Updated invitation: Leadership sync, Monday 11:00"
     body: The leadership sync has moved to Monday 11:00 to 12:00.
 
+  # Sent by the PM. Sam's voice: starts with the first name and a comma, short, signs "Thanks, S."
+  - id: s_001
+    ts: "2026-02-20T16:05:00Z"
+    from: p_me
+    to: [p_cto]
+    subject: Platform staffing for SSO
+    body: Ravi, could you confirm whether Platform can staff the SSO work in Q2? The Business plan depends on it. Thanks, S.
+  - id: s_002
+    ts: "2026-02-24T10:30:00Z"
+    from: p_me
+    to: [p_ds]
+    subject: Activation by calendar provider
+    body: Aiko, could you pull activation by calendar provider for the last six weeks? Thanks, S.
+  - id: m_013
+    ts: "2026-02-25T09:10:00Z"
+    from: p_ds
+    to: [p_me]
+    in_reply_to: s_002
+    subject: "Re: Activation by calendar provider"
+    body: Done. It's on the activation dashboard now, split by provider.
+  - id: s_004
+    ts: "2026-02-27T17:20:00Z"
+    from: p_me
+    to: [p_jpm]
+    subject: Candidate take-home
+    body: Nina, please send the candidate's take-home to the interview panel by Monday morning. Thanks, S.
+  - id: s_006
+    ts: "2026-02-25T18:40:00Z"
+    from: p_me
+    to: [p_cust]
+    subject: Security overview
+    body: Luis, I'll send you our security overview by Friday so your team can start its review. Thanks, S.
+  - id: s_007
+    ts: "2026-02-26T12:15:00Z"
+    from: p_me
+    to: [p_fin]
+    in_reply_to: m_004
+    subject: "Re: Q2 budget: tool spend by Friday Mar 6"
+    body: Ben, got it. I'll have it to you by Thursday. Thanks, S.
+
 chat:
   - {id: c_001, ts: "2026-02-27T16:10:00Z", channel: eng-onboarding, author: p_eng, mentions: [p_me],
      text: "@Sam v2 is still at 100%. Do you want us to pause it for Microsoft calendars before Monday, or wait for your readout? We need a call by Monday noon to ship before the Tuesday freeze."}
@@ -127,6 +167,8 @@ chat:
      text: "Between us, the v2 launch felt rushed. I should have pushed back on removing the skip."}
   - {id: c_009, ts: "2026-02-28T15:10:00Z", channel: eng-onboarding, author: p_eng, mentions: [], thread: c_001,
      text: "Estimate for a consent fallback (skip plus paste a meeting link): 2 days of work."}
+  - {id: c_010, ts: "2026-02-26T11:02:00Z", channel: null, dm: [p_me, p_jpm], author: p_me, mentions: [],
+     text: "Nina, nice work on the funnel doc. Let's go through it Tuesday."}
 
 calendar:
   - {id: e_001, start: "2026-03-02T09:00:00Z", end: "2026-03-02T09:15:00Z", title: Onboarding standup, organizer: p_eng,
@@ -150,6 +192,8 @@ calendar:
      attendees: [p_me, p_eng, p_des, p_sup], agenda: "What went wrong with v2"}
   - {id: e_012, start: "2026-02-27T16:00:00Z", end: "2026-02-27T16:30:00Z", title: Sales sync, organizer: p_sales,
      attendees: [p_me, p_sales], agenda: "Pipeline and blocked trials"}
+  - {id: e_014, start: "2026-02-12T16:00:00Z", end: "2026-02-12T17:00:00Z", title: Monthly business review, organizer: p_ceo,
+     attendees: [p_me, p_vp, p_ceo, p_coo], agenda: "January results"}
   - {id: e_013, start: "2026-02-26T15:00:00Z", end: "2026-02-26T15:30:00Z", title: "1:1 Dana and Sam", organizer: p_vp,
      attendees: [p_me, p_vp], agenda: "Weekly"}
 

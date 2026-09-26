@@ -10,7 +10,7 @@ import yaml
 
 SCHEMA = """
 CREATE TABLE people (person_id TEXT PRIMARY KEY, name TEXT, role TEXT, team TEXT, manager_id TEXT, is_me INTEGER, external INTEGER);
-CREATE TABLE mail (message_id TEXT PRIMARY KEY, ts TEXT, from_id TEXT, to_ids TEXT, subject TEXT, body TEXT);
+CREATE TABLE mail (message_id TEXT PRIMARY KEY, ts TEXT, from_id TEXT, to_ids TEXT, in_reply_to TEXT, subject TEXT, body TEXT);
 CREATE TABLE chat (message_id TEXT PRIMARY KEY, ts TEXT, channel TEXT, dm_members TEXT, author_id TEXT, mentions TEXT,
   thread_id TEXT, text TEXT);
 CREATE TABLE calendar (event_id TEXT PRIMARY KEY, start TEXT, end TEXT, title TEXT, organizer_id TEXT, attendees TEXT, agenda TEXT);
@@ -30,8 +30,9 @@ def write_workplace(conn: sqlite3.Connection, scenario_dir: Path, cutoff: str) -
         (p["id"], p["name"], p["role"], p["team"], p.get("manager"), int(p.get("me", False)), int(p.get("external", False)))
         for p in w["people"]
     ])
-    conn.executemany("INSERT INTO mail VALUES (?,?,?,?,?,?)", [
-        (m["id"], m["ts"], m["from"], json.dumps(m["to"]), m["subject"], m["body"]) for m in w["mail"] if m["ts"] < cutoff
+    conn.executemany("INSERT INTO mail VALUES (?,?,?,?,?,?,?)", [
+        (m["id"], m["ts"], m["from"], json.dumps(m["to"]), m.get("in_reply_to"), m["subject"], m["body"])
+        for m in w["mail"] if m["ts"] < cutoff
     ])
     conn.executemany("INSERT INTO chat VALUES (?,?,?,?,?,?,?,?)", [
         (c["id"], c["ts"], c.get("channel"), json.dumps(c["dm"]) if c.get("dm") else None, c["author"],

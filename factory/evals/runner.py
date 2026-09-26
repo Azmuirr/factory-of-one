@@ -111,6 +111,10 @@ def system_prompt(agent: AgentConfig, config: install.Config, text: str, capabil
     company = config.company.read_text(encoding="utf-8")
     references = [(ROOT / r).read_text(encoding="utf-8").strip() for r in agent.references]
     parts = [text.strip(), *references, install.tools_section(install.resolve(config, capabilities)), company.strip()]
+    lessons = config.lessons / f"{agent.name}.yaml" if config.lessons else None
+    if lessons and lessons.exists():
+        rules = lessons.read_text(encoding="utf-8").strip()
+        parts.append("## Rules learned from the PM's corrections\n\nFollow these. They override your defaults.\n\n" + rules)
     return "\n\n".join(parts)
 
 
@@ -120,7 +124,11 @@ def build_command(agent: AgentConfig, trial: Trial, config: install.Config | Non
     mapping = install.resolve(config, agent.all_capabilities())
     tools = sorted(set(mapping.values()))
     mcp_path = trial.dir / "mcp.json"
-    mcp_path.write_text(json.dumps({"mcpServers": install.mcp_servers(config, tools, slots(agent, trial))}, indent=2), encoding="utf-8")
+    servers = install.mcp_servers(config, tools, slots(agent, trial))
+    for spec in servers.values():
+        if "env" in spec:
+            spec["env"].update(trial.task.env)
+    mcp_path.write_text(json.dumps({"mcpServers": servers}, indent=2), encoding="utf-8")
 
     cmd = [
         claude_binary(), "-p", trial.task.prompt,

@@ -1,7 +1,8 @@
 name: chief
-version: 0.2.0
+version: 0.3.0
 model: sonnet
-max_turns: 50
+max_turns: 80
 skill: SKILL.md
-capabilities: [mail.list, mail.read, chat.list, chat.thread, calendar.list, transcripts.list, transcripts.read,
-               directory.lookup, tracker.search, commitments.due, ledger.read, ledger.write]
+capabilities: [mail.list, mail.read, mail.sent, chat.list, chat.thread, calendar.list, calendar.context, calendar.free,
+               transcripts.list, transcripts.read, directory.lookup, tracker.search, loops.list, people.history, people.stale,
+               goals.get, goals.time, voice.samples, commitments.due, notify.self, ledger.read, ledger.write]
