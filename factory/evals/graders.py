@@ -179,8 +179,30 @@ def numbers_grounded(trial: Trial, key: dict, params: dict) -> list[Assertion]:
     return [("every number came from a tool", not invented, f"{len(numbers)} numbers, ungrounded: {invented[:5]}")]
 
 
+def tool_texts(trial: Trial) -> str:
+    parts = []
+
+    def walk(v):
+        if isinstance(v, str):
+            parts.append(v)
+        elif isinstance(v, dict):
+            for x in v.values():
+                walk(x)
+        elif isinstance(v, list):
+            for x in v:
+                walk(x)
+
+    for call in trial.tool_calls:
+        parts.append(call["result"])
+        try:
+            walk(json.loads(call["result"]))
+        except (json.JSONDecodeError, TypeError):
+            pass
+    return " ".join(" ".join(p.split()) for p in parts)
+
+
 def quotes_grounded(trial: Trial, key: dict, params: dict) -> list[Assertion]:
-    text = " ".join(" ".join(c["result"].split()) for c in trial.tool_calls)
+    text = tool_texts(trial)
     quotes = []
     for e in entries(trial):
         for claim in e["payload"].get("cause", []) + e["payload"].get("ruled_out", []):

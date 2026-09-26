@@ -3,7 +3,7 @@ import json
 from datetime import datetime, timezone
 
 from . import graders
-from .runner import run_trial
+from .runner import Trial, parse_transcript, run_trial
 from .suite import ROOT, load_agent, load_suite
 
 
@@ -71,23 +71,42 @@ def main() -> None:
     run.add_argument("--trials", type=int)
     run.add_argument("--task", action="append", help="Run only these task ids")
     run.add_argument("--null", action="store_true", help="Run no model; proves graders fail an empty agent")
+    regrade = sub.add_parser("regrade", help="Grade saved transcripts again after a grader or answer-key fix")
+    regrade.add_argument("agent")
+    regrade.add_argument("run_id")
     args = parser.parse_args()
 
     suite = load_suite(args.agent)
-    agent = None if args.null else load_agent(args.agent)
-    k = args.trials or suite.trials
-    run_id = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ") + ("-null" if args.null else "")
-    trial_root = ROOT / "runs" / "evals" / args.agent / run_id
-
-    results = []
-    for task in suite.tasks:
-        if args.task and task.id not in args.task:
-            continue
-        trials = []
-        for i in range(k):
-            print(f"{task.id}: trial {i + 1}/{k}", flush=True)
-            trials.append(run_trial(agent, task, i, trial_root))
-        results.append(grade_task(task, trials))
+    if args.command == "regrade":
+        agent, trial_root = load_agent(args.agent), ROOT / "runs" / "evals" / args.agent / args.run_id
+        results, k = [], 0
+        for task in suite.tasks:
+            dirs = sorted((trial_root / task.id).glob("trial-*")) if (trial_root / task.id).exists() else []
+            if not dirs:
+                continue
+            trials = []
+            for i, d in enumerate(dirs):
+                trial = Trial(task, i, d)
+                parse_transcript(trial, (d / "transcript.jsonl").read_text(encoding="utf-8"))
+                trials.append(trial)
+            k = max(k, len(trials))
+            results.append(grade_task(task, trials))
+        run_id, mode = args.run_id + "-regraded", "regraded"
+    else:
+        agent = None if args.null else load_agent(args.agent)
+        k = args.trials or suite.trials
+        run_id = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ") + ("-null" if args.null else "")
+        mode = "null" if args.null else "real"
+        trial_root = ROOT / "runs" / "evals" / args.agent / run_id
+        results = []
+        for task in suite.tasks:
+            if args.task and task.id not in args.task:
+                continue
+            trials = []
+            for i in range(k):
+                print(f"{task.id}: trial {i + 1}/{k}", flush=True)
+                trials.append(run_trial(agent, task, i, trial_root))
+            results.append(grade_task(task, trials))
 
     summary = {}
     for kind in ("capability", "regression"):
@@ -102,7 +121,7 @@ def main() -> None:
         "agent_version": agent.version if agent else None,
         "suite_version": suite.version,
         "run_id": run_id,
-        "mode": "null" if args.null else "real",
+        "mode": mode,
         "trials_per_task": k,
         "cost_usd": round(sum(t["cost_usd"] for r in results for t in r["trials"]), 4),
         "summary": summary,

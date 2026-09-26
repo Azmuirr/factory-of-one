@@ -1,0 +1,46 @@
+{
+  "agent": "signal",
+  "agent_version": "0.1.0",
+  "suite_version": "0.1.0",
+  "run_id": "20260926T040735Z",
+  "mode": "real",
+  "trials_per_task": 1,
+  "cost_usd": 0.5906,
+  "summary": {
+    "capability": {
+      "pass_at_k": "0/1",
+      "pass_pow_k": "0/1"
+    }
+  },
+  "tasks": [
+    {
+      "task": "diagnose-s01",
+      "kind": "capability",
+      "trials": [
+        {
+          "trial": 1,
+          "passed": false,
+          "partial": 0.846,
+          "failed": [
+            "mechanism: first_meeting_rate_7d",
+            "every quote matches a tool result word for word: 4 quotes, not found: ['Getting \"admin consent required\" when I connect Outlook. Our IT team takes a week to approve new apps. Any workaround so I can use the trial meanwhile?']"
+          ],
+          "advisory": [
+            "reasoning rubric: pass (pass: The cause (rel_0412's mandatory calendar connect without skip for Microsoft users, combined with admin-consent blocking) logically follows from the evidence (7.33% activation drop concentrated in Microsoft segment p=0.0, release timing, connect-rate spike with first-meeting-rate drop in that segment, and 17 support tickets describing the block); all facts are correctly labeled with specific evidence and appropriate 'does_not_prove' caveats (e.g., 'timing alone is correlational,' '17 is a lower bound'); the company-size alternative is ruled out; and the recommended action (scope/rollback for Microsoft segment) is minimal and testable.)"
+          ],
+          "error": null,
+          "cost_usd": 0.5906,
+          "turns": 7,
+          "duration_s": 274.6,
+          "transcript": "runs\\evals\\signal\\20260926T040735Z\\diagnose-s01\\trial-1\\transcript.jsonl"
+        }
+      ],
+      "cross_trial": [
+        "same diagnosis and action in every trial: pass (1 distinct)"
+      ],
+      "pass_at_k": false,
+      "pass_pow_k": false,
+      "mean_partial": 0.846
+    }
+  ]
+}

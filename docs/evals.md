@@ -55,3 +55,13 @@ Each trial gets a fresh temporary directory. Regression tasks use fixed seeds. R
 Per task: pass or fail per trial, partial credit, and the failed assertions with a transcript path. Per suite: pass@3 and pass^3, split by capability and regression, plus estimated cost, turns, and duration. A suite that passes 95% or more on 3 runs in a row is flagged saturated: its tasks move to regression and harder tiers get added.
 
 Read transcripts. Graders are only trustworthy if someone reads the trials they graded.
+
+## Grader changes
+
+Graders have bugs too. Each fix is logged, and saved transcripts are regraded with `python -m factory.evals regrade <agent> <run_id>`.
+
+| Date | Grader | Bug | Found by | Fix |
+|---|---|---|---|---|
+| 2026-09-25 | `quiet-s00` task | The empty agent passed: "raise no alarm" is satisfied by doing nothing | The null-agent run | Added `signal_card_written`: the quiet task also requires the positive outcome |
+| 2026-09-25 | `diagnosis_matches_truth` (answer key) | Expected `calendar_connect_rate_1d` as the mechanism. That metric rises after the release, because every user must now try the step. The first registered step that drops is `first_meeting_rate_7d` | Reading Signal's first real trial, which named the right metric | Corrected `truth.yaml` and the example ledger |
+| 2026-09-25 | `quotes_grounded` | Compared quotes against raw JSON, where quotation marks are escaped. A real quote failed | The same trial | Decode JSON tool results before comparing |

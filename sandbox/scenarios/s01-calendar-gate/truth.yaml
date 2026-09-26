@@ -7,7 +7,7 @@ cause:
   mechanism: "Onboarding v2 made calendar connect mandatory. About 45% of Microsoft calendar workspaces need admin consent, so they get stuck."
   affected:
     segment: {calendar_provider: microsoft}
-    funnel_step: "calendar_connect_started -> calendar_connect_completed"
+    funnel_step: "calendar connect step -> first real meeting. Connect completion rises (everyone must try), while consent failures now block the first meeting"
   onset: {week: 6, day: 2}
   size:
     microsoft_activation_7d: {before: 0.39, after: 0.30}
@@ -68,7 +68,9 @@ grading:
     metric: activation_rate_7d
     segment: {calendar_provider: [microsoft]}
     release_id: rel_0412
-    mechanism_metric: calendar_connect_rate_1d
+    # calendar_connect_rate_1d rises after the release because every user must now attempt the step.
+    # The first registered step that drops is the first meeting.
+    mechanism_metric: first_meeting_rate_7d
     voice_min_workspaces: 3
   false_causes:
     - {dimension: meeting_platform}

@@ -102,3 +102,9 @@ def test_suite_references_only_real_graders(agent):
     for task in suite.tasks:
         for g in task.graders:
             assert g.name in known, f"{task.id}: {g.name}"
+
+
+def test_quotes_inside_json_tool_results_are_decoded(tmp_path):
+    packet = {"type": "decision_packet", "payload": {"cause": [{"evidence": [{"quote": 'Getting "admin consent required" when I connect'}]}]}}
+    result = json.dumps({"tickets": [{"body": 'Getting "admin consent required" when I connect Outlook.'}]})
+    assert ok(graders.quotes_grounded(make_trial(tmp_path, [packet], [result]), KEY, {}))
