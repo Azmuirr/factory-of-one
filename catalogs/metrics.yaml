@@ -9,6 +9,7 @@ families:
     handler: cohort_rate
     metrics:
       activation_rate_7d:
+        aliases: [activation, activation rate, activated, 7-day activation]
         description: Share of new workspaces that share a recap of a real meeting within 7 days of signup
         numerator: Workspaces with recap_shared for a meeting with 2+ participants and 5+ minutes, within 7 days of signup
         denominator: Workspaces that signed up in the period
@@ -17,6 +18,7 @@ families:
         dimensions: [calendar_provider, channel, company_size]
         related: [calendar_connect_rate_1d, first_meeting_rate_7d, trial_to_paid_rate]
       calendar_connect_rate_1d:
+        aliases: [calendar connect rate, calendar connection, connect rate]
         description: Share of workspaces that saw the calendar step and connected within 1 day
         numerator: Workspaces with calendar_connect_completed within 1 day of signup
         denominator: Workspaces with onboarding_step_viewed where step = calendar_connect
@@ -25,6 +27,7 @@ families:
         dimensions: [calendar_provider, channel, company_size]
         related: [activation_rate_7d]
       first_meeting_rate_7d:
+        aliases: [first meeting rate, first recording, meeting rate]
         description: Share of new workspaces that record a real meeting within 7 days
         numerator: Workspaces with meeting_recorded (2+ participants, 5+ minutes) within 7 days of signup
         denominator: Workspaces that signed up in the period
@@ -38,6 +41,7 @@ families:
     handler: cohort_rate
     metrics:
       trial_to_paid_rate:
+        aliases: [conversion, trial conversion, conversion rate, paid conversion]
         description: Share of trials that end on a paid plan
         numerator: Workspaces with trial_ended where outcome = paid
         denominator: Workspaces whose trial ended
@@ -46,6 +50,7 @@ families:
         dimensions: [calendar_provider, channel, company_size]
         related: [activation_rate_7d, new_mrr]
       new_mrr:
+        aliases: [mrr, new revenue, revenue]
         description: Monthly recurring revenue added by trials that converted
         numerator: Sum of mrr on the first paid subscription row
         denominator: null
@@ -59,6 +64,7 @@ families:
     handler: count
     metrics:
       new_workspaces:
+        aliases: [signups, sign ups, new signups, trials started, workspaces]
         description: Workspaces created
         numerator: Rows in workspaces by created_at
         denominator: null

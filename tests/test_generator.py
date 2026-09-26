@@ -45,11 +45,6 @@ def table(run: Path, name: str, where: str = "") -> list:
 
 
 @pytest.fixture(scope="session")
-def now_run(tmp_path_factory):
-    return generate(SCENARIO, seed=1, out=tmp_path_factory.mktemp("now"))
-
-
-@pytest.fixture(scope="session")
 def end_run(tmp_path_factory):
     return generate(SCENARIO, seed=1, through="end", out=tmp_path_factory.mktemp("end"))
 

@@ -23,6 +23,7 @@ CREATE TABLE tickets (ticket_id TEXT PRIMARY KEY, created_at TEXT, workspace_id 
   subject TEXT, body TEXT, support_tag TEXT);
 CREATE TABLE messages (message_id TEXT PRIMARY KEY, ts TEXT, from_role TEXT, subject TEXT, body TEXT);
 CREATE TABLE actions (action_id TEXT PRIMARY KEY, ts TEXT, name TEXT, params TEXT, decided_by TEXT);
+CREATE TABLE meta (key TEXT PRIMARY KEY, value TEXT);
 CREATE INDEX events_ws ON events (workspace_id);
 CREATE INDEX events_name_ts ON events (name, ts);
 """
@@ -81,6 +82,7 @@ def write_world(path: Path, world: World, scenario: Scenario, actions: list[Acti
         (f"act_{k + 1:03d}", iso(a.ts), a.name, json.dumps(a.params, sort_keys=True), a.decided_by)
         for k, a in enumerate(actions) if a.ts < cutoff
     ])
+    conn.execute("INSERT INTO meta VALUES (?, ?)", ("data_through", iso(cutoff)))
     conn.commit()
     counts = {t: conn.execute(f"SELECT COUNT(*) FROM {t}").fetchone()[0]
               for t in ("workspaces", "events", "subscriptions", "tickets", "messages", "releases", "actions")}
