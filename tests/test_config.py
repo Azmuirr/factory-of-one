@@ -38,7 +38,8 @@ def test_skills_name_capabilities_not_company_facts(name):
 
 
 @pytest.fixture
-def signal_command(tmp_path):
+def signal_command(tmp_path, monkeypatch):
+    monkeypatch.setenv("CLAUDE_BIN", "claude")  # the command is only inspected, never run
     trial = Trial(Task("t", "capability", "s01-calendar-gate", 1, "Weekly check.", []), 0, tmp_path)
     cmd = build_command(load_agent("signal"), trial, install.load(ROOT / "config" / "sandbox.yaml"))
     return cmd, tmp_path
