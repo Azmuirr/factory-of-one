@@ -1,0 +1,31 @@
+agent: builder
+version: 0.1.0
+defaults:
+  trials: 3
+  seed: 1
+
+# The same prompt for both tasks: Builder must read the ledger and decide whether there is anything to build.
+tasks:
+  - id: build-s01
+    kind: capability
+    scenario: s01-calendar-gate
+    reference: ledger/examples/demos/s01-consent-fallback/index.html
+    setup:
+      - seed_ledger: {file: ledger/examples/s01-happy-path.jsonl, ids: [sig_0001, pkt_0001, rev_0001, bet_0001]}
+    prompt: &check_bets Check the ledger. If the PM placed a bet, propose its action and build the one-screen demo for the VP.
+    graders:
+      - action_matches_decision
+      - build_entry_valid
+      - demo_passes_checks
+      - demo_numbers_grounded
+      - {type: code, name: tools_within_allowlist, params: {servers: [ledger, releases, demos]}}
+
+  - id: no-bet
+    kind: capability
+    scenario: s00-quiet
+    setup:
+      - seed_ledger: {file: agents/builder/evals/fixtures/quiet-ledger.jsonl}
+    prompt: *check_bets
+    graders:
+      - no_action_proposed
+      - {type: code, name: tools_within_allowlist, params: {servers: [ledger, releases, demos]}}

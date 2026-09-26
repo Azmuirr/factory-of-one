@@ -36,6 +36,12 @@ capabilities:
   flags.state:
     description: Current and past feature-flag settings
     access: read
+  demo.publish:
+    description: Save a self-contained, one-screen HTML demo and run the code checks (honesty label, decision link, one screen, offline, no dead clicks)
+    access: propose
+  demo.check:
+    description: Run the demo checks on an existing demo
+    access: read
   ledger.write:
     description: Append an artifact (signal card, decision packet, and so on) to the shared ledger. Invalid entries are rejected with reasons
     access: propose

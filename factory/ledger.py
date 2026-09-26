@@ -57,3 +57,10 @@ def validate_file(path: Path) -> list[str]:
         problems += [f"line {n} ({entry.get('id')}): {p}" for p in errors(entry, ids)]
         ids.add(entry.get("id"))
     return problems
+
+
+def action_key(payload: dict) -> tuple:
+    """What an action does, ignoring status and ordering: name, release, and segment."""
+    params = payload.get("params", {})
+    segment = {k: sorted(v) for k, v in (params.get("segment") or {}).items()}
+    return payload.get("name"), params.get("release_id"), json.dumps(segment, sort_keys=True)

@@ -10,10 +10,12 @@ servers:
   support:   {command: "{python}", args: [-m, factory.servers.support_server]}
   releases:  {command: "{python}", args: [-m, factory.servers.releases_server]}
   ledger:    {command: "{python}", args: [-m, factory.servers.ledger_server]}
+  demos:     {command: "{python}", args: [-m, factory.servers.demos_server]}
 server_env:
   FACTORY_WORLD: "{world}"
   FACTORY_LEDGER: "{ledger}"
   FACTORY_AGENT: "{agent}"
+  FACTORY_DEMOS: "{demos}"
   FACTORY_CATALOGS: "{catalogs}"
   PYTHONIOENCODING: utf-8
 
@@ -29,5 +31,7 @@ capabilities:
   support.get: mcp__support__get_ticket
   releases.list: mcp__releases__list_releases
   flags.state: mcp__releases__flag_state
+  demo.publish: mcp__demos__publish_demo
+  demo.check: mcp__demos__check_demo
   ledger.write: mcp__ledger__write_entry
   ledger.read: mcp__ledger__read_entries

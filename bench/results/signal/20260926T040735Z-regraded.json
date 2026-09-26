@@ -1,6 +1,6 @@
 {
   "agent": "signal",
-  "agent_version": "0.1.0",
+  "agent_version": "0.2.0",
   "suite_version": "0.1.0",
   "run_id": "20260926T040735Z-regraded",
   "mode": "regraded",
@@ -23,7 +23,7 @@
           "partial": 1.0,
           "failed": [],
           "advisory": [
-            "reasoning rubric: fail (fail: Assumptions (that admin-consent errors are new and triggered by rel_0412) are not explicitly labeled as assumptions; they are embedded in fact statements without clear syntactic separation from empirical observations, violating the 'facts and assumptions are labeled correctly' criterion.)"
+            "reasoning rubric: pass (pass: Cause follows from evidence with appropriate caveats (segment isolation, funnel break, corroborating tickets); all claims correctly labeled with candid 'does_not_prove' statements acknowledging correlation vs causation; recommendation (re-enable skip for Microsoft segment and remeasure) is the minimal action that tests whether mandatory connect-with-no-skip is the mechanism.)"
           ],
           "error": null,
           "cost_usd": 0.5906,

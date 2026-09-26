@@ -9,11 +9,13 @@ servers:
   metrics:   {command: "{python}", args: [-m, factory.servers.metrics_server]}   # needs a warehouse adapter (planned)
   warehouse: {command: "{python}", args: [-m, factory.servers.warehouse_server]} # needs a warehouse adapter (planned)
   ledger:    {command: "{python}", args: [-m, factory.servers.ledger_server]}
+  demos:     {command: "{python}", args: [-m, factory.servers.demos_server]}
   support:   {command: "<command that starts your help desk's MCP server>", args: [], env: {API_TOKEN: "${SUPPORT_API_TOKEN}"}}
   releases:  {command: "<command that starts your code host's or flag tool's MCP server>", args: []}
 server_env:
   FACTORY_LEDGER: "{ledger}"
   FACTORY_AGENT: "{agent}"
+  FACTORY_DEMOS: "{demos}"
   FACTORY_CATALOGS: "{catalogs}"
 
 # capability: mcp__<server name above>__<that server's tool name>
@@ -29,5 +31,7 @@ capabilities:
   support.get: mcp__support__<get ticket tool>
   releases.list: mcp__releases__<list releases tool>
   flags.state: mcp__releases__<read flag state tool>
+  demo.publish: mcp__demos__publish_demo
+  demo.check: mcp__demos__check_demo
   ledger.write: mcp__ledger__write_entry
   ledger.read: mcp__ledger__read_entries

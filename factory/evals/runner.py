@@ -66,8 +66,8 @@ def prepare(task: Task, index: int, root: Path) -> Trial:
     (trial_dir / "world").mkdir(parents=True)
     shutil.copy(world_for(task), trial_dir / "world" / "world.db")
     trial = Trial(task, index, trial_dir)
-    apply_setup(trial)
     trial.ledger_path.touch()
+    apply_setup(trial)
     return trial
 
 
@@ -83,12 +83,21 @@ def apply_setup(trial: Trial) -> None:
             ).fetchone()
             conn.execute("INSERT INTO tickets VALUES (?,?,?,?,?,?,?)",
                          (t["ticket_id"], t["created_at"], ws, user, t["subject"], t["body"], t["support_tag"]))
+        if "seed_ledger" in step:
+            seed = step["seed_ledger"]
+            rows = [json.loads(line) for line in (ROOT / seed["file"]).read_text(encoding="utf-8").splitlines() if line.strip()]
+            wanted = seed.get("ids")
+            with trial.ledger_path.open("a", encoding="utf-8") as f:
+                for row in rows:
+                    if wanted is None or row["id"] in wanted:
+                        f.write(json.dumps(row, sort_keys=True))
+                        f.write("\n")
     conn.commit()
     conn.close()
 
 
 def slots(agent: AgentConfig, trial: Trial) -> dict:
-    return {"world": trial.world_path, "ledger": trial.ledger_path, "agent": agent.name}
+    return {"world": trial.world_path, "ledger": trial.ledger_path, "agent": agent.name, "demos": trial.dir / "demos"}
 
 
 def system_prompt(agent: AgentConfig, config: install.Config, text: str, capabilities: list[str]) -> str:

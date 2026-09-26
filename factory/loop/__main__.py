@@ -24,9 +24,9 @@ CHIEF = {"kind": "agent", "name": "chief", "version": "0.1.0"}
 
 
 class Loop:
-    def __init__(self, scenario: str, seed: int, out: Path, gates: Gates, signal_fixture: Path | None):
+    def __init__(self, scenario: str, seed: int, out: Path, gates: Gates, fixture: Path | None):
         self.scenario, self.seed, self.dir, self.gates = scenario, seed, out, gates
-        self.signal_fixture = signal_fixture.resolve() if signal_fixture else None
+        self.fixture = fixture.resolve() if fixture else None
         self.ledger = out / "ledger.jsonl"
         self.world = out / "world" / "world.db"
         self.trace: list[dict] = []
@@ -65,20 +65,25 @@ class Loop:
 
     def sense_and_frame(self) -> None:
         self.log("sense", "start")
-        if self.signal_fixture:
-            rows = [json.loads(l) for l in self.signal_fixture.read_text(encoding="utf-8").splitlines() if l.strip()]
-            for row in rows:
-                if row["type"] in ("signal_card", "decision_packet"):
-                    ledger.append(self.ledger, row)
-            self.log("sense", "signal output loaded from fixture", fixture=str(self.signal_fixture))
+        if self.fixture:
+            self.load_fixture(lambda row: row["type"] in ("signal_card", "decision_packet"))
+            self.log("sense", "signal output loaded from fixture", fixture=str(self.fixture))
             return
-        agent = load_agent("signal")
-        suite = yaml.safe_load((ROOT / "agents" / "signal" / "evals" / "suite.yaml").read_text(encoding="utf-8"))
-        prompt = next(t["prompt"] for t in suite["tasks"] if t["id"] == "diagnose-s01")
-        trial = Trial(Task("sense", "capability", self.scenario, self.seed, prompt, []), 0, self.dir)
-        run_claude(agent, trial)
+        self.run_agent("signal", "diagnose-s01", "sense")
+
+    def load_fixture(self, keep) -> None:
+        for line in self.fixture.read_text(encoding="utf-8").splitlines():
+            if line.strip() and keep(json.loads(line)):
+                ledger.append(self.ledger, json.loads(line))
+
+    def run_agent(self, name: str, task_id: str, station: str) -> None:
+        suite = yaml.safe_load((ROOT / "agents" / name / "evals" / "suite.yaml").read_text(encoding="utf-8"))
+        prompt = next(t["prompt"] for t in suite["tasks"] if t["id"] == task_id)
+        trial = Trial(Task(station, "capability", self.scenario, self.seed, prompt, []), 0, self.dir)
+        run_claude(load_agent(name), trial)
+        (self.dir / "transcript.jsonl").rename(self.dir / f"transcript-{name}.jsonl")
         self.agent_cost += trial.cost_usd
-        self.log("sense", "signal finished", cost_usd=round(trial.cost_usd, 4), turns=trial.turns, seconds=trial.duration_s,
+        self.log(station, f"{name} finished", cost_usd=round(trial.cost_usd, 4), turns=trial.turns, seconds=trial.duration_s,
                  error=trial.error)
 
     def decide(self) -> bool:
@@ -125,13 +130,38 @@ class Loop:
             "kill_trigger": a["kill_trigger"],
             "review_date": a["review_date"],
         }, [packet["id"]])
-        action = p["recommended_action"]
-        act_id = self.write("action", HUMAN, {"name": action["name"], "params": action["params"], "status": "approved"}, [bet_id])
-        self.log("decide", "bet placed", bet=bet_id, action=act_id)
+        self.log("decide", "bet placed", bet=bet_id)
         return True
 
     def build(self) -> None:
-        self.log("build", "Builder is not built yet. The approved action spec passes through unchanged.")
+        if self.fixture:
+            self.load_fixture(lambda row: row["type"] == "build" or (row["type"] == "action" and row["payload"]["status"] == "proposed"))
+            demos = self.fixture.parent / "demos"
+            if demos.exists():
+                shutil.copytree(demos, self.dir / "demos", dirs_exist_ok=True)
+            self.log("build", "builder output loaded from fixture")
+            return
+        self.run_agent("builder", "build-s01", "build")
+
+    def approve(self) -> bool:
+        """Code checks that Builder proposed exactly what the PM approved. A mismatch goes to the PM."""
+        packet = self.latest("decision_packet")["payload"]
+        proposals = [e for e in ledger.read(self.ledger) if e["type"] == "action" and e["payload"]["status"] == "proposed"]
+        if not proposals:
+            self.log("build", "no action proposed")
+            return False
+        proposed = proposals[-1]
+        if ledger.action_key(proposed["payload"]) != ledger.action_key(packet["recommended_action"]):
+            briefing = "\n".join([f"Builder proposed {json.dumps(proposed['payload'])}",
+                                  f"You approved {json.dumps(packet['recommended_action'])}"])
+            a = self.gates.ask("confirm", briefing, [("apply", "Apply Builder's proposal? (yes/no)", "no")])
+            if a["apply"].lower() not in ("y", "yes"):
+                self.log("build", "proposal rejected by PM")
+                return False
+        payload = {**proposed["payload"], "status": "approved"}
+        act_id = self.write("action", CHIEF, payload, [proposed["id"]])
+        self.log("build", "proposal matches the approved decision", action=act_id)
+        return True
 
     def apply(self) -> None:
         action = self.latest("action")["payload"]
@@ -203,11 +233,12 @@ class Loop:
         result = None
         if self.decide():
             self.build()
-            self.apply()
-            result = self.prove()
-            if result:
-                self.call(result)
-                self.tell()
+            if self.approve():
+                self.apply()
+                result = self.prove()
+                if result:
+                    self.call(result)
+                    self.tell()
         summary = self.learn(result)
         (self.dir / "trace.jsonl").write_text("".join(json.dumps(t) + "\n" for t in self.trace), encoding="utf-8")
         (self.dir / "summary.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
@@ -219,13 +250,13 @@ def main() -> None:
     parser.add_argument("--scenario", default="s01-calendar-gate")
     parser.add_argument("--seed", type=int, default=1)
     parser.add_argument("--gates", type=Path, help="YAML answers for the gates. Omit to answer at the keyboard")
-    parser.add_argument("--signal-fixture", type=Path, help="Load Signal's output from a ledger file instead of running the agent")
+    parser.add_argument("--fixture", type=Path, help="Load agent outputs from a ledger file instead of running the agents")
     parser.add_argument("--out", type=Path)
     args = parser.parse_args()
     script = yaml.safe_load(args.gates.read_text(encoding="utf-8")) if args.gates else None
     run_id = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     out = args.out or ROOT / "runs" / "loop" / f"{args.scenario}-seed{args.seed}-{run_id}"
-    summary = Loop(args.scenario, args.seed, out, Gates(script), args.signal_fixture).run()
+    summary = Loop(args.scenario, args.seed, out, Gates(script), args.fixture).run()
     print("\n" + json.dumps(summary, indent=2))
     print(f"\nLedger, trace, and summary: {out}")
 

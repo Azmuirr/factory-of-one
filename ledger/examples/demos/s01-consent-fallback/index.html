@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Activation drop: the ask</title>
+<style>
+  :root { --bg: #f7f6f2; --ink: #1d1d1b; --muted: #6b6a64; --accent: #b3261e; --card: #ffffff; --line: #e3e1da; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { max-width: 760px; margin: 40px auto; padding: 0 16px; }
+  .label { display: inline-block; font-size: 12px; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 2px 10px; }
+  h1 { font-size: 28px; line-height: 1.25; margin: 14px 0 8px; }
+  .number { font-size: 56px; font-weight: 700; color: var(--accent); margin: 8px 0 0; }
+  .sub { color: var(--muted); margin: 0 0 24px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 20px 24px; }
+  .ask { font-size: 20px; font-weight: 600; margin: 0 0 12px; }
+  button { font: inherit; border: 1px solid var(--ink); background: var(--ink); color: #fff; border-radius: 8px; padding: 8px 16px; cursor: pointer; }
+  #evidence { display: none; margin-top: 16px; color: var(--muted); }
+  #evidence.open { display: block; }
+  footer { margin-top: 16px; font-size: 13px; color: var(--muted); }
+</style>
+</head>
+<body>
+<main data-decision="pkt_0001" data-honesty="hardcoded">
+  <span class="label">Hardcoded: numbers copied from the ledger at build time</span>
+  <h1>Microsoft calendar users stopped activating after onboarding v2.</h1>
+  <p class="number">$25,300 a week</p>
+  <p class="sub">New ARR at risk. Microsoft activation fell from 39.4% to 29.8%. Google did not move.</p>
+  <section class="card">
+    <p class="ask">The ask: approve a rollback of onboarding v2 for Microsoft calendar users today.</p>
+    <button id="toggle" aria-expanded="false">Show the evidence</button>
+    <div id="evidence">
+      <p>Onboarding v2 made calendar connect mandatory. Orgs that require admin consent cannot finish it, so they never reach a first meeting.</p>
+      <p>Customers say it too: "It says I need admin approval."</p>
+    </div>
+  </section>
+  <footer>Decision packet pkt_0001. Next: retest v2 behind a flag, with a fallback when consent is required.</footer>
+</main>
+<script>
+  const toggle = document.getElementById("toggle");
+  const evidence = document.getElementById("evidence");
+  toggle.addEventListener("click", () => {
+    const open = evidence.classList.toggle("open");
+    toggle.setAttribute("aria-expanded", String(open));
+    toggle.textContent = open ? "Hide the evidence" : "Show the evidence";
+  });
+</script>
+</body>
+</html>

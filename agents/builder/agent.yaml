@@ -1,0 +1,6 @@
+name: builder
+version: 0.1.0
+model: sonnet
+max_turns: 30
+skill: SKILL.md
+capabilities: [ledger.read, ledger.write, releases.list, demo.publish, demo.check]
