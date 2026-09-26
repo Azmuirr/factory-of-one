@@ -95,3 +95,17 @@ Each entry records the options, the choice, and what would reverse it. The reaso
 - Evals stay on the sandbox, where an answer key exists. Real use is monitored, and sanitized failures become eval cases.
 
 **Would change if:** a capability needs guarantees a vendor tool cannot give. Then it gets a factory adapter, like `metrics`.
+
+## D8. Every metric number cites its query, and code replays it
+
+| Option | Verdict |
+|---|---|
+| Check that each number exists somewhere in a recomputed pool | Rejected as the main check. With 528 recomputed values, almost any plausible rate matches something. It caught invented numbers but let a true number from the wrong slice through |
+| Make evidence fully structured (metric, periods, segment) | Rejected. Heavy for the model to write, and a second source of truth next to the tool call |
+| **The metrics tools log every answer by `query_id`. Evidence cites the `query_id`. Code replays the query on the same world** | **Chosen.** An evidence value must equal the replayed result, and a claim's prose numbers must come from its own queries |
+
+**Also:** a signal card is recomputed exactly from its metric, periods, and segment. The size must equal the sizing tool's answer.
+
+**What code still cannot catch:** a packet whose numbers and quotes are all true but whose causal story is wrong, such as blaming a release that shipped before the drop. That is the job of Quality's Elon Mode disproof pass, and Quality's eval suite plants exactly that case.
+
+**Would change if:** replay becomes too slow on a real warehouse. Then log results with a hash instead of replaying.

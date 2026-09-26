@@ -83,6 +83,13 @@ def apply_setup(trial: Trial) -> None:
             ).fetchone()
             conn.execute("INSERT INTO tickets VALUES (?,?,?,?,?,?,?)",
                          (t["ticket_id"], t["created_at"], ws, user, t["subject"], t["body"], t["support_tag"]))
+        if "copy_files" in step:
+            source, target = ROOT / step["copy_files"]["from"], trial.dir / step["copy_files"]["to"]
+            if source.is_dir():
+                shutil.copytree(source, target, dirs_exist_ok=True)
+            else:
+                target.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy(source, target)
         if "seed_ledger" in step:
             seed = step["seed_ledger"]
             rows = [json.loads(line) for line in (ROOT / seed["file"]).read_text(encoding="utf-8").splitlines() if line.strip()]
@@ -102,7 +109,8 @@ def slots(agent: AgentConfig, trial: Trial) -> dict:
 
 def system_prompt(agent: AgentConfig, config: install.Config, text: str, capabilities: list[str]) -> str:
     company = config.company.read_text(encoding="utf-8")
-    parts = [text.strip(), install.tools_section(install.resolve(config, capabilities)), company.strip()]
+    references = [(ROOT / r).read_text(encoding="utf-8").strip() for r in agent.references]
+    parts = [text.strip(), *references, install.tools_section(install.resolve(config, capabilities)), company.strip()]
     return "\n\n".join(parts)
 
 

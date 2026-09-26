@@ -23,7 +23,7 @@ def loop_run(tmp_path_factory):
 def test_the_loop_writes_every_artifact_in_order(loop_run):
     out, _ = loop_run
     types = [e["type"] for e in ledger.read(out / "ledger.jsonl")]
-    assert types == ["signal_card", "decision_packet", "bet", "action", "build", "action", "action", "verdict", "call"]
+    assert types == ["signal_card", "decision_packet", "review", "bet", "action", "build", "review", "action", "action", "verdict", "call"]
     assert ledger.validate_file(out / "ledger.jsonl") == []
 
 

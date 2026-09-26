@@ -11,6 +11,7 @@ servers:
   releases:  {command: "{python}", args: [-m, factory.servers.releases_server]}
   ledger:    {command: "{python}", args: [-m, factory.servers.ledger_server]}
   demos:     {command: "{python}", args: [-m, factory.servers.demos_server]}
+  review:    {command: "{python}", args: [-m, factory.servers.review_server]}
 server_env:
   FACTORY_WORLD: "{world}"
   FACTORY_LEDGER: "{ledger}"
@@ -33,5 +34,7 @@ capabilities:
   flags.state: mcp__releases__flag_state
   demo.publish: mcp__demos__publish_demo
   demo.check: mcp__demos__check_demo
+  review.check: mcp__review__check_entry
+  review.submit: mcp__review__submit_review
   ledger.write: mcp__ledger__write_entry
   ledger.read: mcp__ledger__read_entries

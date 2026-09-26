@@ -11,7 +11,7 @@ from pathlib import Path
 
 import yaml
 
-from factory import ledger
+from factory import ledger, review
 from factory.evals.runner import Trial, run_claude, world_for
 from factory.evals.suite import ROOT, Task, load_agent
 from factory.loop.gates import Gates
@@ -67,6 +67,8 @@ class Loop:
         self.log("sense", "start")
         if self.fixture:
             self.load_fixture(lambda row: row["type"] in ("signal_card", "decision_packet"))
+            if (self.fixture.parent / "queries.jsonl").exists():
+                shutil.copy(self.fixture.parent / "queries.jsonl", self.dir / "queries.jsonl")
             self.log("sense", "signal output loaded from fixture", fixture=str(self.fixture))
             return
         self.run_agent("signal", "diagnose-s01", "sense")
@@ -76,15 +78,35 @@ class Loop:
             if line.strip() and keep(json.loads(line)):
                 ledger.append(self.ledger, json.loads(line))
 
-    def run_agent(self, name: str, task_id: str, station: str) -> None:
-        suite = yaml.safe_load((ROOT / "agents" / name / "evals" / "suite.yaml").read_text(encoding="utf-8"))
-        prompt = next(t["prompt"] for t in suite["tasks"] if t["id"] == task_id)
+    def run_agent(self, name: str, task_id: str, station: str, prompt: str | None = None) -> None:
+        if prompt is None:
+            suite = yaml.safe_load((ROOT / "agents" / name / "evals" / "suite.yaml").read_text(encoding="utf-8"))
+            prompt = next(t["prompt"] for t in suite["tasks"] if t["id"] == task_id)
         trial = Trial(Task(station, "capability", self.scenario, self.seed, prompt, []), 0, self.dir)
         run_claude(load_agent(name), trial)
-        (self.dir / "transcript.jsonl").rename(self.dir / f"transcript-{name}.jsonl")
+        (self.dir / "transcript.jsonl").replace(self.dir / f"transcript-{name}-{station}.jsonl")
         self.agent_cost += trial.cost_usd
         self.log(station, f"{name} finished", cost_usd=round(trial.cost_usd, 4), turns=trial.turns, seconds=trial.duration_s,
                  error=trial.error)
+
+    def quality_review(self, entry_id: str, station: str) -> dict | None:
+        """Quality reviews one entry. With a fixture, a code-only review stands in for the agent."""
+        if self.fixture:
+            entries = ledger.read(self.ledger)
+            entry = next(e for e in entries if e["id"] == entry_id)
+            payload = review.code_only_review(entry, entries, self.world, self.dir)
+            ledger.append(self.ledger, {"id": ledger.next_id(self.ledger, "review"), "type": "review", "ts": self.sim_now(),
+                                        "author": {"kind": "agent", "name": "quality", "version": "code-only"},
+                                        "refs": [entry_id], "payload": payload})
+        else:
+            self.run_agent("quality", "", station, prompt=f"Review ledger entry {entry_id} before it reaches the PM.")
+        found = [e for e in ledger.read(self.ledger) if e["type"] == "review" and entry_id in e["refs"]]
+        if not found:
+            self.log(station, "no review written", entry=entry_id)
+            return None
+        r = found[-1]["payload"]
+        self.log(station, "review", entry=entry_id, verdict=r["verdict"], correctness=r["correctness"])
+        return r
 
     def decide(self) -> bool:
         packet = self.latest("decision_packet")
@@ -104,6 +126,7 @@ class Loop:
             f"Cheapest test: {p['cheapest_test']}",
             f"Would change if: {'; '.join(p['would_change_if'])}",
             f"Unknowns: {'; '.join(p.get('unknowns', [])) or 'none'}",
+            *self.review_lines(packet["id"]),
         ])
         now = date.fromisoformat(self.sim_now()[:10])
         onset = date.fromisoformat(card["payload"]["after"]["period"]["start"]) if card else now
@@ -143,6 +166,14 @@ class Loop:
             return
         self.run_agent("builder", "build-s01", "build")
 
+    def review_lines(self, entry_id: str) -> list[str]:
+        found = [e for e in ledger.read(self.ledger) if e["type"] == "review" and entry_id in e["refs"]]
+        if not found:
+            return ["Quality: no review."]
+        r = found[-1]["payload"]
+        return [f"Quality: {r['verdict']}. Checks: {r['correctness']}",
+                *[f"- FINDING ({f['severity']}): {f['claim']} Smallest action: {f['smallest_action']}" for f in r["findings"]]]
+
     def approve(self) -> bool:
         """Code checks that Builder proposed exactly what the PM approved. A mismatch goes to the PM."""
         packet = self.latest("decision_packet")["payload"]
@@ -157,6 +188,15 @@ class Loop:
             a = self.gates.ask("confirm", briefing, [("apply", "Apply Builder's proposal? (yes/no)", "no")])
             if a["apply"].lower() not in ("y", "yes"):
                 self.log("build", "proposal rejected by PM")
+                return False
+        build = self.latest("build")
+        build_review = self.quality_review(build["id"], "build") if build else None
+        verdict = build_review["verdict"] if build_review else None
+        if verdict != "SHIP":
+            lines = [f"Quality did not ship the build ({verdict}).", *self.review_lines(build["id"] if build else "")]
+            a = self.gates.ask("confirm", "\n".join(lines), [("apply", "Apply the action anyway? (yes/no)", "no")])
+            if a["apply"].lower() not in ("y", "yes"):
+                self.log("build", "stopped after Quality's review")
                 return False
         payload = {**proposed["payload"], "status": "approved"}
         act_id = self.write("action", CHIEF, payload, [proposed["id"]])
@@ -230,6 +270,9 @@ class Loop:
     def run(self) -> dict:
         self.setup()
         self.sense_and_frame()
+        packet = self.latest("decision_packet")
+        if packet:
+            self.quality_review(packet["id"], "review")
         result = None
         if self.decide():
             self.build()

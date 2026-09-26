@@ -1,0 +1,3 @@
+{"args": {"after_end": "2026-02-22", "after_start": "2026-02-10", "before_end": "2026-02-08", "before_start": "2026-01-05", "group_by": null, "metric": "activation_rate_7d", "segment": {"calendar_provider": ["microsoft"]}}, "query_id": "q_ea831d73923d", "tool": "compare_periods"}
+{"args": {"after_end": "2026-02-22", "after_start": "2026-02-10", "before_end": "2026-02-08", "before_start": "2026-01-05", "group_by": null, "metric": "first_meeting_rate_7d", "segment": {"calendar_provider": ["microsoft"]}}, "query_id": "q_becfc6b20b99", "tool": "compare_periods"}
+{"args": {"after_end": "2026-02-22", "after_start": "2026-02-10", "before_end": "2026-02-08", "before_start": "2026-01-05", "segment": null}, "query_id": "q_beed673729b3", "tool": "estimate_weekly_arr_impact"}

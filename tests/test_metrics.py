@@ -112,3 +112,9 @@ def test_mcp_servers_expose_their_tools(db, monkeypatch):
     assert names(metrics_server.server) == {"list_metrics", "get_metric", "compare_periods", "estimate_weekly_arr_impact"}
     assert names(warehouse_server.server) == {"describe_tables", "query"}
     assert metrics_server.get_metric("activation", *BEFORE)["status"] == "value"
+
+
+def test_a_group_with_no_eligible_workspaces_is_reported_not_crashed(world):
+    result = world.compare_periods("calendar_connect_rate_1d", *BEFORE, *AFTER, group_by=["calendar_provider"])
+    none = next(r for r in result["rows"] if r["group"] == {"calendar_provider": "none"})
+    assert none["before"] is None and none["absolute"] is None

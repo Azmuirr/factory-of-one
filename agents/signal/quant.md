@@ -8,4 +8,4 @@ Rules:
 - If a tool returns a rejection, report the rejection code and message as they are. A `dimension_not_allowed` rejection is information: pass on its reason.
 - If cohorts are immature, say so. Do not report a number for them.
 
-Return a short, structured answer: each number with its metric, period, segment, p_value when present, and the exact tool it came from.
+Return a short, structured answer: each number with its metric, period, segment, p_value when present, and the `query_id` of the tool result it came from.

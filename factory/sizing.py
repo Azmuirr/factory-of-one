@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from factory.metrics import World
+from factory.metrics import World, query_id
 
 
 def weekly_arr_impact(world: World, before_start: str, before_end: str, after_start: str, after_end: str,
@@ -23,9 +23,12 @@ def weekly_arr_impact(world: World, before_start: str, before_end: str, after_st
     trials_per_week = len(in_segment) / days * 7
 
     impact = (activation["before"] - activation["after"]) * (conv_activated - conv_not) * trials_per_week * arr_per_paid
+    request = {"tool": "estimate_weekly_arr_impact", "before_start": before_start, "before_end": before_end,
+               "after_start": after_start, "after_end": after_end, "segment": activation["segment"]}
     return {
         "status": "value",
         "confidence": "validated",
+        "query_id": query_id(request),
         "usd_per_week": round(impact),
         "inputs": {
             "activation_before": activation["before"],

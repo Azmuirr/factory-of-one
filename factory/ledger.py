@@ -64,3 +64,23 @@ def action_key(payload: dict) -> tuple:
     params = payload.get("params", {})
     segment = {k: sorted(v) for k, v in (params.get("segment") or {}).items()}
     return payload.get("name"), params.get("release_id"), json.dumps(segment, sort_keys=True)
+
+
+PREFIX = {
+    "signal_card": "sig", "decision_packet": "pkt", "bet": "bet", "action": "act", "build": "bld", "verdict": "ver",
+    "review": "rev", "call": "call", "readout": "rdo", "commitment": "cmt", "patch": "pch",
+}
+
+
+def next_id(path: Path, type: str) -> str:
+    count = sum(1 for e in read(path) if e["type"] == type)
+    return f"{PREFIX[type]}_{count + 1:04d}"
+
+
+def sim_now(world_path: Path) -> str:
+    import sqlite3
+
+    conn = sqlite3.connect(f"file:{Path(world_path).as_posix()}?mode=ro", uri=True)
+    value = conn.execute("SELECT value FROM meta WHERE key = 'data_through'").fetchone()[0]
+    conn.close()
+    return value

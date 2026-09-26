@@ -39,6 +39,7 @@ class AgentConfig:
     skill: str
     capabilities: list[str]
     subagents: dict = field(default_factory=dict)
+    references: list[str] = field(default_factory=list)
 
     def all_capabilities(self) -> list[str]:
         caps = list(self.capabilities)

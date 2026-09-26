@@ -10,9 +10,11 @@ servers:
   warehouse: {command: "{python}", args: [-m, factory.servers.warehouse_server]} # needs a warehouse adapter (planned)
   ledger:    {command: "{python}", args: [-m, factory.servers.ledger_server]}
   demos:     {command: "{python}", args: [-m, factory.servers.demos_server]}
+  review:    {command: "{python}", args: [-m, factory.servers.review_server]}
   support:   {command: "<command that starts your help desk's MCP server>", args: [], env: {API_TOKEN: "${SUPPORT_API_TOKEN}"}}
   releases:  {command: "<command that starts your code host's or flag tool's MCP server>", args: []}
 server_env:
+  FACTORY_WORLD: "{world}"   # the warehouse adapter replaces this (planned)
   FACTORY_LEDGER: "{ledger}"
   FACTORY_AGENT: "{agent}"
   FACTORY_DEMOS: "{demos}"
@@ -33,5 +35,7 @@ capabilities:
   flags.state: mcp__releases__<read flag state tool>
   demo.publish: mcp__demos__publish_demo
   demo.check: mcp__demos__check_demo
+  review.check: mcp__review__check_entry
+  review.submit: mcp__review__submit_review
   ledger.write: mcp__ledger__write_entry
   ledger.read: mcp__ledger__read_entries

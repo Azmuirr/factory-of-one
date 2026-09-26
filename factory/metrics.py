@@ -280,6 +280,9 @@ class World:
 
 
 def change(before: dict, after: dict, rate: bool) -> dict:
+    if before["value"] is None or after["value"] is None:
+        return {"before": before["value"], "after": after["value"], "absolute": None, "relative": None,
+                "note": "No eligible workspaces in one period, so there is nothing to compare."}
     out = {
         "before": before["value"],
         "after": after["value"],

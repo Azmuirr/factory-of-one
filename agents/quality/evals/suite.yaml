@@ -1,0 +1,62 @@
+agent: quality
+version: 0.1.0
+defaults:
+  trials: 3
+  seed: 1
+
+# Planted defects. Code catches the first three. Only judgment catches the wrong cause. The clean packet must SHIP.
+tasks:
+  - id: clean-packet
+    kind: capability
+    scenario: s01-calendar-gate
+    setup: &packet_setup
+      - copy_files: {from: ledger/examples/queries.jsonl, to: queries.jsonl}
+      - seed_ledger: {file: agents/quality/evals/fixtures/clean.jsonl}
+    prompt: &review_packet Review ledger entry pkt_0001 before it reaches the PM.
+    graders:
+      - {type: code, name: review_verdict, params: {target: pkt_0001, allowed: [SHIP]}}
+
+  - id: wrong-number
+    kind: regression
+    scenario: s01-calendar-gate
+    setup:
+      - copy_files: {from: ledger/examples/queries.jsonl, to: queries.jsonl}
+      - seed_ledger: {file: agents/quality/evals/fixtures/wrong-number.jsonl}
+    prompt: *review_packet
+    graders:
+      - {type: code, name: review_verdict, params: {target: pkt_0001, allowed: [FIX, PROVE, STOP]}}
+      - findings_have_evidence
+
+  - id: fake-quote
+    kind: regression
+    scenario: s01-calendar-gate
+    setup:
+      - copy_files: {from: ledger/examples/queries.jsonl, to: queries.jsonl}
+      - seed_ledger: {file: agents/quality/evals/fixtures/fake-quote.jsonl}
+    prompt: *review_packet
+    graders:
+      - {type: code, name: review_verdict, params: {target: pkt_0001, allowed: [FIX, PROVE, STOP]}}
+      - findings_have_evidence
+
+  - id: wrong-cause
+    kind: capability
+    scenario: s01-calendar-gate
+    setup:
+      - copy_files: {from: ledger/examples/queries.jsonl, to: queries.jsonl}
+      - seed_ledger: {file: agents/quality/evals/fixtures/wrong-cause.jsonl}
+    prompt: *review_packet
+    graders:
+      - {type: code, name: review_verdict, params: {target: pkt_0001, allowed: [FIX, PROVE, STOP]}}
+      - findings_have_evidence
+
+  - id: dead-click
+    kind: regression
+    scenario: s01-calendar-gate
+    setup:
+      - copy_files: {from: ledger/examples/queries.jsonl, to: queries.jsonl}
+      - copy_files: {from: agents/quality/evals/fixtures/demos, to: demos}
+      - seed_ledger: {file: agents/quality/evals/fixtures/dead-click.jsonl}
+    prompt: Review ledger entry bld_0001 before it reaches the PM.
+    graders:
+      - {type: code, name: review_verdict, params: {target: bld_0001, allowed: [FIX]}}
+      - findings_have_evidence

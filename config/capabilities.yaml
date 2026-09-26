@@ -42,6 +42,12 @@ capabilities:
   demo.check:
     description: Run the demo checks on an existing demo
     access: read
+  review.check:
+    description: Run the code checks (numbers, quotes, fields, privacy) on a ledger entry
+    access: read
+  review.submit:
+    description: Record a review verdict and findings. Code fills the checks and refuses SHIP when one failed
+    access: propose
   ledger.write:
     description: Append an artifact (signal card, decision packet, and so on) to the shared ledger. Invalid entries are rejected with reasons
     access: propose
