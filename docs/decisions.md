@@ -63,3 +63,18 @@ Each entry records the options, the choice, and what would reverse it. The reaso
 | Statistical power | A 3-point activation drop is about 3 to 4 standard errors in one week of data. Detectable, but not obvious from one day |
 
 **Would change if:** a growth leader who ran a meeting product says a number is off. Their word beats the assumption.
+
+## D6. How agents run: no extra spend
+
+| Option | Verdict |
+|---|---|
+| Anthropic API key | Rejected for now. Adds a separate pay-as-you-go bill |
+| **Claude Code headless mode (`claude -p`) on the existing subscription** | **Chosen.** No added cost. Supports per-agent MCP servers (`--mcp-config`), tool allow-lists (`--allowedTools`), model choice (`--model`), and JSON output with token usage |
+| A second vendor's model as judge | Deferred. It needs a paid key. Code graders and human spot checks cover v1 |
+
+**Consequences:**
+- Cost per task is reported from Claude Code's list-price estimate (`total_cost_usd`). It is an estimate, not a bill.
+- Subscription rate limits cap how many eval runs fit in a day. Evals run locally, sized to fit. CI runs only code tests, because it has no login.
+- A plain headless call loads about 33,000 tokens of default context. Agent runs restrict tools and MCP servers to what each agent needs, to keep runs small.
+
+**Would change if:** eval volume outgrows the subscription's limits, or a cross-vendor judge becomes a blocker.
