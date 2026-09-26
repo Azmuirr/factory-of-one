@@ -8,22 +8,14 @@ import os
 import shutil
 import sqlite3
 import subprocess
-import sys
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from factory import config as install
 from sandbox.generator import generate
 
 from .suite import ROOT, AgentConfig, Task
-
-SERVER_MODULES = {
-    "metrics": "factory.servers.metrics_server",
-    "warehouse": "factory.servers.warehouse_server",
-    "support": "factory.servers.support_server",
-    "releases": "factory.servers.releases_server",
-    "ledger": "factory.servers.ledger_server",
-}
 
 
 @dataclass
@@ -95,57 +87,55 @@ def apply_setup(trial: Trial) -> None:
     conn.close()
 
 
-def mcp_config(agent: AgentConfig, trial: Trial) -> Path:
-    env = {
-        "FACTORY_WORLD": str(trial.world_path),
-        "FACTORY_LEDGER": str(trial.ledger_path),
-        "FACTORY_AGENT": agent.name,
-        "PYTHONIOENCODING": "utf-8",
-    }
-    config = {"mcpServers": {
-        name: {"type": "stdio", "command": sys.executable, "args": ["-m", SERVER_MODULES[name]], "env": env}
-        for name in agent.servers
-    }}
-    path = trial.dir / "mcp.json"
-    path.write_text(json.dumps(config, indent=2), encoding="utf-8")
-    return path
+def slots(agent: AgentConfig, trial: Trial) -> dict:
+    return {"world": trial.world_path, "ledger": trial.ledger_path, "agent": agent.name}
 
 
-def subagents_file(agent: AgentConfig, trial: Trial) -> Path | None:
-    if not agent.subagents:
-        return None
-    defined = {
-        name: {
-            "description": spec["description"],
-            "prompt": (agent.dir / spec["prompt_file"]).read_text(encoding="utf-8"),
-            "tools": spec["tools"],
-            "model": spec.get("model", agent.model),
-        }
-        for name, spec in agent.subagents.items()
-    }
-    path = trial.dir / "agents.json"
-    path.write_text(json.dumps(defined, indent=2), encoding="utf-8")
-    return path
+def system_prompt(agent: AgentConfig, config: install.Config, text: str, capabilities: list[str]) -> str:
+    company = config.company.read_text(encoding="utf-8")
+    parts = [text.strip(), install.tools_section(install.resolve(config, capabilities)), company.strip()]
+    return "\n\n".join(parts)
 
 
-def run_claude(agent: AgentConfig, trial: Trial) -> None:
-    allowed = [f"mcp__{s}" for s in agent.servers]
-    subagents = subagents_file(agent, trial)
+def build_command(agent: AgentConfig, trial: Trial, config: install.Config | None = None) -> list[str]:
+    """The exact headless Claude Code command for a trial. Writes mcp.json and agents.json into the trial folder."""
+    config = config or install.load()
+    mapping = install.resolve(config, agent.all_capabilities())
+    tools = sorted(set(mapping.values()))
+    mcp_path = trial.dir / "mcp.json"
+    mcp_path.write_text(json.dumps({"mcpServers": install.mcp_servers(config, tools, slots(agent, trial))}, indent=2), encoding="utf-8")
+
     cmd = [
         claude_binary(), "-p", trial.task.prompt,
-        "--system-prompt", (agent.dir / agent.skill).read_text(encoding="utf-8"),
+        "--system-prompt", system_prompt(agent, config, (agent.dir / agent.skill).read_text(encoding="utf-8"), agent.capabilities),
         "--model", agent.model,
         "--max-turns", str(agent.max_turns),
-        "--mcp-config", str(mcp_config(agent, trial)),
+        "--mcp-config", str(mcp_path),
         "--strict-mcp-config",
-        "--tools", "Agent" if subagents else "",
-        "--allowedTools", *allowed, *(["Agent"] if subagents else []),
+        "--tools", "Agent" if agent.subagents else "",
+        "--allowedTools", *tools, *(["Agent"] if agent.subagents else []),
         "--permission-mode", "dontAsk",
         "--output-format", "stream-json", "--verbose",
         "--no-session-persistence",
     ]
-    if subagents:
-        cmd += ["--agents", str(subagents)]
+    if agent.subagents:
+        defined = {}
+        for name, spec in agent.subagents.items():
+            sub_map = install.resolve(config, spec["capabilities"])
+            defined[name] = {
+                "description": spec["description"],
+                "prompt": system_prompt(agent, config, (agent.dir / spec["prompt_file"]).read_text(encoding="utf-8"), spec["capabilities"]),
+                "tools": sorted(set(sub_map.values())),
+                "model": spec.get("model", agent.model),
+            }
+        agents_path = trial.dir / "agents.json"
+        agents_path.write_text(json.dumps(defined, indent=2), encoding="utf-8")
+        cmd += ["--agents", str(agents_path)]
+    return cmd
+
+
+def run_claude(agent: AgentConfig, trial: Trial) -> None:
+    cmd = build_command(agent, trial)
     started = time.time()
     proc = subprocess.run(cmd, cwd=trial.dir, capture_output=True, text=True, encoding="utf-8", timeout=1800)
     trial.duration_s = round(time.time() - started, 1)

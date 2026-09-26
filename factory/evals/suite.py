@@ -37,8 +37,14 @@ class AgentConfig:
     model: str
     max_turns: int
     skill: str
-    servers: list[str]
+    capabilities: list[str]
     subagents: dict = field(default_factory=dict)
+
+    def all_capabilities(self) -> list[str]:
+        caps = list(self.capabilities)
+        for spec in self.subagents.values():
+            caps += spec["capabilities"]
+        return sorted(set(caps))
 
     @property
     def dir(self) -> Path:

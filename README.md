@@ -34,3 +34,5 @@ Agents run through Claude Code in headless mode on an existing subscription. See
 | [ledger/ledger.schema.json](ledger/ledger.schema.json) | Every artifact agents pass to each other. [Example: one full loop](ledger/examples/s01-happy-path.jsonl) |
 | [catalogs/](catalogs/) | Registered metrics and shared dimensions |
 | [docs/decisions.md](docs/decisions.md) | Choices made, options rejected, and what would reverse each one |
+| [docs/install.md](docs/install.md) | Use the agents at your own company, with your own MCP servers |
+| [docs/evals.md](docs/evals.md) | The eval harness, following Anthropic's framework |

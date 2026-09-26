@@ -6,6 +6,7 @@ import difflib
 import hashlib
 import json
 import math
+import os
 import sqlite3
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta, timezone
@@ -14,7 +15,7 @@ from pathlib import Path
 
 import yaml
 
-CATALOGS = Path(__file__).resolve().parents[1] / "catalogs"
+CATALOGS = Path(os.environ.get("FACTORY_CATALOGS") or Path(__file__).resolve().parents[1] / "catalogs")
 
 FACTS_SQL = """
 CREATE TEMP TABLE real_meetings AS

@@ -1,0 +1,33 @@
+# The sandbox install: Tallybird, the simulated company. Same agents and skills as a live install.
+mode: sandbox
+company: company/tallybird/context.md
+catalogs: catalogs
+
+# MCP servers. Placeholders: {python}, {world}, {ledger}, {agent}, {catalogs}. ${NAME} reads an environment variable.
+servers:
+  metrics:   {command: "{python}", args: [-m, factory.servers.metrics_server]}
+  warehouse: {command: "{python}", args: [-m, factory.servers.warehouse_server]}
+  support:   {command: "{python}", args: [-m, factory.servers.support_server]}
+  releases:  {command: "{python}", args: [-m, factory.servers.releases_server]}
+  ledger:    {command: "{python}", args: [-m, factory.servers.ledger_server]}
+server_env:
+  FACTORY_WORLD: "{world}"
+  FACTORY_LEDGER: "{ledger}"
+  FACTORY_AGENT: "{agent}"
+  FACTORY_CATALOGS: "{catalogs}"
+  PYTHONIOENCODING: utf-8
+
+capabilities:
+  metrics.list: mcp__metrics__list_metrics
+  metrics.get: mcp__metrics__get_metric
+  metrics.compare: mcp__metrics__compare_periods
+  metrics.size_impact: mcp__metrics__estimate_weekly_arr_impact
+  warehouse.describe: mcp__warehouse__describe_tables
+  warehouse.query: mcp__warehouse__query
+  support.search: mcp__support__search_tickets
+  support.volume: mcp__support__ticket_volume
+  support.get: mcp__support__get_ticket
+  releases.list: mcp__releases__list_releases
+  flags.state: mcp__releases__flag_state
+  ledger.write: mcp__ledger__write_entry
+  ledger.read: mcp__ledger__read_entries

@@ -1,0 +1,44 @@
+# The capability vocabulary. Skills name capabilities, never tools. Each install maps capabilities to its real tools.
+# access: read, or propose (queues something for a human gate). Nothing here sends, changes, or deletes on its own.
+version: 0.1.0
+
+capabilities:
+  metrics.list:
+    description: List registered metrics with units, windows, allowed dimensions, and aliases
+    access: read
+  metrics.get:
+    description: Compute one registered metric for a period, optionally filtered and grouped by dimensions. Numbers are validated
+    access: read
+  metrics.compare:
+    description: Compare a registered metric across two periods, with a significance test for rates
+    access: read
+  metrics.size_impact:
+    description: Weekly revenue at stake from a change in the key metric in a segment
+    access: read
+  warehouse.describe:
+    description: List warehouse tables and columns
+    access: read
+  warehouse.query:
+    description: Run one read-only SQL query. Answers are exploratory
+    access: read
+  support.search:
+    description: Search support tickets by keywords, dates, and segment. Returns distinct accounts
+    access: read
+  support.volume:
+    description: Ticket counts by week and tag
+    access: read
+  support.get:
+    description: Fetch one ticket
+    access: read
+  releases.list:
+    description: Release notes in a date range
+    access: read
+  flags.state:
+    description: Current and past feature-flag settings
+    access: read
+  ledger.write:
+    description: Append an artifact (signal card, decision packet, and so on) to the shared ledger. Invalid entries are rejected with reasons
+    access: propose
+  ledger.read:
+    description: Read ledger entries
+    access: read

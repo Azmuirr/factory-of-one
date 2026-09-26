@@ -78,3 +78,20 @@ Each entry records the options, the choice, and what would reverse it. The reaso
 - A plain headless call loads about 33,000 tokens of default context. Agent runs restrict tools and MCP servers to what each agent needs, to keep runs small.
 
 **Would change if:** eval volume outgrows the subscription's limits, or a cross-vendor judge becomes a blocker.
+
+## D7. Agents name capabilities, not tools
+
+| Option | Verdict |
+|---|---|
+| Skills call our simulated tools by name | Rejected. Nobody could run the agents on real Slack, Zendesk, or Gmail |
+| Adapters that wrap every vendor API in our own contract | Rejected for most tools. Too much code, and vendors already ship MCP servers |
+| **Skills name capabilities. Each install maps capabilities to real tools in one file** | **Chosen.** The sandbox and a real company run the same agents and skills |
+
+**Exception:** numbers. `metrics.*` stays on the factory's own server, over the company's warehouse and catalog, because "code owns every number" cannot be delegated to an arbitrary vendor tool.
+
+**Consequences:**
+- Company facts move out of skills into `company/<name>/context.md`. A test fails if a skill names a company fact or a tool.
+- The runner allows exactly the mapped tools. Unmapped write tools on a vendor server stay blocked.
+- Evals stay on the sandbox, where an answer key exists. Real use is monitored, and sanitized failures become eval cases.
+
+**Would change if:** a capability needs guarantees a vendor tool cannot give. Then it gets a factory adapter, like `metrics`.

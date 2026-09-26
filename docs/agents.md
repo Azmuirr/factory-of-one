@@ -2,6 +2,8 @@
 
 8 agents run one loop. You touch 3 gates. Every agent writes to one shared ledger.
 
+Tool names below describe capabilities. Each install maps capabilities to real tools: see [install.md](install.md).
+
 ```
  SENSE → FRAME → [DECIDE] → BUILD → PROVE → [CALL] → TELL → LEARN
  [ ] = your gate. TELL also needs your approval before anything is sent.
