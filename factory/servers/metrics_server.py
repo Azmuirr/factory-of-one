@@ -4,7 +4,7 @@ import os
 
 from mcp.server.mcpserver import MCPServer
 
-from factory import metrics
+from factory import metrics, sizing
 
 server = MCPServer(
     "metrics",
@@ -34,6 +34,13 @@ def compare_periods(metric: str, before_start: str, before_end: str, after_start
                     segment: dict[str, list[str]] | None = None, group_by: list[str] | None = None) -> dict:
     """Compare a metric across two cohort periods, with a significance test for rates."""
     return world().compare_periods(metric, before_start, before_end, after_start, after_end, segment, group_by)
+
+
+@server.tool()
+def estimate_weekly_arr_impact(before_start: str, before_end: str, after_start: str, after_end: str,
+                               segment: dict[str, list[str]] | None = None) -> dict:
+    """Weekly new ARR at stake from an activation change in a segment. Use this for any revenue size; never compute it by hand."""
+    return sizing.weekly_arr_impact(world(), before_start, before_end, after_start, after_end, segment)
 
 
 if __name__ == "__main__":

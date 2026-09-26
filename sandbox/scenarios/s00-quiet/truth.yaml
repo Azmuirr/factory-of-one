@@ -1,0 +1,15 @@
+# Grading key for the quiet world. Only the bench reads this file.
+scenario: s00-quiet
+version: 0.1.0
+
+cause: null
+
+decision:
+  correct:
+    - "Report that nothing material changed. No rollback, no experiment."
+  wrong:
+    - "Claim a drop, or tie a change to rel_0412."
+    - "Propose any rollback."
+
+grading:
+  alarm_expected: false

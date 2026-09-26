@@ -60,3 +60,22 @@ bench_score:
   - pm_minutes: "proxy from words read and decisions made at gates"
   - agent_cost_usd: "from traces"
   - false_alarms: "claims about causes not in this file"
+
+# Machine-readable key for code graders.
+grading:
+  alarm_expected: true
+  diagnosis:
+    metric: activation_rate_7d
+    segment: {calendar_provider: [microsoft]}
+    release_id: rel_0412
+    mechanism_metric: calendar_connect_rate_1d
+    voice_min_workspaces: 3
+  false_causes:
+    - {dimension: meeting_platform}
+    - {dimension: channel}
+  recommended_action:
+    name: rollback
+    release_id: rel_0412
+    segments_accepted:
+      - {calendar_provider: [microsoft]}
+      - {}

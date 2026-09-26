@@ -1,0 +1,26 @@
+name: signal
+version: 0.1.0
+model: sonnet
+max_turns: 40
+skill: SKILL.md
+servers: [metrics, warehouse, support, releases, ledger]
+subagents:
+  quant:
+    description: Quantitative analyst. Computes metrics, period comparisons, segment splits, funnel steps, and revenue impact with the metrics and warehouse tools. Returns exact tool numbers.
+    prompt_file: quant.md
+    tools:
+      - mcp__metrics__list_metrics
+      - mcp__metrics__get_metric
+      - mcp__metrics__compare_periods
+      - mcp__metrics__estimate_weekly_arr_impact
+      - mcp__warehouse__describe_tables
+      - mcp__warehouse__query
+      - mcp__releases__list_releases
+  qual:
+    description: Qualitative analyst. Finds customer voice in support tickets and release notes, counts distinct workspaces, and returns exact quotes.
+    prompt_file: qual.md
+    tools:
+      - mcp__support__search_tickets
+      - mcp__support__ticket_volume
+      - mcp__support__get_ticket
+      - mcp__releases__list_releases

@@ -1,0 +1,46 @@
+# Generator input for the quiet world. Nothing is planted. A harmless release in week 6 invites a false alarm.
+id: s00-quiet
+title: Nothing is wrong
+version: 0.1.0
+tier: easy
+tiers_built: [easy]
+
+clock:
+  weeks: 10
+  now: {week: 8, day: 7}
+  post_action_weeks: [9, 10]
+
+baseline: default
+
+releases:
+  - id: rel_0301
+    at: {week: 2, day: 3}
+    title: "Export: fix PDF margins"
+    notes: "Fixes clipped margins on PDF export for long documents."
+    flag: null
+    effects: []
+
+  - id: rel_0318
+    at: {week: 4, day: 2}
+    title: "Zoom bot: faster join"
+    notes: "The notetaker joins Zoom calls about 20 seconds sooner."
+    flag: null
+    effects: []
+
+  - id: rel_0412
+    at: {week: 6, day: 2}
+    title: "Recaps: new share dialog"
+    notes: "Sharing a recap now opens a dialog with suggested recipients from the meeting invite."
+    flag: null
+    effects: []
+
+text:
+  tickets: []
+
+messages:
+  - at: {week: 7, day: 2}
+    from_role: vp_product
+    subject: "Quick check"
+    body: "Anything moving on activation that I should know about?"
+
+actions_available: [rollback, set_flag, start_experiment, no_action]
