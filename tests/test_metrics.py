@@ -109,6 +109,6 @@ def test_mcp_servers_expose_their_tools(db, monkeypatch):
         tools = asyncio.run(tools) if asyncio.iscoroutine(tools) else tools
         return {t.name for t in tools}
 
-    assert names(metrics_server.server) == {"list_metrics", "get_metric", "compare_periods"}
+    assert names(metrics_server.server) == {"list_metrics", "get_metric", "compare_periods", "estimate_weekly_arr_impact"}
     assert names(warehouse_server.server) == {"describe_tables", "query"}
     assert metrics_server.get_metric("activation", *BEFORE)["status"] == "value"
