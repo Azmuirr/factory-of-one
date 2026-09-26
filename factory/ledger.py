@@ -68,7 +68,7 @@ def action_key(payload: dict) -> tuple:
 
 PREFIX = {
     "signal_card": "sig", "decision_packet": "pkt", "bet": "bet", "action": "act", "build": "bld", "verdict": "ver",
-    "review": "rev", "call": "call", "readout": "rdo", "commitment": "cmt", "patch": "pch",
+    "review": "rev", "call": "call", "readout": "rdo", "commitment": "cmt", "patch": "pch", "brief": "brf",
 }
 
 
@@ -84,3 +84,14 @@ def sim_now(world_path: Path) -> str:
     value = conn.execute("SELECT value FROM meta WHERE key = 'data_through'").fetchone()[0]
     conn.close()
     return value
+
+
+def commitments_due(path: Path, today: str) -> dict:
+    """Open commitments sorted into overdue, due today, and upcoming."""
+    out = {"overdue": [], "due_today": [], "upcoming": []}
+    for e in read(path):
+        if e["type"] != "commitment" or e["payload"]["status"] != "open":
+            continue
+        due = e["payload"]["due"]
+        out["overdue" if due < today else "due_today" if due == today else "upcoming"].append({"id": e["id"], **e["payload"]})
+    return out

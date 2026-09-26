@@ -20,7 +20,9 @@ This builds 8 weeks of data for Tallybird, a fictional AI meeting notetaker, wit
 ```bash
 python -m factory.loop            # Signal diagnoses, you decide, Builder proposes, the world reacts
 python -m factory.loop --fixture ledger/examples/s01-happy-path.jsonl   # skip the agents, keep the gates
-python -m factory.evals run signal --trials 3                                    # score Signal against the answer key
+python -m factory.chief           # Chief reads the workplace and writes today's brief
+python -m factory.chief --fixture agents/chief/evals/fixtures/reference-brief.jsonl   # see a reference brief
+python -m factory.evals run signal --trials 3                                    # score an agent against the answer key
 ```
 
 Agents run through Claude Code in headless mode on an existing subscription. See [docs/evals.md](docs/evals.md).

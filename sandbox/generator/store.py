@@ -7,7 +7,8 @@ from pathlib import Path
 
 from .baseline import DAY, EPOCH
 from .model import World
-from .scenario import Action, Scenario, day_index
+from .scenario import SCENARIOS_DIR, Action, Scenario, day_index
+from .workplace import write_workplace
 
 WORLD_SCHEMA = """
 CREATE TABLE workspaces (workspace_id TEXT PRIMARY KEY, created_at TEXT, channel TEXT, company_size TEXT,
@@ -83,11 +84,12 @@ def write_world(path: Path, world: World, scenario: Scenario, actions: list[Acti
         for k, a in enumerate(actions) if a.ts < cutoff
     ])
     conn.execute("INSERT INTO meta VALUES (?, ?)", ("data_through", iso(cutoff)))
+    workplace_counts = write_workplace(conn, SCENARIOS_DIR / scenario.id, iso(cutoff))
     conn.commit()
     counts = {t: conn.execute(f"SELECT COUNT(*) FROM {t}").fetchone()[0]
               for t in ("workspaces", "events", "subscriptions", "tickets", "messages", "releases", "actions")}
     conn.close()
-    return counts
+    return {**counts, **workplace_counts}
 
 
 def write_truth(path: Path, world: World, scenario: Scenario, seed: int, cutoff: float) -> None:

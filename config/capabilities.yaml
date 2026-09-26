@@ -48,6 +48,36 @@ capabilities:
   review.submit:
     description: Record a review verdict and findings. Code fills the checks and refuses SHIP when one failed
     access: propose
+  mail.list:
+    description: Your inbox since a time, with sender importance and a suspicious-sender flag
+    access: read
+  mail.read:
+    description: One full email
+    access: read
+  chat.list:
+    description: Channel messages and your direct messages, with unanswered hours for anything addressed to you
+    access: read
+  chat.thread:
+    description: A chat message and its replies
+    access: read
+  calendar.list:
+    description: Your events in a time range, with conflicts, missing agendas, back-to-backs, unsolicited invites, and focus minutes
+    access: read
+  transcripts.list:
+    description: Meetings with transcripts, and past meetings that were not transcribed
+    access: read
+  transcripts.read:
+    description: One meeting transcript with its attendees
+    access: read
+  directory.lookup:
+    description: People by name, role, or team, with manager and reports
+    access: read
+  tracker.search:
+    description: Tracker issues by keyword or status
+    access: read
+  commitments.due:
+    description: Open commitments from the ledger, sorted into overdue, due today, and upcoming
+    access: read
   ledger.write:
     description: Append an artifact (signal card, decision packet, and so on) to the shared ledger. Invalid entries are rejected with reasons
     access: propose

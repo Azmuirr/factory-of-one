@@ -81,3 +81,43 @@ grading:
     segments_accepted:
       - {calendar_provider: [microsoft]}
       - {}
+
+  # Chief's daily brief for Monday 2026-03-02.
+  chief:
+    brief_date: "2026-03-02"
+    # Each theme is one real priority. The top 3 must cover at least 2 of these, using any ref in the theme.
+    top_themes:
+      readout: ["mail:m_001", "chat:c_007", "cal:e_004", "cal:e_002"]
+      cobalt_ridge: ["mail:m_002", "mail:m_003", "chat:c_006", "cal:e_005"]
+      pause_decision: ["chat:c_001"]
+      conflict: ["cal:e_004", "cal:e_005"]
+    never_top: ["mail:m_005", "mail:m_006", "mail:m_007", "mail:m_008", "chat:c_004", "cal:e_008"]
+    mail_labels:  # acceptable labels per message
+      m_001: [act_now]
+      m_002: [act_now]
+      m_003: [act_now, delegate]
+      m_004: [answer_later]
+      m_005: [ignore]
+      m_006: [ignore]
+      m_007: [ignore]
+      m_008: [ignore]
+      m_009: [delegate, answer_later]
+      m_010: [answer_later, act_now]
+      m_011: [act_now, answer_later]
+      m_012: [ignore, answer_later]
+    suspicious: ["mail:m_008"]
+    needs_you: ["chat:c_001", "chat:c_005", "chat:c_006"]
+    fyi: ["chat:c_002", "chat:c_003", "chat:c_007", "chat:c_009"]
+    calendar_flags:
+      conflict: ["cal:e_004", "cal:e_005"]
+      no_agenda: ["cal:e_006"]
+    commitments:  # owner and due date; the task must mention one keyword
+      - {owner: p_ds, due: "2026-02-27", keyword: maturity}
+      - {owner: p_me, due: "2026-03-02", keyword: readout}
+      - {owner: p_jpm, due: "2026-02-27", keyword: interview}
+      - {owner: p_des, due: "2026-02-27", keyword: design}
+      - {owner: p_eng, due: "2026-03-02", keyword: estimate}
+      - {owner: p_sup, due: "2026-03-02", keyword: tag}
+      - {owner: p_sales, due: "2026-03-02", keyword: call}
+      - {owner: p_me, due: "2026-03-02", keyword: workaround}
+    private_text: "felt rushed"

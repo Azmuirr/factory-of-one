@@ -16,7 +16,7 @@
   "properties": {
     "id": {
       "type": "string",
-      "pattern": "^(sig|pkt|bet|act|bld|ver|rev|call|rdo|cmt|pch)_[a-z0-9]{4,}$"
+      "pattern": "^(sig|pkt|bet|act|bld|ver|rev|call|rdo|cmt|pch|brf)_[a-z0-9]{4,}$"
     },
     "type": {
       "enum": [
@@ -30,7 +30,8 @@
         "call",
         "readout",
         "commitment",
-        "patch"
+        "patch",
+        "brief"
       ]
     },
     "ts": {
@@ -286,12 +287,31 @@
           }
         }
       }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "brief"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "id": {
+            "pattern": "^brf_"
+          },
+          "payload": {
+            "$ref": "#/$defs/brief"
+          }
+        }
+      }
     }
   ],
   "$defs": {
     "id_ref": {
       "type": "string",
-      "pattern": "^(sig|pkt|bet|act|bld|ver|rev|call|rdo|cmt|pch)_[a-z0-9]{4,}$"
+      "pattern": "^(sig|pkt|bet|act|bld|ver|rev|call|rdo|cmt|pch|brf)_[a-z0-9]{4,}$"
     },
     "human": {
       "type": "object",
@@ -1015,6 +1035,136 @@
             "approved",
             "rejected"
           ]
+        }
+      }
+    },
+    "brief_item": {
+      "type": "object",
+      "required": [
+        "ref",
+        "why"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "ref": {
+          "type": "string",
+          "pattern": "^(mail|chat|cal|trk|cmt):[A-Za-z0-9_-]+$"
+        },
+        "why": {
+          "type": "string"
+        },
+        "next_step": {
+          "type": "string"
+        }
+      }
+    },
+    "brief": {
+      "type": "object",
+      "required": [
+        "date",
+        "top",
+        "triage",
+        "needs_you",
+        "calendar"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "date": {
+          "type": "string",
+          "format": "date"
+        },
+        "top": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 3,
+          "items": {
+            "$ref": "#/$defs/brief_item"
+          }
+        },
+        "at_risk": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/brief_item"
+          }
+        },
+        "can_wait": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^(mail|chat|cal|trk|cmt):[A-Za-z0-9_-]+$"
+          }
+        },
+        "triage": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "ref",
+              "label"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "ref": {
+                "type": "string",
+                "pattern": "^mail:"
+              },
+              "label": {
+                "enum": [
+                  "act_now",
+                  "delegate",
+                  "answer_later",
+                  "ignore"
+                ]
+              },
+              "delegate_to": {
+                "type": "string"
+              },
+              "draft_reply": {
+                "type": "string"
+              },
+              "suspicious": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "needs_you": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/brief_item"
+          }
+        },
+        "calendar": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "ref",
+              "flag"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "ref": {
+                "type": "string",
+                "pattern": "^cal:"
+              },
+              "flag": {
+                "enum": [
+                  "conflict",
+                  "no_agenda",
+                  "back_to_back",
+                  "decline"
+                ]
+              },
+              "suggestion": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "focus_minutes": {
+          "type": "integer",
+          "minimum": 0
         }
       }
     }

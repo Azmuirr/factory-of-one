@@ -12,6 +12,7 @@ servers:
   ledger:    {command: "{python}", args: [-m, factory.servers.ledger_server]}
   demos:     {command: "{python}", args: [-m, factory.servers.demos_server]}
   review:    {command: "{python}", args: [-m, factory.servers.review_server]}
+  workplace: {command: "{python}", args: [-m, factory.servers.workplace_server]}
 server_env:
   FACTORY_WORLD: "{world}"
   FACTORY_LEDGER: "{ledger}"
@@ -36,5 +37,15 @@ capabilities:
   demo.check: mcp__demos__check_demo
   review.check: mcp__review__check_entry
   review.submit: mcp__review__submit_review
+  mail.list: mcp__workplace__mail_list
+  mail.read: mcp__workplace__mail_read
+  chat.list: mcp__workplace__chat_list
+  chat.thread: mcp__workplace__chat_thread
+  calendar.list: mcp__workplace__calendar_list
+  transcripts.list: mcp__workplace__transcripts_list
+  transcripts.read: mcp__workplace__transcript_read
+  directory.lookup: mcp__workplace__directory_lookup
+  tracker.search: mcp__workplace__tracker_search
+  commitments.due: mcp__ledger__commitments_due
   ledger.write: mcp__ledger__write_entry
   ledger.read: mcp__ledger__read_entries

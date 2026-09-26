@@ -13,6 +13,11 @@ servers:
   review:    {command: "{python}", args: [-m, factory.servers.review_server]}
   support:   {command: "<command that starts your help desk's MCP server>", args: [], env: {API_TOKEN: "${SUPPORT_API_TOKEN}"}}
   releases:  {command: "<command that starts your code host's or flag tool's MCP server>", args: []}
+  mail:      {command: "<your mail MCP server>", args: []}
+  chat:      {command: "<your chat MCP server>", args: []}
+  calendar:  {command: "<your calendar MCP server>", args: []}
+  meetings:  {command: "<your meeting transcripts MCP server>", args: []}
+  tracker:   {command: "<your tracker MCP server>", args: []}
 server_env:
   FACTORY_WORLD: "{world}"   # the warehouse adapter replaces this (planned)
   FACTORY_LEDGER: "{ledger}"
@@ -37,5 +42,15 @@ capabilities:
   demo.check: mcp__demos__check_demo
   review.check: mcp__review__check_entry
   review.submit: mcp__review__submit_review
+  mail.list: mcp__mail__<list or search inbox tool>
+  mail.read: mcp__mail__<read message tool>
+  chat.list: mcp__chat__<list messages tool>
+  chat.thread: mcp__chat__<read thread tool>
+  calendar.list: mcp__calendar__<list events tool>
+  transcripts.list: mcp__meetings__<list transcripts tool>
+  transcripts.read: mcp__meetings__<read transcript tool>
+  directory.lookup: mcp__chat__<user lookup tool>
+  tracker.search: mcp__tracker__<search issues tool>
+  commitments.due: mcp__ledger__commitments_due
   ledger.write: mcp__ledger__write_entry
   ledger.read: mcp__ledger__read_entries

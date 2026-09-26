@@ -46,7 +46,7 @@ Tool names below describe capabilities. Each install maps capabilities to real t
 | Commitments | Tracks every promise from every transcribed meeting | Due and overdue checks, reminders | Pulling commitments from transcripts |
 | Loop runner | Moves bets through stations, caps open bets at 3, names the bottleneck | All of it | Wording escalations |
 
-Tools: `slack`, `mail`, `calendar`, `transcripts`, `tracker`, `directory`, `field_requests`, `ledger`. Model: a small model for the brief. Gate: escalations.
+Capabilities: `mail.*`, `chat.*`, `calendar.list`, `transcripts.*`, `directory.lookup`, `tracker.search`, `commitments.due`, `ledger.*`. The sandbox serves them from a simulated workplace; a live install maps them to real mail, chat, calendar, and tracker servers. Code owns sender weight, suspicious senders, calendar conflicts, missing agendas, focus time, and unanswered hours. The workplace never serves direct messages the PM is not in. Run it with `python -m factory.chief`. Gate: escalations.
 Scored on: the right top 3 in the brief, commitments caught, detection latency, bottleneck named (scenario 7).
 
 ## 2. Signal: all quantitative and qualitative knowledge

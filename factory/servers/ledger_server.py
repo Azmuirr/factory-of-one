@@ -2,6 +2,7 @@
 
 import os
 import sqlite3
+from datetime import date
 from pathlib import Path
 
 from mcp.server.mcpserver import MCPServer
@@ -9,10 +10,8 @@ from mcp.server.mcpserver import MCPServer
 from factory import ledger
 from factory.metrics import catalog
 
-PREFIX = {
-    "signal_card": "sig", "decision_packet": "pkt", "action": "act", "build": "bld", "verdict": "ver",
-    "review": "rev", "readout": "rdo", "commitment": "cmt", "patch": "pch",
-}
+# Humans write bets and calls. Reviews go through the review server, which runs the code checks.
+PREFIX = {k: v for k, v in ledger.PREFIX.items() if k not in ("bet", "call", "review")}
 
 server = MCPServer(
     "ledger",
@@ -84,6 +83,13 @@ def read_entries(type: str | None = None) -> dict:
     """Read ledger entries, optionally of one type."""
     entries = ledger.read(Path(os.environ["FACTORY_LEDGER"]))
     return {"status": "value", "entries": [e for e in entries if type is None or e["type"] == type]}
+
+
+@server.tool()
+def commitments_due() -> dict:
+    """Open commitments from the ledger: overdue, due today, and upcoming."""
+    today = sim_now()[:10] if os.environ.get("FACTORY_WORLD") else date.today().isoformat()
+    return {"status": "value", "today": today, **ledger.commitments_due(Path(os.environ["FACTORY_LEDGER"]), today)}
 
 
 if __name__ == "__main__":
