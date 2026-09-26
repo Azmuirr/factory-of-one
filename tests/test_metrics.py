@@ -100,8 +100,9 @@ def test_warehouse_is_read_only_and_labeled_exploratory(db):
     assert warehouse.query(db, "SELECT * FROM events", limit=10)["truncated"] is True
 
 
-def test_mcp_servers_expose_their_tools(db, monkeypatch):
+def test_mcp_servers_expose_their_tools(db, monkeypatch, tmp_path):
     monkeypatch.setenv("FACTORY_WORLD", str(db))
+    monkeypatch.setenv("FACTORY_QUERY_LOG", str(tmp_path / "queries.jsonl"))
     from factory.servers import metrics_server, warehouse_server
 
     def names(server):
@@ -118,3 +119,15 @@ def test_a_group_with_no_eligible_workspaces_is_reported_not_crashed(world):
     result = world.compare_periods("calendar_connect_rate_1d", *BEFORE, *AFTER, group_by=["calendar_provider"])
     none = next(r for r in result["rows"] if r["group"] == {"calendar_provider": "none"})
     assert none["before"] is None and none["absolute"] is None
+
+
+def test_every_metrics_answer_is_logged_for_replay(db, monkeypatch, tmp_path):
+    from factory import queries
+    from factory.servers import metrics_server
+    log = tmp_path / "queries.jsonl"
+    monkeypatch.setenv("FACTORY_WORLD", str(db))
+    monkeypatch.setenv("FACTORY_QUERY_LOG", str(log))
+    answer = metrics_server.compare_periods("activation", *BEFORE, *AFTER, segment={"calendar_provider": ["microsoft"]})
+    logged = queries.load(log)[answer["query_id"]]
+    replayed = queries.run(World(db), logged["tool"], logged["args"])
+    assert replayed["after"] == answer["after"]
