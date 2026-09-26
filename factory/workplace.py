@@ -4,6 +4,7 @@ unanswered time, and privacy. Nothing here writes."""
 from __future__ import annotations
 
 import json
+import os
 import re
 import sqlite3
 from datetime import datetime, timedelta
@@ -20,7 +21,7 @@ def parse(ts: str) -> datetime:
 
 
 class Workplace:
-    def __init__(self, db_path: Path):
+    def __init__(self, db_path: Path, link_base: str | None = None):
         self.conn = sqlite3.connect(f"file:{Path(db_path).as_posix()}?mode=ro", uri=True)
         self.conn.row_factory = sqlite3.Row
         self.now = parse(self.conn.execute("SELECT value FROM meta WHERE key = 'data_through'").fetchone()[0])
@@ -28,6 +29,11 @@ class Workplace:
         self.me = next((p for p in self.people.values() if p["is_me"]), None)
         company = self.conn.execute("SELECT value FROM meta WHERE key = 'company_name'").fetchone()
         self.company = company[0].lower() if company else None
+        self.link_base = link_base or os.environ.get("FACTORY_LINK_BASE", "workplace.html")
+
+    def url(self, kind: str, item_id: str) -> str:
+        """Where the item lives. In the sandbox, an anchor in the generated workplace viewer."""
+        return f"{self.link_base}#{kind}-{item_id}"
 
     def __enter__(self) -> "Workplace":
         return self
@@ -71,7 +77,7 @@ class Workplace:
 
     def mail_list(self, since: str | None = None) -> list[dict]:
         rows = self.conn.execute("SELECT * FROM mail WHERE ts >= ? ORDER BY ts", (since or "0000",)).fetchall()
-        return [{"id": r["message_id"], "ts": r["ts"], "from": self.person(r["from_id"]), "subject": r["subject"],
+        return [{"id": r["message_id"], "url": self.url("mail", r["message_id"]), "ts": r["ts"], "from": self.person(r["from_id"]), "subject": r["subject"],
                  "snippet": r["body"][:160], "deadline_hint": bool(DEADLINE.search(r["subject"] + " " + r["body"])),
                  "hours_old": round((self.now - parse(r["ts"])).total_seconds() / 3600, 1)} for r in rows]
 
@@ -79,7 +85,7 @@ class Workplace:
         r = self.conn.execute("SELECT * FROM mail WHERE message_id = ?", (message_id,)).fetchone()
         if not r:
             return None
-        return {"id": r["message_id"], "ts": r["ts"], "from": self.person(r["from_id"]),
+        return {"id": r["message_id"], "url": self.url("mail", r["message_id"]), "ts": r["ts"], "from": self.person(r["from_id"]),
                 "to": [self.person(t) for t in json.loads(r["to_ids"])], "subject": r["subject"], "body": r["body"]}
 
     # Chat ----------------------------------------------------------------------
@@ -92,7 +98,7 @@ class Workplace:
         to_me = bool(self.me) and (self.me["person_id"] in mentions or (r["channel"] is None and r["author_id"] != self.me["person_id"]))
         replied = self.conn.execute("SELECT 1 FROM chat WHERE thread_id = ? AND author_id = ?",
                                     (r["message_id"], self.me["person_id"] if self.me else "")).fetchone()
-        return {"id": r["message_id"], "ts": r["ts"], "where": f"#{r['channel']}" if r["channel"] else "direct message",
+        return {"id": r["message_id"], "url": self.url("chat", r["message_id"]), "ts": r["ts"], "where": f"#{r['channel']}" if r["channel"] else "direct message",
                 "author": self.person(r["author_id"]), "text": r["text"], "thread": r["thread_id"],
                 "addressed_to_me": to_me,
                 "unanswered_hours": round((self.now - parse(r["ts"])).total_seconds() / 3600, 1) if to_me and not replied else None}
@@ -118,7 +124,7 @@ class Workplace:
             adjacent = [o["event_id"] for o in rows if o["event_id"] != r["event_id"] and (parse(o["start"]) == e or parse(o["end"]) == s)]
             attendees = [self.person(a) for a in json.loads(r["attendees"])]
             events.append({
-                "id": r["event_id"], "start": r["start"], "end": r["end"], "title": r["title"],
+                "id": r["event_id"], "url": self.url("cal", r["event_id"]), "start": r["start"], "end": r["end"], "title": r["title"],
                 "organizer": self.person(r["organizer_id"]), "attendees": attendees, "agenda": r["agenda"],
                 "no_agenda": not r["agenda"].strip() and len(attendees) > 1,
                 "conflicts_with": conflicts, "back_to_back_with": adjacent,
@@ -128,7 +134,7 @@ class Workplace:
 
     def event_get(self, event_id: str) -> dict | None:
         r = self.conn.execute("SELECT * FROM calendar WHERE event_id = ?", (event_id,)).fetchone()
-        return {"id": r["event_id"], "start": r["start"], "end": r["end"], "title": r["title"]} if r else None
+        return {"id": r["event_id"], "url": self.url("cal", r["event_id"]), "start": r["start"], "end": r["end"], "title": r["title"]} if r else None
 
     def focus_minutes(self, rows, start: str, end: str) -> dict:
         out = {}
@@ -153,7 +159,7 @@ class Workplace:
     def transcripts_list(self, since: str | None = None) -> list[dict]:
         rows = self.conn.execute("""SELECT t.transcript_id, t.event_id, t.ts, c.title, c.attendees FROM transcripts t
                                     JOIN calendar c USING (event_id) WHERE t.ts >= ? ORDER BY t.ts""", (since or "0000",)).fetchall()
-        return [{"id": r["transcript_id"], "event": r["event_id"], "ended": r["ts"], "title": r["title"],
+        return [{"id": r["transcript_id"], "url": self.url("tr", r["transcript_id"]), "event": r["event_id"], "ended": r["ts"], "title": r["title"],
                  "attendees": [self.person(a) for a in json.loads(r["attendees"])]} for r in rows]
 
     def transcript_get(self, transcript_id: str) -> dict | None:
@@ -161,7 +167,7 @@ class Workplace:
                                  WHERE t.transcript_id = ?""", (transcript_id,)).fetchone()
         if not r:
             return None
-        return {"id": r["transcript_id"], "event": r["event_id"], "ended": r["ts"], "title": r["title"],
+        return {"id": r["transcript_id"], "url": self.url("tr", r["transcript_id"]), "event": r["event_id"], "ended": r["ts"], "title": r["title"],
                 "attendees": [self.person(a) for a in json.loads(r["attendees"])], "text": r["text"]}
 
     def untranscribed_meetings(self, since: str) -> list[dict]:
@@ -173,5 +179,5 @@ class Workplace:
     def tracker_search(self, query: str | None = None, status: str | None = None) -> list[dict]:
         rows = self.conn.execute("SELECT * FROM tracker").fetchall()
         q = (query or "").lower()
-        return [{**dict(r), "owner": self.person(r["owner_id"])} for r in rows
+        return [{**dict(r), "url": self.url("trk", r["issue_id"]), "owner": self.person(r["owner_id"])} for r in rows
                 if (not q or q in r["title"].lower() or q in r["issue_id"].lower()) and (not status or r["status"].lower() == status.lower())]

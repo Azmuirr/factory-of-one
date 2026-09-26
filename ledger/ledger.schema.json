@@ -1055,6 +1055,14 @@
         },
         "next_step": {
           "type": "string"
+        },
+        "draft_reply": {
+          "type": "string",
+          "description": "A suggested reply in the PM's voice. Never sent by an agent"
+        },
+        "url": {
+          "type": "string",
+          "description": "Permalink copied from the tool result, when the source system provides one"
         }
       }
     },
@@ -1124,6 +1132,9 @@
               },
               "suspicious": {
                 "type": "boolean"
+              },
+              "url": {
+                "type": "string"
               }
             }
           }

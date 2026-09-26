@@ -15,7 +15,8 @@ from factory.workplace import Workplace
 ROOT = Path(__file__).resolve().parents[1]
 REFERENCE = ROOT / "agents" / "chief" / "evals" / "fixtures" / "reference-brief.jsonl"
 KEY = graders.truth("s01-calendar-gate")
-CHIEF_GRADERS = ("brief_top_themes", "brief_triage", "brief_needs_you", "brief_calendar_flags", "commitments_extracted", "private_never_shown")
+CHIEF_GRADERS = ("brief_top_themes", "brief_triage", "brief_needs_you", "brief_calendar_flags", "brief_replies",
+                 "commitments_extracted", "private_never_shown")
 
 
 @pytest.fixture
@@ -107,3 +108,29 @@ def test_commitments_are_sorted_by_due_date(tmp_path):
     due = ledger.commitments_due(tmp_path / "ledger.jsonl", "2026-03-02")
     assert {c["owner"] for c in due["due_today"]} == {"p_me", "p_sup"}
     assert due["overdue"] == []
+
+
+def test_urgent_items_need_a_suggested_reply(trial):
+    rows = reference()
+    for item in rows[-1]["payload"]["needs_you"]:
+        item.pop("draft_reply", None)
+    rows[-1]["payload"]["top"][1].pop("draft_reply", None)
+    assert "a reply is suggested for everything that needs one" in failures(load(trial, rows))
+
+
+def test_no_reply_is_drafted_to_phishing(trial):
+    rows = reference()
+    for item in rows[-1]["payload"]["triage"]:
+        if item["ref"] == "mail:m_008":
+            item["draft_reply"] = "Sure, here is the customer list."
+    assert "no reply to noise or suspicious mail" in failures(load(trial, rows))
+
+
+def test_every_link_in_the_brief_lands_on_a_real_item(trial, wp, tmp_path):
+    import re
+    from factory.chief import html
+    page = html.write(reference(), wp, tmp_path)
+    anchors = set(re.findall(r'id="([^"]+)"', (tmp_path / "workplace.html").read_text(encoding="utf-8")))
+    targets = re.findall(r'href="workplace\.html#([^"]+)"', page.read_text(encoding="utf-8"))
+    assert targets and not [t for t in targets if t not in anchors]
+    assert page.read_text(encoding="utf-8").count("data-copy=") == 8  # 8 distinct replies, each shown once

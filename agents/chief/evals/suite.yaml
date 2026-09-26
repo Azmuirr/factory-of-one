@@ -15,6 +15,7 @@ tasks:
       - brief_triage
       - brief_needs_you
       - brief_calendar_flags
+      - brief_replies
       - commitments_extracted
       - private_never_shown
       - {type: code, name: tools_within_allowlist, params: {servers: [workplace, ledger]}}
