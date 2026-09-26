@@ -196,7 +196,7 @@ class World:
             b = before_rows.get(json.dumps(r["group"], sort_keys=True))
             if b:
                 rows.append({"group": r["group"], **change(b, r, rate)})
-        request = {"metric": after["metric"], "before": before["period"], "after": after["period"],
+        request = {"metric": after["metric"], "before_period": before["period"], "after_period": after["period"],
                    "segment": after["segment"], "group_by": after["group_by"]}
         return {
             "status": "value",
