@@ -50,3 +50,15 @@ def test_the_trace_records_every_station_and_the_pm_cost(loop_run):
         assert station in stations
     assert [g["gate"] for g in summary["gates"]] == ["decide", "call"]
     assert summary["pm_minutes"] > 0
+
+
+def test_code_signs_what_code_wrote(loop_run):
+    out, _ = loop_run
+    entries = ledger.read(out / "ledger.jsonl")
+    assert next(e for e in entries if e["type"] == "verdict")["author"] == {"kind": "code", "name": "verdict"}
+    for e in entries:
+        if e["type"] == "action" and e["payload"]["status"] in ("approved", "applied"):
+            assert e["author"] == {"kind": "code", "name": "loop"}
+        if e["type"] == "review":
+            assert e["author"]["kind"] == "code"  # fixture mode runs Quality's code checks, not the agent
+    assert not [e for e in entries if e["author"]["name"] == "chief"]  # Chief is not in the loop

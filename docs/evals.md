@@ -56,6 +56,17 @@ Per task: pass or fail per trial, partial credit, and the failed assertions with
 
 Read transcripts. Graders are only trustworthy if someone reads the trials they graded.
 
+## Live runs
+
+Real headless runs on the subscription, graded with the same code graders. Costs are list-price estimates; nothing was billed beyond the subscription.
+
+| Date | Run | Result | What it found |
+|---|---|---|---|
+| 2026-09-26 | Chief v0.3, morning, s01 | 30/35 | Told the VP "the dip is mostly immature cohorts", a planted trap no grader caught. Proposed moving the CEO's sync instead of the customer call. A 101-word note. "Talk soon" instead of the PM's sign-off. Read Ben's "by Thursday" as the send date |
+| 2026-09-26 | Chief v0.4, morning, s01 | 36/36 | All of the above fixed. 59 turns, 6 minutes, about $0.83 |
+| 2026-09-26 | Loop, s01, live-1 | Stopped | Relative run folder broke every path; then Quality returned FIX on a correct packet because the numbers check read "Microsoft 365" as data |
+| 2026-09-26 | Loop, s01, live-2 | Full loop | Signal 12/13 (joined a release title and its notes into one quote; Quality caught it and returned FIX). Builder 8/8. Quality 4/4 on the planted-quote task and SHIP on the build. Microsoft activation 30.5% to 38.2%, prediction hit, Brier 0.04, 7.2 PM minutes, about $0.82 |
+
 ## Grader changes
 
 Graders have bugs too. Each fix is logged, and saved transcripts are regraded with `python -m factory.evals regrade <agent> <run_id>`.
@@ -67,3 +78,6 @@ Graders have bugs too. Each fix is logged, and saved transcripts are regraded wi
 | 2026-09-25 | `quotes_grounded` | Compared quotes against raw JSON, where quotation marks are escaped. A real quote failed | The same trial | Decode JSON tool results before comparing |
 | 2026-09-26 | `numbers_grounded`, `demo_numbers_grounded` | Numbers written in prose were never checked, so Builder could not reuse Signal's "39.4%" and Signal could have invented numbers in text | The reference demo failed its own check | Prose numbers are now checked with the rounding their precision implies. Signal's saved trial still scores 100% |
 | 2026-09-26 | Quality's correctness pass | Pool grounding passed a planted wrong number (22.1%), because 22.1% exists elsewhere in the data | Building Quality's defect fixtures | Metric evidence cites a `query_id`; code replays it (decision D8). Pool grounding stays only as a fallback for text outside claims |
+| 2026-09-26 | Numbers check (`factory/numbers.py`) | Read "Microsoft 365" as an untraced data number, so Quality had to return FIX on a correct packet | The first live loop | Known product names with numbers are skipped. "Microsoft 30 workspaces" is still checked |
+| 2026-09-26 | `brief_open_loops`, `brief_meeting_prep` | Failed a brief that tracked the PM's promise through its commitment (`cmt:cmt_0004`) instead of the mail it was made in | Chief's first live brief | Commitment refs resolve to their source before grading and rendering, so the brief also links to the mail |
+| 2026-09-26 | New: `no_unsourced_cause` | Chief drafted "the dip is mostly immature cohorts" to the VP, a planted trap, and no grader noticed | Reading Chief's first live brief | A sentence that blames a trap cause for the drop fails. Chief's skill now says it has no metrics and leaves the cause to the readout |

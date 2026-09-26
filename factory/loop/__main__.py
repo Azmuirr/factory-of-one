@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import sys
 import json
 import shutil
 import time
@@ -20,7 +21,7 @@ from factory.verdict import verdict
 from sandbox.generator import generate
 
 HUMAN = {"kind": "human", "name": "pm"}
-CHIEF = {"kind": "agent", "name": "chief", "version": "0.1.0"}
+LOOP = {"kind": "code", "name": "loop"}  # the runner records approved and applied actions
 
 
 class Loop:
@@ -96,7 +97,7 @@ class Loop:
             entry = next(e for e in entries if e["id"] == entry_id)
             payload = review.code_only_review(entry, entries, self.world, self.dir)
             ledger.append(self.ledger, {"id": ledger.next_id(self.ledger, "review"), "type": "review", "ts": self.sim_now(),
-                                        "author": {"kind": "agent", "name": "quality", "version": "code-only"},
+                                        "author": {"kind": "code", "name": "review"},
                                         "refs": [entry_id], "payload": payload})
         else:
             self.run_agent("quality", "", station, prompt=f"Review ledger entry {entry_id} before it reaches the PM.")
@@ -199,7 +200,7 @@ class Loop:
                 self.log("build", "stopped after Quality's review")
                 return False
         payload = {**proposed["payload"], "status": "approved"}
-        act_id = self.write("action", CHIEF, payload, [proposed["id"]])
+        act_id = self.write("action", LOOP, payload, [proposed["id"]])
         self.log("build", "proposal matches the approved decision", action=act_id)
         return True
 
@@ -215,7 +216,7 @@ class Loop:
         started = time.time()
         generated = generate(self.scenario, seed=self.seed, actions_path=actions_file, out=self.dir / "world-after")
         shutil.copy(generated / "world" / "world.db", self.world)
-        self.write("action", CHIEF, {"name": action["name"], "params": action["params"], "status": "applied"}, [self.latest("action")["id"]])
+        self.write("action", LOOP, {"name": action["name"], "params": action["params"], "status": "applied"}, [self.latest("action")["id"]])
         self.log("apply", "world advanced with the action", data_through=self.sim_now(), seconds=round(time.time() - started, 1))
 
     def prove(self) -> dict | None:
@@ -227,7 +228,7 @@ class Loop:
         if result["status"] != "value":
             self.log("prove", "verdict not available", detail=result)
             return None
-        ver_id = self.write("verdict", {"kind": "agent", "name": "signal", "version": "verdict-script"}, result["entry"], [bet["id"], applied["id"]])
+        ver_id = self.write("verdict", {"kind": "code", "name": "verdict"}, result["entry"], [bet["id"], applied["id"]])
         self.log("prove", "verdict written", verdict=ver_id, outcome=result["entry"]["outcome"], before=result["entry"]["before"],
                  after=result["entry"]["after"], prediction_hit=result["prediction_hit"])
         return result
@@ -296,6 +297,7 @@ def main() -> None:
     parser.add_argument("--fixture", type=Path, help="Load agent outputs from a ledger file instead of running the agents")
     parser.add_argument("--out", type=Path)
     args = parser.parse_args()
+    sys.stdout.reconfigure(encoding="utf-8")  # Windows consoles default to cp1252
     script = yaml.safe_load(args.gates.read_text(encoding="utf-8")) if args.gates else None
     run_id = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     out = args.out or ROOT / "runs" / "loop" / f"{args.scenario}-seed{args.seed}-{run_id}"

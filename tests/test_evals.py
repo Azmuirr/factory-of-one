@@ -108,3 +108,18 @@ def test_quotes_inside_json_tool_results_are_decoded(tmp_path):
     packet = {"type": "decision_packet", "payload": {"cause": [{"evidence": [{"quote": 'Getting "admin consent required" when I connect'}]}]}}
     result = json.dumps({"tickets": [{"body": 'Getting "admin consent required" when I connect Outlook.'}]})
     assert ok(graders.quotes_grounded(make_trial(tmp_path, [packet], [result]), KEY, {}))
+
+
+def test_a_relative_run_folder_still_gives_the_agent_absolute_paths(tmp_path, monkeypatch):
+    # Claude runs with the trial folder as its working directory, so a relative path would point inside itself.
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setenv("CLAUDE_BIN", "claude")
+    from factory.evals.runner import build_command
+    trial = Trial(Task("t", "capability", "s01-calendar-gate", 1, "", []), 0, Path("runs") / "live")
+    trial.dir.mkdir(parents=True)
+    cmd = build_command(load_agent("signal"), trial)
+    assert trial.dir.is_absolute()
+    assert Path(cmd[cmd.index("--agents") + 1]).is_absolute() and Path(cmd[cmd.index("--mcp-config") + 1]).is_absolute()
+    servers = json.loads((trial.dir / "mcp.json").read_text(encoding="utf-8"))["mcpServers"]
+    paths = [v for s in servers.values() for k, v in s.get("env", {}).items() if k in ("FACTORY_WORLD", "FACTORY_LEDGER")]
+    assert paths and all(Path(p).is_absolute() for p in paths)

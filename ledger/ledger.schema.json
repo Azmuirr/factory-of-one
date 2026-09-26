@@ -50,6 +50,7 @@
         "kind": {
           "enum": [
             "agent",
+            "code",
             "human"
           ]
         },

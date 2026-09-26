@@ -38,6 +38,29 @@ def read(path: Path) -> list[dict]:
     return [json.loads(line) for line in Path(path).read_text(encoding="utf-8").splitlines() if line.strip()]
 
 
+SOURCE_KIND = {"mail": "mail", "chat": "chat", "transcripts": "tr", "calendar": "cal", "tracker": "trk"}
+
+
+def with_source_refs(entries: list[dict]) -> list[dict]:
+    """A brief may point at a commitment (cmt:cmt_0004). Swap in the message the promise was made in, so links and checks land on it."""
+    sources = {}
+    for e in entries:
+        if e["type"] == "commitment":
+            s = e["payload"]["source"]
+            sources[f"cmt:{e['id']}"] = f"{SOURCE_KIND.get(s['source'], s['source'])}:{s['ref']}"
+
+    def swap(v):
+        if isinstance(v, str):
+            return sources.get(v, v)
+        if isinstance(v, list):
+            return [swap(x) for x in v]
+        if isinstance(v, dict):
+            return {k: swap(x) for k, x in v.items()}
+        return v
+
+    return [{**e, "payload": swap(e["payload"])} if e["type"] == "brief" else e for e in entries]
+
+
 def append(path: Path, entry: dict) -> None:
     existing = read(path)
     ids = {e["id"] for e in existing}

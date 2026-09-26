@@ -30,6 +30,10 @@ class Trial:
     duration_s: float = 0.0
     error: str | None = None
 
+    def __post_init__(self) -> None:
+        # Claude runs with this folder as its working directory, so every path handed to it must be absolute.
+        self.dir = Path(self.dir).resolve()
+
     @property
     def ledger_path(self) -> Path:
         return self.dir / "ledger.jsonl"

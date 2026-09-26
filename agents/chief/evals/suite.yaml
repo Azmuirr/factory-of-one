@@ -1,5 +1,5 @@
 agent: chief
-version: 0.3.0
+version: 0.4.0
 defaults:
   trials: 3
   seed: 1
@@ -26,6 +26,7 @@ tasks:
       - brief_stale
       - notified_self
       - respects_lessons
+      - no_unsourced_cause
       - private_never_shown
       - {type: code, name: tools_within_allowlist, params: {servers: [workplace, ledger]}}
 

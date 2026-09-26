@@ -136,6 +136,8 @@ grading:
     stale: [p_cto]
     not_stale: [p_vp]
     voice: {signoff: "Thanks, S.", max_words: 60, banned_openings: [hi, hello, hope, dear]}
+    # Chief reads chatter, not metrics. Blaming one of these for the drop repeats a trap from traps_in_data.
+    trap_causes: [immature, "not mature", seasonal, weekend, "teams bot", "microsoft teams"]
     weekly:
       as_of: "2026-02-27T17:00:00Z"
       starved_goals: [g2]

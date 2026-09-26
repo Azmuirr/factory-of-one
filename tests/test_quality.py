@@ -95,3 +95,10 @@ def test_a_submitted_review_carries_the_code_checks(review_env):
     assert result["status"] == "value"
     written = ledger.read(root / "clean" / "ledger.jsonl")[-1]
     assert written["type"] == "review" and written["payload"]["correctness"]["numbers"] == "pass"
+
+
+def test_a_product_name_is_not_a_data_number():
+    from factory import numbers as nums
+    text = "Microsoft 365 admin consent blocks the calendar step; Office 365 tenants too."
+    assert nums.text_numbers(text) == []
+    assert [v for v, _ in nums.text_numbers("Microsoft 30 workspaces filed tickets")] == [30.0]

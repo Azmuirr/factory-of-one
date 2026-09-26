@@ -6,7 +6,8 @@ import re
 
 TEXT_NUMBER = re.compile(r"(?<![A-Za-z_\d.])\$?(\d[\d,]*(?:\.\d+)?)(%|[kK]\b)?")
 NOT_NUMBERS = re.compile(
-    r"<script.*?</script>|<style.*?</style>|<[^>]+>|\b[a-z]+_[a-z0-9]+\b|\d{4}-\d{2}-\d{2}|\d+(?:\.\d+)?e-?\d+", re.S)
+    r"<script.*?</script>|<style.*?</style>|<[^>]+>|\b[a-z]+_[a-z0-9]+\b|\d{4}-\d{2}-\d{2}|\d+(?:\.\d+)?e-?\d+"
+    r"|\b(?:Microsoft|Office|Dynamics) 365\b|\bWindows 1[01]\b", re.S)  # product names, not data
 NARRATIVE_MAX = 14  # bare small integers such as "7 days" or "3 weeks" are narrative, not data
 
 

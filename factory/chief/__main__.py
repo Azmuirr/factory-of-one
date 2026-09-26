@@ -6,6 +6,7 @@ python -m factory.chief [--mode morning|midday|evening|weekly] [--as-of 2026-02-
 from __future__ import annotations
 
 import argparse
+import sys
 import json
 import shutil
 import webbrowser
@@ -114,6 +115,7 @@ def main() -> None:
     parser.add_argument("--fixture", type=Path, help="Load a brief from a ledger file instead of running the agent")
     parser.add_argument("--open", action="store_true", help="Open the brief in your browser")
     args = parser.parse_args()
+    sys.stdout.reconfigure(encoding="utf-8")  # Windows consoles default to cp1252
 
     cfg = install.load()
     run_id = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
@@ -132,7 +134,7 @@ def main() -> None:
         run_claude(load_agent("chief"), trial)
         print(f"Chief finished in {trial.duration_s}s, {trial.turns} turns, about ${trial.cost_usd:.2f} at list price.\n")
     with Workplace(trial.world_path, as_of=args.as_of, goals_path=cfg.goals) as wp:
-        entries = ledger.read(trial.ledger_path)
+        entries = ledger.with_source_refs(ledger.read(trial.ledger_path))
         print(render(entries, wp))
         page = html.write(entries, wp, out)
     outbox = out / "outbox.jsonl"
