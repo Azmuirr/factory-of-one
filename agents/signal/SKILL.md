@@ -2,7 +2,7 @@
 name: signal
 description: One front door for quantitative and qualitative product knowledge. Finds what changed, explains why with numbers and customer voice, and writes a signal card or a decision packet to the ledger.
 metadata:
-  version: "0.3.1"
+  version: "0.3.4"
 ---
 
 # Signal
@@ -33,15 +33,15 @@ You write results with `ledger.write`. The tool table below maps each capability
 3. **Localize.** Name the segment where the change concentrates. A segment explains the change only if the other values of that dimension did not move.
 4. **Time it.** Ask `quant` to list releases around the recent period. Tie the onset to a release only if the release date sits at the start of the change.
 5. **Mechanism.** Ask `quant` for each funnel metric in the same segment and periods. The mechanism is the earliest funnel step that moved in the same direction as the key metric. A step that moved the other way is not the mechanism.
-6. **Voice.** Ask `qual` for tickets in that segment after the onset that describe the mechanism. Get the distinct account count and one or two exact quotes.
+6. **Voice.** Ask `qual` for tickets in that segment after the onset that describe the mechanism. Get the distinct account count from one search (several phrasings go in `any_of`) and one or two exact quotes. Never add or merge counts from separate searches.
 7. **Rule out.** Name the most plausible alternative cause and show why the evidence does not support it. A metrics rejection for a dimension at the wrong grain is a reason to rule that cause out, not to chase it.
 8. **Size.** Ask `quant` for the revenue impact (`metrics.size_impact`) for the segment and periods.
-9. **Write a `signal_card`, then a `decision_packet`** that references the card.
+9. **Write a `signal_card`, then a `decision_packet`** that references the card. The card's `before`, `after`, and `change` are copied from one `metrics.compare` result, and its `segment` is exactly the segment that comparison used. Code recomputes the card from its metric, periods, and segment, so a segment label on overall numbers fails.
 
 ## Decision packet fields
 
 - `question`: the question you answered.
-- `cause`: claims. Each has `text`, `class` (fact, hard_constraint, assumption, unknown), `evidence` (each with `source`, `ref`, and a `value` copied from a tool or a `quote` copied from a tool), and `does_not_prove`. For metric evidence, `ref` is the tool's `query_id`, and every number in the claim's text must come from that query's result. A fact needs at least one piece of evidence.
+- `cause`: claims. Each has `text`, `class` (fact, hard_constraint, assumption, unknown), `evidence` (each with `source`, `ref`, and a `value` copied from a tool or a `quote` copied from a tool), and `does_not_prove`. For metric evidence, `ref` is the tool's `query_id`, and every number in the claim's text must come from a query cited in that claim's evidence. To compare with a number from another claim, cite that query in this claim too. A fact needs at least one piece of evidence.
 - `ruled_out`: the alternative you ruled out, in the same claim shape.
 - `diagnosis`: `metric` (the key metric that moved), `segment` (for example `{"<dimension>": ["<value>"]}`), `release_id` (or null), `mechanism_metric`, `voice_workspaces` (distinct accounts from `qual`).
 - `size`: `metric` ("new_arr_at_risk"), `value` (from the tool), `unit` (from the tool), `method` (from the tool), `ref` (the tool's `query_id`).

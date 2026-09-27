@@ -123,3 +123,23 @@ def test_a_relative_run_folder_still_gives_the_agent_absolute_paths(tmp_path, mo
     servers = json.loads((trial.dir / "mcp.json").read_text(encoding="utf-8"))["mcpServers"]
     paths = [v for s in servers.values() for k, v in s.get("env", {}).items() if k in ("FACTORY_WORLD", "FACTORY_LEDGER")]
     assert paths and all(Path(p).is_absolute() for p in paths)
+
+
+def quality_trial(tmp_path, now_run, entries):
+    import shutil
+    (tmp_path / "world").mkdir()
+    shutil.copy(now_run / "world" / "world.db", tmp_path / "world" / "world.db")
+    shutil.copy(ROOT / "ledger" / "examples" / "queries.jsonl", tmp_path / "queries.jsonl")
+    return make_trial(tmp_path, entries)
+
+
+def test_signal_is_graded_by_the_same_checks_quality_runs(tmp_path, now_run):
+    trial = quality_trial(tmp_path, now_run, example_packet_entries())
+    assert ok(graders.passes_quality_checks(trial, KEY, {}))
+
+
+def test_a_card_labeled_with_the_wrong_segment_fails(tmp_path, now_run):
+    entries = example_packet_entries()
+    card = next(e for e in entries if e["type"] == "signal_card")
+    card["payload"]["segment"] = {"calendar_provider": ["google"]}  # the numbers are not Google's
+    assert not ok(graders.passes_quality_checks(quality_trial(tmp_path, now_run, entries), KEY, {}))

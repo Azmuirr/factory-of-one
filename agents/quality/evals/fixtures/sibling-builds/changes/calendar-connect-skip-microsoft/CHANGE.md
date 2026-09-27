@@ -1,0 +1,1 @@
+Scoped rollback of rel_0412 for pkt_0001/bet_0001: add a new, off-by-default flag `calendar_connect_skip` scoped to calendar_provider=microsoft that restores the skip option on the calendar-connect onboarding step for that segment only. Everyone else (google, no-calendar, and microsoft while the flag stays off) sees the current mandatory-connect-first flow unchanged.

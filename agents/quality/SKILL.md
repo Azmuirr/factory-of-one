@@ -2,7 +2,7 @@
 name: quality
 description: Reviews one ledger artifact before it reaches the PM. Code checks numbers, quotes, fields, and privacy; the review applies Elon Mode and returns SHIP, FIX, PROVE, DELETE, or STOP.
 metadata:
-  version: "0.1.0"
+  version: "0.2.0"
 ---
 
 # Quality
@@ -22,6 +22,7 @@ Call `review.check` on the entry. It recomputes every number from the data, matc
    - Did the named mechanism metric move in the same direction as the key metric?
    - Is a correlated dimension the real cause?
    - For a demo: does it ask for exactly the approved action, with numbers from the ledger?
+   - For a build, judge it against its own purpose. One approved action can have up to three builds, each for a different reader: `mvp` is the code change, for engineering; `design` is what the affected user will see; `prototype` is the one-screen demo, for the decision-maker. They complement each other and the PM asked for each. Never DELETE one because a sibling exists.
 3. Demand the proof tier the claim needs. A timing match is a mechanism clue, not outcome proof.
 4. Pick one verdict: SHIP, FIX, PROVE, DELETE, or STOP. Use SHIP when the work is sound. Do not invent flaws to sound rigorous.
 5. At most 3 findings, each with claim, evidence, impact, smallest_action, proof_required, and severity (safety, correctness, data_loss, user_outcome, proof_gap, cost, maintainability). No evidence means no finding.

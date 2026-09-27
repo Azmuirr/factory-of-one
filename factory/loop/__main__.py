@@ -220,6 +220,9 @@ class Loop:
         actions_file.write_text(yaml.safe_dump(spec, sort_keys=False), encoding="utf-8")
         started = time.time()
         generated = generate(self.scenario, seed=self.seed, actions_path=actions_file, out=self.dir / "world-after")
+        # Keep the world every earlier artifact was checked against, so its numbers can be replayed later.
+        (self.dir / "world-before").mkdir(exist_ok=True)
+        shutil.copy(self.world, self.dir / "world-before" / "world.db")
         shutil.copy(generated / "world" / "world.db", self.world)
         self.write("action", LOOP, {"name": action["name"], "params": action["params"], "status": "applied"}, [self.latest("action")["id"]])
         self.log("apply", "world advanced with the action", data_through=self.sim_now(), seconds=round(time.time() - started, 1))

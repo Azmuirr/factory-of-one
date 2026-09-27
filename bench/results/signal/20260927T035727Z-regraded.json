@@ -1,0 +1,46 @@
+{
+  "agent": "signal",
+  "agent_version": "0.3.0",
+  "suite_version": "0.1.0",
+  "run_id": "20260927T035727Z-regraded",
+  "mode": "regraded",
+  "trials_per_task": 1,
+  "cost_usd": 0.7768,
+  "summary": {
+    "capability": {
+      "pass_at_k": "0/1",
+      "pass_pow_k": "0/1"
+    }
+  },
+  "tasks": [
+    {
+      "task": "diagnose-s01",
+      "kind": "capability",
+      "trials": [
+        {
+          "trial": 1,
+          "passed": false,
+          "partial": 0.867,
+          "failed": [
+            "signal_card passes Quality's code checks: card before is 0.4011; recomputed 0.3937; card after is 0.3717; recomputed 0.3061; card change.absolute is -0.0294; recomputed -0.0876; card change.relative is -0.0733; recomputed -0.2225",
+            "decision_packet passes Quality's code checks: '15.46' in \"Whether calendar_provider=microsoft mix within the s51_plus \" is not in the data"
+          ],
+          "advisory": [
+            "reasoning rubric: pass (pass: All criteria hold: the cause (forced calendar-connect requirement blocking Microsoft users after skip removal) logically follows from the segmented decline, timing, funnel analysis, and support evidence; facts and assumptions are consistently labeled; every claim explicitly states what it does not prove; and the recommended test (restore skip for Microsoft-only, flag-gated, measure recovery) minimally tests the skip hypothesis while acknowledging OAuth-scope uncertainty via staged follow-up.)"
+          ],
+          "error": null,
+          "cost_usd": 0.7768,
+          "turns": 7,
+          "duration_s": 0.0,
+          "transcript": "runs\\evals\\signal\\20260927T035727Z\\diagnose-s01\\trial-1\\transcript.jsonl"
+        }
+      ],
+      "cross_trial": [
+        "same diagnosis and action in every trial: pass (1 distinct)"
+      ],
+      "pass_at_k": false,
+      "pass_pow_k": false,
+      "mean_partial": 0.867
+    }
+  ]
+}

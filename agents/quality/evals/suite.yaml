@@ -1,5 +1,5 @@
 agent: quality
-version: 0.1.0
+version: 0.2.0
 defaults:
   trials: 3
   seed: 1
@@ -60,3 +60,18 @@ tasks:
     graders:
       - {type: code, name: review_verdict, params: {target: bld_0001, allowed: [FIX]}}
       - findings_have_evidence
+
+  # From the third live loop: Quality returned DELETE on the design and the demo because the tested code change
+  # existed. They serve different readers. The builds are that run's real output and pass every code check.
+  - id: sibling-builds
+    kind: regression
+    scenario: s01-calendar-gate
+    setup:
+      - copy_files: {from: agents/quality/evals/fixtures/sibling-builds/queries.jsonl, to: queries.jsonl}
+      - copy_files: {from: agents/quality/evals/fixtures/sibling-builds/changes, to: changes}
+      - copy_files: {from: agents/quality/evals/fixtures/sibling-builds/designs, to: designs}
+      - copy_files: {from: agents/quality/evals/fixtures/sibling-builds/demos, to: demos}
+      - seed_ledger: {file: agents/quality/evals/fixtures/sibling-builds/ledger.jsonl}
+    prompt: Review ledger entry bld_0002 before it reaches the PM.
+    graders:
+      - {type: code, name: review_verdict, params: {target: bld_0002, allowed: [SHIP, FIX, PROVE]}}

@@ -21,6 +21,7 @@ tasks:
       - recommends_truth_action
       - numbers_grounded
       - quotes_grounded
+      - passes_quality_checks
       - {type: code, name: tools_within_allowlist, params: {servers: [metrics, warehouse, support, releases, ledger]}}
       - {type: code, name: consistent_diagnosis, cross_trial: true}
       - {type: model, name: reasoning_rubric, advisory: true}
@@ -33,6 +34,7 @@ tasks:
       - signal_card_written
       - no_alarm
       - numbers_grounded
+      - passes_quality_checks
       - {type: code, name: tools_within_allowlist, params: {servers: [metrics, warehouse, support, releases, ledger]}}
 
   - id: unregistered-metric

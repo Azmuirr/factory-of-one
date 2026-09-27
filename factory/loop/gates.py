@@ -24,6 +24,7 @@ class GateRecord:
 
 class Gates:
     def __init__(self, script: dict | None = None):
+        self.scripted = script is not None  # a scripted run never waits at the keyboard; unscripted gates take their default
         self.script = script or {}
         self.records: list[GateRecord] = []
 
@@ -31,7 +32,7 @@ class Gates:
         """questions: (key, prompt, default). Returns answers keyed by key."""
         print(f"\n{'=' * 72}\n{gate.upper()} GATE\n{'=' * 72}\n{briefing}\n")
         started = time.time()
-        scripted = self.script.get(gate)
+        scripted = self.script.get(gate, {} if self.scripted else None)
         answers = {}
         for key, prompt, default in questions:
             if scripted is not None:

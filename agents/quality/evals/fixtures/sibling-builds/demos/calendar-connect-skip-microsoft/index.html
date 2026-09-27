@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Fix Microsoft calendar onboarding</title>
+<style>
+  :root { --ink:#17202A; --muted:#5A6572; --canvas:#F5F6F4; --surface:#FFFFFF; --border:#DDE1DC;
+          --brand:#0E6B5C; --brand-strong:#0A5246; --warn-soft:#FFF4DC; --warn-ink:#7A4E00; }
+  * { box-sizing: border-box; }
+  html, body { margin:0; padding:0; width:1280px; height:800px; overflow:hidden;
+               font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background: var(--canvas); color: var(--ink); }
+  .page { width:1280px; height:800px; display:flex; align-items:center; justify-content:center; }
+  .card { width: 860px; background: var(--surface); border:1px solid var(--border); border-radius:16px;
+          padding: 40px 48px; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
+  .eyebrow { font-size:12px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); margin:0 0 8px; }
+  h1 { font-size:28px; line-height:1.25; margin:0 0 16px; }
+  .metric-row { display:flex; align-items:baseline; gap:12px; margin: 20px 0 24px; }
+  .metric { font-size:40px; font-weight:700; color: var(--brand-strong); }
+  .metric-label { font-size:14px; color:var(--muted); max-width: 420px; }
+  .ask { background: var(--warn-soft); color: var(--warn-ink); border-radius:10px; padding:16px 20px; margin: 0 0 24px; font-size:16px; }
+  .ask b { display:block; font-size:12px; text-transform:uppercase; letter-spacing:.04em; margin-bottom:4px; }
+  .actions { display:flex; gap:12px; align-items:center; }
+  button { font: inherit; border-radius:999px; padding:12px 22px; font-size:14px; cursor:pointer; border:1px solid transparent; }
+  .btn-primary { background: var(--brand); color:#fff; }
+  .btn-primary:hover { background: var(--brand-strong); }
+  .btn-ghost { background: transparent; color: var(--brand-strong); border-color: var(--border); }
+  .evidence { margin-top: 24px; border-top: 1px solid var(--border); padding-top: 20px; }
+  .evidence.hidden { display:none; }
+  .claim { font-size:14px; margin: 0 0 10px; }
+  .quote { font-size:14px; font-style: italic; color: var(--muted); border-left: 3px solid var(--border);
+           padding: 8px 14px; margin: 10px 0 0; }
+  .cite { font-size:12px; color: var(--muted); margin-top:4px; }
+</style>
+</head>
+<body>
+<main class="page" data-decision="pkt_0001" data-honesty="hardcoded">
+  <div class="card">
+    <p class="eyebrow">Onboarding regression &middot; rel_0412</p>
+    <h1>Since calendar-connect became mandatory, Microsoft-calendar signups are getting stuck and never record their first meeting.</h1>
+    <div class="metric-row">
+      <span class="metric">$24,783</span>
+      <span class="metric-label">in new ARR at risk per week from this segment's activation drop</span>
+    </div>
+    <div class="ask">
+      <b>Ask</b>
+      Approve a scoped rollback of rel_0412: bring back the "skip for now" option on calendar connect for Microsoft-calendar workspaces only. Everyone else keeps today's flow.
+    </div>
+    <div class="actions">
+      <button class="btn-primary" data-action="approve" onclick="document.getElementById('approved').classList.remove('hidden'); this.closest('.actions').classList.add('hidden');">Approve rollback</button>
+      <button class="btn-ghost" data-action="toggle-evidence" onclick="document.getElementById('evidence').classList.toggle('hidden'); this.textContent = document.getElementById('evidence').classList.contains('hidden') ? 'Show evidence' : 'Hide evidence';">Show evidence</button>
+    </div>
+    <p id="approved" class="ask hidden" style="margin-top:16px; background:#E3F1EE; color:#0A5246;"><b>Recorded</b>Rollback approved for calendar_provider = microsoft.</p>
+    <div id="evidence" class="evidence hidden">
+      <p class="claim">&bull; Onboarding v2 (rel_0412, shipped 2026-02-10) made calendar connect mandatory and removed the skip option.</p>
+      <p class="claim">&bull; Within Microsoft-calendar workspaces, activation fell 22.25% while first_meeting_rate_7d fell 14.84% &mdash; the earliest funnel step moving with the drop.</p>
+      <p class="claim">&bull; 12 Microsoft-calendar workspaces filed support tickets about calendar-connect failures since the release.</p>
+      <p class="quote">&ldquo;Getting &quot;admin consent required&quot; when I connect Outlook. Our IT team takes a week to approve new apps. Any workaround so I can use the trial meanwhile?&rdquo;</p>
+      <p class="cite">&mdash; support ticket t_c082072dd6</p>
+    </div>
+  </div>
+</main>
+</body>
+</html>

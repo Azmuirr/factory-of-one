@@ -67,6 +67,11 @@ Real headless runs on the subscription, graded with the same code graders. Costs
 | 2026-09-26 | Loop, s01, live-1 | Stopped | Relative run folder broke every path; then Quality returned FIX on a correct packet because the numbers check read "Microsoft 365" as data |
 | 2026-09-26 | Loop, s01, live-2 | Full loop | Signal 12/13 (joined a release title and its notes into one quote; Quality caught it and returned FIX). Builder 8/8. Quality 4/4 on the planted-quote task and SHIP on the build. Microsoft activation 30.5% to 38.2%, prediction hit, Brier 0.04, 7.2 PM minutes, about $0.82 |
 | 2026-09-26 | Builder v0.2, build-s01 | 100% after a grader fix | A 5-line change behind `calendar_skip_fallback_microsoft` (off), 3 new tests, all hidden acceptance tests passed. A design of the calendar step with an admin-approval banner and Skip for now, system classes only. About $0.22 |
+| 2026-09-26 | Loop, s01, live-3 | Stopped at a gate | Signal's quote fix held (SHIP). Quality returned DELETE on the design and the demo because the tested code existed: it judged three builds for three readers as rivals. The scripted gates then fell through to the keyboard |
+| 2026-09-26 | Quality v0.2, sibling-builds | 100% | New regression task built from live-3's real builds. SHIP on the design |
+| 2026-09-26 | Loop, s01, live-4 | Full loop | All three builds SHIP. Quality returned FIX on the packet: a ruled-out claim used Microsoft's -22.25% without citing its query. Microsoft activation 30.5% to 38.2%, Brier 0.04, 7.3 PM minutes, about $0.97 |
+| 2026-09-26 | Signal v0.3.2, diagnose-s01 | 100%, then 87% on regrade | Its own graders passed a card labeled "Microsoft" that held overall numbers, and a ruled-out claim with an untraced 15.46. Quality's checks caught both |
+| 2026-09-26 | Signal v0.3.3, diagnose-s01 | 93% | Card fixed. Reported "12 distinct workspaces" by merging 12 separate searches itself. The search tool now takes `any_of`, so code counts across phrasings |
 
 ## Grader changes
 
@@ -83,3 +88,4 @@ Graders have bugs too. Each fix is logged, and saved transcripts are regraded wi
 | 2026-09-26 | `brief_open_loops`, `brief_meeting_prep` | Failed a brief that tracked the PM's promise through its commitment (`cmt:cmt_0004`) instead of the mail it was made in | Chief's first live brief | Commitment refs resolve to their source before grading and rendering, so the brief also links to the mail |
 | 2026-09-26 | New: `no_unsourced_cause` | Chief drafted "the dip is mostly immature cohorts" to the VP, a planted trap, and no grader noticed | Reading Chief's first live brief | A sentence that blames a trap cause for the drop fails. Chief's skill now says it has no metrics and leaves the cause to the readout |
 | 2026-09-26 | `mvp_change_passes` scope check | Counted `CHANGE.md`, the change description the code tool writes, as a file outside the app's folders | Builder's first live trial (94%) | The description is metadata, excluded from diffs and scope. Regraded: 100% |
+| 2026-09-26 | New: `passes_quality_checks` on Signal | Signal's eval used pool grounding, weaker than the checks Quality runs before the PM sees anything. A mislabeled card scored 100% | Comparing a live trial's eval score with Quality's checks on the same entries | Signal's tasks run Quality's code checks. One definition of correct for both. Regraded: 87% |

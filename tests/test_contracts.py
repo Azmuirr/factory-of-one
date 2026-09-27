@@ -81,3 +81,13 @@ def test_catalog_metrics_reference_real_dimensions_and_metrics():
         assert set(m["dimensions"]) <= set(DIMENSIONS), name
         assert set(m["related"]) <= set(metrics), name
         assert {"description", "numerator", "unit", "window_days"} <= set(m), name
+
+
+def test_support_counts_distinct_workspaces_across_phrasings(monkeypatch, now_run):
+    monkeypatch.setenv("FACTORY_WORLD", str(now_run / "world" / "world.db"))
+    from factory.servers import support_server
+    phrasings = ["admin approval", "consent required", "skip calendar"]
+    single = [support_server.search_tickets(p, start="2026-02-10") for p in phrasings]
+    union = {t["workspace_id"] for r in single for t in r["tickets"]}
+    combined = support_server.search_tickets(any_of=phrasings, start="2026-02-10")
+    assert combined["distinct_workspaces"] == len(union) > max(r["distinct_workspaces"] for r in single)

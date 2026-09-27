@@ -1,0 +1,82 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Tallybird</title><style>/* Tallybird design system. Every value comes from tokens.json. Designs use these classes only. */
+:root {
+  --tb-ink: #17202A; --tb-muted: #5A6572; --tb-canvas: #F5F6F4; --tb-surface: #FFFFFF; --tb-border: #DDE1DC;
+  --tb-brand: #0E6B5C; --tb-brand-strong: #0A5246; --tb-brand-soft: #E3F1EE; --tb-accent: #E8A317;
+  --tb-warn-soft: #FFF4DC; --tb-warn-ink: #7A4E00; --tb-danger: #B3372D; --tb-success: #1E7D4A;
+  --tb-font: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; --tb-mono: ui-monospace, 'SF Mono', Consolas, monospace;
+  --tb-xs: 12px; --tb-sm: 14px; --tb-md: 16px; --tb-lg: 20px; --tb-xl: 28px; --tb-xxl: 40px;
+  --tb-s1: 4px; --tb-s2: 8px; --tb-s3: 12px; --tb-s4: 16px; --tb-s5: 24px; --tb-s6: 32px; --tb-s7: 48px;
+  --tb-r-sm: 6px; --tb-r-md: 10px; --tb-r-lg: 16px; --tb-r-pill: 999px;
+}
+* { box-sizing: border-box; }
+body { margin: 0; }
+
+/* Layout */
+.tb-canvas { background: var(--tb-canvas); color: var(--tb-ink); font-family: var(--tb-font); font-size: var(--tb-md); line-height: 1.5; min-height: 100vh; }
+.tb-topbar { display: flex; align-items: center; gap: var(--tb-s3); padding: var(--tb-s4) var(--tb-s6); background: var(--tb-surface); border-bottom: 1px solid var(--tb-border); }
+.tb-logo { font-weight: 700; font-size: var(--tb-lg); color: var(--tb-brand); letter-spacing: -0.01em; }
+.tb-page { max-width: 640px; margin: 0 auto; padding: var(--tb-s7) var(--tb-s5); }
+.tb-stack { display: flex; flex-direction: column; gap: var(--tb-s4); }
+.tb-row { display: flex; align-items: center; gap: var(--tb-s3); flex-wrap: wrap; }
+
+/* Surfaces */
+.tb-card { background: var(--tb-surface); border: 1px solid var(--tb-border); border-radius: var(--tb-r-lg); padding: var(--tb-s6); display: flex; flex-direction: column; gap: var(--tb-s3); }
+.tb-divider { border: 0; border-top: 1px solid var(--tb-border); margin: var(--tb-s2) 0; }
+
+/* Type */
+.tb-eyebrow { margin: 0; font-size: var(--tb-xs); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--tb-muted); }
+.tb-title { margin: 0; font-size: var(--tb-xl); line-height: 1.2; font-weight: 700; }
+.tb-subtitle { margin: 0; font-size: var(--tb-lg); font-weight: 600; }
+.tb-body { margin: 0; color: var(--tb-ink); }
+.tb-muted { margin: 0; color: var(--tb-muted); font-size: var(--tb-sm); }
+.tb-code { font-family: var(--tb-mono); font-size: var(--tb-sm); background: var(--tb-canvas); padding: 0 var(--tb-s1); border-radius: var(--tb-r-sm); }
+
+/* Actions */
+.tb-actions { display: flex; gap: var(--tb-s3); flex-wrap: wrap; margin-top: var(--tb-s2); }
+.tb-btn { font: inherit; font-weight: 600; border-radius: var(--tb-r-md); padding: var(--tb-s3) var(--tb-s5); border: 1px solid transparent; cursor: pointer; }
+.tb-btn--primary { background: var(--tb-brand); color: var(--tb-surface); }
+.tb-btn--primary:hover { background: var(--tb-brand-strong); }
+.tb-btn--secondary { background: var(--tb-surface); color: var(--tb-brand); border-color: var(--tb-brand); }
+.tb-btn--ghost { background: transparent; color: var(--tb-muted); }
+.tb-btn--ghost:hover { color: var(--tb-ink); }
+.tb-link { color: var(--tb-brand); font-weight: 600; text-decoration: underline; cursor: pointer; background: none; border: 0; padding: 0; font: inherit; }
+
+/* Feedback */
+.tb-banner { display: flex; flex-direction: column; gap: var(--tb-s1); border-radius: var(--tb-r-md); padding: var(--tb-s4); background: var(--tb-brand-soft); color: var(--tb-brand-strong); }
+.tb-banner--warn { background: var(--tb-warn-soft); color: var(--tb-warn-ink); }
+.tb-badge { display: inline-block; font-size: var(--tb-xs); font-weight: 600; padding: 2px var(--tb-s2); border-radius: var(--tb-r-pill); background: var(--tb-brand-soft); color: var(--tb-brand-strong); }
+.tb-badge--accent { background: var(--tb-warn-soft); color: var(--tb-warn-ink); }
+
+/* Forms */
+.tb-field { display: flex; flex-direction: column; gap: var(--tb-s1); }
+.tb-label { font-size: var(--tb-sm); font-weight: 600; }
+.tb-input { font: inherit; padding: var(--tb-s3); border: 1px solid var(--tb-border); border-radius: var(--tb-r-md); background: var(--tb-surface); color: var(--tb-ink); }
+.tb-input:focus { outline: 2px solid var(--tb-brand); outline-offset: 1px; }
+
+/* Progress */
+.tb-steps { display: flex; gap: var(--tb-s2); list-style: none; margin: 0; padding: 0; }
+.tb-step { flex: 1; height: 4px; border-radius: var(--tb-r-pill); background: var(--tb-border); }
+.tb-step--done { background: var(--tb-brand); }
+.tb-step--current { background: var(--tb-accent); }
+
+/* Lists */
+.tb-list { margin: 0; padding-left: var(--tb-s5); display: flex; flex-direction: column; gap: var(--tb-s1); }
+.tb-hidden { display: none; }
+</style></head><body class="tb-canvas"><header class="tb-topbar"><span class="tb-logo">Tallybird</span></header>
+<main class="tb-page tb-stack">
+  <ol class="tb-steps"><li class="tb-step tb-step--current"></li><li class="tb-step"></li><li class="tb-step"></li></ol>
+  <section class="tb-card" data-step="calendar_connect">
+    <p class="tb-eyebrow">Step 1 of 3</p>
+    <h1 class="tb-title">Connect your calendar</h1>
+    <p class="tb-body">Tallybird joins the meetings on your calendar and writes the notes for you.</p>
+    <div class="tb-banner tb-banner--warn">
+      <p class="tb-subtitle">Waiting on IT approval?</p>
+      <p class="tb-body">Some Microsoft 365 admins need to approve new apps before you can connect. You can skip this for now and connect later.</p>
+    </div>
+    <div class="tb-actions">
+      <button class="tb-btn tb-btn--primary" data-action="connect">Connect calendar</button>
+      <button class="tb-btn tb-btn--ghost" data-action="skip">Skip for now</button>
+    </div>
+  </section>
+</main>
+</body></html>

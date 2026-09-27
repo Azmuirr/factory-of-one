@@ -102,3 +102,17 @@ def test_a_product_name_is_not_a_data_number():
     text = "Microsoft 365 admin consent blocks the calendar step; Office 365 tenants too."
     assert nums.text_numbers(text) == []
     assert [v for v, _ in nums.text_numbers("Microsoft 30 workspaces filed tickets")] == [30.0]
+
+
+def test_the_sibling_builds_fixture_passes_every_code_check(tmp_path):
+    import shutil
+    from factory import review
+    from factory.evals.suite import load_suite
+    fixture = ROOT / "agents" / "quality" / "evals" / "fixtures" / "sibling-builds"
+    for folder in ("changes", "designs", "demos"):
+        shutil.copytree(fixture / folder, tmp_path / folder)
+    entries = [json.loads(l) for l in (fixture / "ledger.jsonl").read_text(encoding="utf-8").splitlines()]
+    for entry in (e for e in entries if e["type"] == "build"):
+        checks = review.correctness(entry, entries, tmp_path / "world.db", tmp_path)
+        assert checks["fields"] == "pass" and checks["numbers"] != "fail", (entry["payload"]["kind"], checks)
+    assert "sibling-builds" in {t.id for t in load_suite("quality").tasks}

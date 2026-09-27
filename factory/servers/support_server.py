@@ -16,16 +16,29 @@ def connect() -> sqlite3.Connection:
 
 
 @server.tool()
-def search_tickets(query: str, start: str | None = None, end: str | None = None,
-                   calendar_provider: str | None = None) -> dict:
-    """Find tickets containing every word in query (subject or body). Dates are YYYY-MM-DD, inclusive."""
-    terms = [t.lower() for t in query.split() if t.strip()]
+def contains_all(words: list[str]) -> tuple[str, list]:
+    clause = " AND ".join("(lower(t.subject) LIKE ? OR lower(t.body) LIKE ?)" for _ in words)
+    return f"({clause})", [p for w in words for p in (f"%{w}%", f"%{w}%")]
+
+
+def search_tickets(query: str = "", start: str | None = None, end: str | None = None,
+                   calendar_provider: str | None = None, any_of: list[str] | None = None) -> dict:
+    """Find tickets containing every word in query (subject or body). any_of: several phrasings; a ticket matches if it
+    contains every word of at least one. Counts are distinct across all phrasings, so never add counts from separate
+    searches. Dates are YYYY-MM-DD, inclusive."""
     sql = """SELECT t.ticket_id, t.created_at, t.workspace_id, w.calendar_provider, t.subject, t.body, t.support_tag
              FROM tickets t JOIN workspaces w USING (workspace_id) WHERE 1 = 1"""
     params: list = []
-    for term in terms:
-        sql += " AND (lower(t.subject) LIKE ? OR lower(t.body) LIKE ?)"
-        params += [f"%{term}%", f"%{term}%"]
+    terms = [t.lower() for t in query.split() if t.strip()]
+    if terms:
+        clause, values = contains_all(terms)
+        sql += f" AND {clause}"
+        params += values
+    phrases = [[w.lower() for w in p.split()] for p in (any_of or []) if p.strip()]
+    if phrases:
+        parts = [contains_all(words) for words in phrases]
+        sql += " AND (" + " OR ".join(c for c, _ in parts) + ")"
+        params += [v for _, values in parts for v in values]
     if start:
         sql += " AND date(t.created_at) >= ?"
         params.append(start)

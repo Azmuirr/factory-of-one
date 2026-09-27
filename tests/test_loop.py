@@ -62,3 +62,22 @@ def test_code_signs_what_code_wrote(loop_run):
         if e["type"] == "review":
             assert e["author"]["kind"] == "code"  # fixture mode runs Quality's code checks, not the agent
     assert not [e for e in entries if e["author"]["name"] == "chief"]  # Chief is not in the loop
+
+
+def test_a_scripted_run_never_waits_at_the_keyboard(monkeypatch):
+    def no_keyboard(prompt=""):
+        raise AssertionError("a scripted run asked the keyboard")
+    monkeypatch.setattr("builtins.input", no_keyboard)
+    answers = Gates({"decide": {"approve": "yes"}}).ask("confirm", "Apply anyway?", [("apply", "Apply? (yes/no)", "no")])
+    assert answers == {"apply": "no"}  # an unscripted gate takes its safe default
+
+
+def test_the_world_before_the_action_is_kept_so_earlier_artifacts_stay_checkable(loop_run):
+    import sqlite3
+    out, _ = loop_run
+    def data_through(path):
+        conn = sqlite3.connect(path)
+        value = conn.execute("SELECT value FROM meta WHERE key = 'data_through'").fetchone()[0]
+        conn.close()
+        return value
+    assert data_through(out / "world-before" / "world.db") < data_through(out / "world" / "world.db")
