@@ -13,6 +13,9 @@ servers:
   ledger:    {command: "{python}", args: [-m, factory.servers.ledger_server]}
   demos:     {command: "{python}", args: [-m, factory.servers.demos_server]}
   review:    {command: "{python}", args: [-m, factory.servers.review_server]}
+  # code: the factory's server over a local clone of your repo (set FACTORY_APP). Its scope rules are written for the sandbox app today.
+  code:      {command: "{python}", args: [-m, factory.servers.code_server], env: {FACTORY_APP: "<path to a local clone of your repo>"}}
+  design:    {command: "{python}", args: [-m, factory.servers.design_server], env: {FACTORY_DESIGN_SYSTEM: "<folder with tokens.json, your stylesheet, components.md>"}}
   support:   {command: "<command that starts your help desk's MCP server>", args: [], env: {API_TOKEN: "${SUPPORT_API_TOKEN}"}}
   releases:  {command: "<command that starts your code host's or flag tool's MCP server>", args: []}
   mail:      {command: "<your mail MCP server>", args: []}
@@ -25,6 +28,8 @@ server_env:
   FACTORY_LEDGER: "{ledger}"
   FACTORY_AGENT: "{agent}"
   FACTORY_DEMOS: "{demos}"
+  FACTORY_CHANGES: "{changes}"
+  FACTORY_DESIGNS: "{designs}"
   FACTORY_CATALOGS: "{catalogs}"
   FACTORY_GOALS: "{goals}"
 
@@ -43,6 +48,13 @@ capabilities:
   flags.state: mcp__releases__<read flag state tool>
   demo.publish: mcp__demos__publish_demo
   demo.check: mcp__demos__check_demo
+  code.list: mcp__code__list_files
+  code.read: mcp__code__read_file
+  code.search: mcp__code__search_code
+  code.propose: mcp__code__propose_change
+  code.test: mcp__code__run_tests
+  design.system: mcp__design__get_design_system
+  design.render: mcp__design__render_design
   review.check: mcp__review__check_entry
   review.submit: mcp__review__submit_review
   mail.list: mcp__mail__<list or search inbox tool>

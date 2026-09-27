@@ -57,3 +57,4 @@ The rules land in `lessons/chief.yaml` for your install and load on every run.
 | Warehouse adapter for Postgres, BigQuery, or Snowflake | Planned. Today `metrics` and `warehouse` read a SQLite world |
 | Live loop scheduling (daily runs, waiting for review dates) | Planned. Today the loop advances a simulated world |
 | A tested setup for specific vendor MCP servers | Planned. Each vendor gets verified when wired in |
+| `code` scope rules for your repo | Planned. Today the flag file and the folders a change may touch are the sandbox app's. Point `FACTORY_APP` at a clone to read and test; scope rules come next |

@@ -6,7 +6,7 @@ import re
 import sqlite3
 from pathlib import Path
 
-from factory import demos, ledger, queries, sizing
+from factory import code, demos, design, ledger, queries, sizing
 from factory import numbers as nums
 from factory.metrics import World, catalog
 
@@ -157,7 +157,13 @@ def correctness(entry: dict, entries: list[dict], world_path: Path, root: Path) 
             details["quotes"] += [q for q in quotes if " ".join(q.split()) not in corpus]
             result["quotes"] = "pass"
 
-    if kind == "build":
+    if kind == "build" and payload.get("kind") == "mvp":
+        details["fields"] += mvp_problems(root / payload["location"], payload)
+
+    if kind == "build" and payload.get("kind") == "design":
+        details["fields"] += design_problems(root / payload["location"], payload)
+
+    if kind == "build" and payload.get("kind") not in ("mvp", "design"):
         path = root / payload["location"]
         if not path.is_file():
             details["fields"].append(f"{payload['location']} does not exist")
@@ -173,6 +179,29 @@ def correctness(entry: dict, entries: list[dict], world_path: Path, root: Path) 
         if details[c]:
             result[c] = "fail"
     return {**result, "details": {c: [str(d) for d in details[c]] for c in CHECKS if details[c]}}
+
+
+def mvp_problems(folder: Path, payload: dict) -> list[str]:
+    """A proposed code change: code reruns its tests and checks its scope. The entry must report what code finds."""
+    if not folder.is_dir():
+        return [f"{payload['location']} is not a proposed change"]
+    tests = code.run_tests(folder)
+    problems = [] if tests["passed"] else [f"the tests fail: {tests['summary']}"]
+    if payload.get("checks", {}).get("tests_passed") != tests["passed"]:
+        problems.append(f"the entry says tests_passed={payload.get('checks', {}).get('tests_passed')}; code found {tests['passed']}")
+    if payload.get("honesty_label") != "live":
+        problems.append("a code change is real code: its honesty label is live")
+    return problems + code.scope(code.APP, folder)
+
+
+def design_problems(page: Path, payload: dict) -> list[str]:
+    markup = page.parent / "markup.html"
+    if not markup.is_file():
+        return [f"{payload['location']} was not rendered by the design tool"]
+    problems = design.static_problems(markup.read_text(encoding="utf-8"))
+    if payload.get("honesty_label") != "mocked":
+        problems.append("a design is a mock: its honesty label is mocked")
+    return problems
 
 
 def failed(checks: dict) -> list[str]:

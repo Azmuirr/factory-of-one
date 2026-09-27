@@ -43,6 +43,27 @@ capabilities:
   demo.check:
     description: Run the demo checks on an existing demo
     access: read
+  code.list:
+    description: List the files in the product codebase
+    access: read
+  code.read:
+    description: Read one file from the product codebase
+    access: read
+  code.search:
+    description: Find lines in the product codebase that match a pattern
+    access: read
+  code.propose:
+    description: Propose a change on a copy of the codebase, as a pull request; runs the tests and reports the diff, new flags, and scope problems. Never merges
+    access: propose
+  code.test:
+    description: Run the tests on a proposed change
+    access: read
+  design.system:
+    description: The design system's tokens, components with examples, and class list
+    access: read
+  design.render:
+    description: Render a design built from the design system, save a screenshot, and run the checks (system classes only, no inline styles, one screen)
+    access: propose
   review.check:
     description: Run the code checks (numbers, quotes, fields, privacy) on a ledger entry
     access: read

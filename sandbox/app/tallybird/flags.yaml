@@ -1,0 +1,13 @@
+# Every flag: enabled (on or off), rules (who it applies to; none means everyone), and why it exists.
+# A new flag ships with enabled: false. A person turns it on in the flag console after review.
+
+recap_link_preview:
+  enabled: true
+  rules: []
+  description: Shared recap links show a preview card in Slack and Teams.
+
+teams_bot_beta:
+  enabled: false
+  rules:
+    - {plan: [business, enterprise]}
+  description: The notetaker joins Microsoft Teams calls through the new bot. Beta for Business and Enterprise.

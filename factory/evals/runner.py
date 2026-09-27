@@ -108,7 +108,8 @@ def apply_setup(trial: Trial) -> None:
 
 
 def slots(agent: AgentConfig, trial: Trial) -> dict:
-    return {"world": trial.world_path, "ledger": trial.ledger_path, "agent": agent.name, "demos": trial.dir / "demos"}
+    return {"world": trial.world_path, "ledger": trial.ledger_path, "agent": agent.name, "demos": trial.dir / "demos",
+            "changes": trial.dir / "changes", "designs": trial.dir / "designs"}
 
 
 def system_prompt(agent: AgentConfig, config: install.Config, text: str, capabilities: list[str]) -> str:

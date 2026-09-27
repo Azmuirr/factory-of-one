@@ -42,8 +42,8 @@ Each tool is an MCP (Model Context Protocol) server shaped like the real product
 | `docs` | Google Docs, Notion, Confluence | v1 |
 | `tracker` | Jira, Azure DevOps, Linear | v1 |
 | `directory` | Org chart and OKRs | v1 |
-| `github` | GitHub and CI | v1 |
-| `design` | Figma and a design system | v1 |
+| `code` | GitHub and CI: read the app, propose a change on a copy, run the tests. Never merges. The app is `sandbox/app` | v1 |
+| `design` | Figma and a design system: render designs built from `sandbox/design`, with a screenshot and checks | v1 |
 | `flags` | LaunchDarkly | v1 |
 
 ## Internal

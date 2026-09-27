@@ -46,7 +46,13 @@ def world_problems(type: str, payload: dict) -> list[str]:
                 problems.append(f"segment values {sorted(set(values) - set(dims[dim]['values']))} are not values of {dim}")
     if type == "build" and os.environ.get("FACTORY_DEMOS"):
         location = Path(os.environ["FACTORY_DEMOS"]).parent / payload.get("location", "")
-        if not location.is_file():
+        if payload.get("kind") == "mvp":
+            if not location.is_dir():
+                problems.append(f"build location {payload.get('location')} is not a proposed change")
+        elif payload.get("kind") == "design":
+            if not location.is_file():
+                problems.append(f"build location {payload.get('location')} does not exist")
+        elif not location.is_file():
             problems.append(f"build location {payload.get('location')} does not exist")
         elif f'data-honesty="{payload.get("honesty_label")}"' not in location.read_text(encoding="utf-8"):
             problems.append(f"honesty_label {payload.get('honesty_label')} does not match the page's data-honesty")

@@ -190,11 +190,16 @@ class Loop:
             if a["apply"].lower() not in ("y", "yes"):
                 self.log("build", "proposal rejected by PM")
                 return False
-        build = self.latest("build")
-        build_review = self.quality_review(build["id"], "build") if build else None
-        verdict = build_review["verdict"] if build_review else None
-        if verdict != "SHIP":
-            lines = [f"Quality did not ship the build ({verdict}).", *self.review_lines(build["id"] if build else "")]
+        bet = self.latest("bet")
+        builds = [e for e in ledger.read(self.ledger) if e["type"] == "build" and e["ts"] >= bet["ts"]]
+        verdicts = {}
+        for build in builds:
+            build_review = self.quality_review(build["id"], "build")
+            verdicts[build["id"]] = build_review["verdict"] if build_review else None
+        not_shipped = [b for b in builds if verdicts[b["id"]] != "SHIP"]
+        if not builds or not_shipped:
+            lines = ["Quality did not ship every build." if builds else "Builder built nothing.",
+                     *[line for b in not_shipped for line in (f"{b['payload']['kind']} {b['id']}:", *self.review_lines(b["id"]))]]
             a = self.gates.ask("confirm", "\n".join(lines), [("apply", "Apply the action anyway? (yes/no)", "no")])
             if a["apply"].lower() not in ("y", "yes"):
                 self.log("build", "stopped after Quality's review")

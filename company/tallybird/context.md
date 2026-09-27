@@ -23,6 +23,13 @@ Revenue follows activation: `trial_to_paid_rate`, then `new_mrr`.
 - Baseline: 2026-01-05 to 2026-02-08
 - Recent: 2026-02-09 to the latest data
 
+## Codebase and design
+
+- The onboarding flow is in `tallybird/onboarding.py`; each step renders through `tallybird/screens.py`.
+- Feature flags live in `tallybird/flags.yaml`. A flag's rules match keys on the user, such as `calendar_provider` or `plan`. New flags ship with `enabled: false`; a person turns them on after review.
+- Tests live in `tests/` and run with pytest.
+- The design system is Tallybird's own: tokens, one stylesheet, and components. Onboarding screens use `tb-card`, `tb-steps`, and one primary button per card.
+
 ## Glossary
 
 - Workspace: one customer account.

@@ -15,11 +15,15 @@ servers:
   demos:     {command: "{python}", args: [-m, factory.servers.demos_server]}
   review:    {command: "{python}", args: [-m, factory.servers.review_server]}
   workplace: {command: "{python}", args: [-m, factory.servers.workplace_server]}
+  code:      {command: "{python}", args: [-m, factory.servers.code_server]}
+  design:    {command: "{python}", args: [-m, factory.servers.design_server]}
 server_env:
   FACTORY_WORLD: "{world}"
   FACTORY_LEDGER: "{ledger}"
   FACTORY_AGENT: "{agent}"
   FACTORY_DEMOS: "{demos}"
+  FACTORY_CHANGES: "{changes}"
+  FACTORY_DESIGNS: "{designs}"
   FACTORY_CATALOGS: "{catalogs}"
   FACTORY_GOALS: "{goals}"
   PYTHONIOENCODING: utf-8
@@ -38,6 +42,13 @@ capabilities:
   flags.state: mcp__releases__flag_state
   demo.publish: mcp__demos__publish_demo
   demo.check: mcp__demos__check_demo
+  code.list: mcp__code__list_files
+  code.read: mcp__code__read_file
+  code.search: mcp__code__search_code
+  code.propose: mcp__code__propose_change
+  code.test: mcp__code__run_tests
+  design.system: mcp__design__get_design_system
+  design.render: mcp__design__render_design
   review.check: mcp__review__check_entry
   review.submit: mcp__review__submit_review
   mail.list: mcp__workplace__mail_list

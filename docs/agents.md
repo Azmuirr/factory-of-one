@@ -82,13 +82,13 @@ Scored on: size within range of the answer key, cheapest valid test chosen, kill
 
 | Output | Tools |
 |---|---|
-| MVP in code, behind a flag, with tests | `github`, test runner, `flags` |
-| Design using the Tallybird design system | `design`, screenshots |
+| MVP in code, behind a flag, with tests | `code.*`: reads the app in `sandbox/app`, proposes a change on a copy, runs the tests |
+| Design using the Tallybird design system | `design.*`: the system in `sandbox/design`, a rendered screenshot, code checks |
 | Clickable prototype with an honesty label (live, mocked, hardcoded) | Playwright clicks every control |
 | Video walkthrough, on request | Playwright recording, captions |
 
-Code owns: the action spec matches the allowed action list, 0 dead clicks, the honesty label, tests pass. Model owns: designing the change and the demo. Gate: Call.
-Scored on: the build matches the approved decision, gates pass, time to a shareable link.
+Code owns: the action spec matches the approved decision, the tests (rerun by code, never taken on Builder's word), the change's scope (new flag ships off, at least one new test, no test removed, under 150 changed lines), design system classes only, 0 dead clicks, the honesty label. Model owns: the change, the design, and the demo. Gate: Call.
+Scored on: the action matches the decision, hidden acceptance tests on the change (Builder never sees them), the design and demo checks, and every number on the demo traced to the ledger.
 
 ## 5. Quality: reviewer
 

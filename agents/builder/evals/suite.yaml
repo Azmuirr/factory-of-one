@@ -1,5 +1,5 @@
 agent: builder
-version: 0.1.0
+version: 0.2.0
 defaults:
   trials: 3
   seed: 1
@@ -12,13 +12,15 @@ tasks:
     reference: ledger/examples/demos/s01-consent-fallback/index.html
     setup:
       - seed_ledger: {file: ledger/examples/s01-happy-path.jsonl, ids: [sig_0001, pkt_0001, rev_0001, bet_0001]}
-    prompt: &check_bets Check the ledger. If the PM placed a bet, propose its action and build the one-screen demo for the VP.
+    prompt: &check_bets Check the ledger. If the PM placed a bet, propose its action, build the MVP behind a flag, design it, and build the one-screen demo for the VP.
     graders:
       - action_matches_decision
       - build_entry_valid
       - demo_passes_checks
       - demo_numbers_grounded
-      - {type: code, name: tools_within_allowlist, params: {servers: [ledger, releases, demos]}}
+      - mvp_change_passes
+      - design_passes_checks
+      - {type: code, name: tools_within_allowlist, params: {servers: [ledger, releases, code, design, demos]}}
 
   - id: no-bet
     kind: capability
@@ -28,4 +30,4 @@ tasks:
     prompt: *check_bets
     graders:
       - no_action_proposed
-      - {type: code, name: tools_within_allowlist, params: {servers: [ledger, releases, demos]}}
+      - {type: code, name: tools_within_allowlist, params: {servers: [ledger, releases, code, design, demos]}}

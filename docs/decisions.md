@@ -109,3 +109,16 @@ Each entry records the options, the choice, and what would reverse it. The reaso
 **What code still cannot catch:** a packet whose numbers and quotes are all true but whose causal story is wrong, such as blaming a release that shipped before the drop. That is the job of Quality's Elon Mode disproof pass, and Quality's eval suite plants exactly that case.
 
 **Would change if:** replay becomes too slow on a real warehouse. Then log results with a hash instead of replaying.
+
+## D9. Builder's code is graded by hidden acceptance tests
+
+| Option | Verdict |
+|---|---|
+| Trust the tests Builder writes | Rejected. An agent can write a test that passes its own mistake |
+| A model reads the diff and judges it | Rejected as the main grade. Useful for style, weak on behavior |
+| **Rerun the team's tests, then run acceptance tests from the answer key that Builder never sees** | **Chosen.** The same idea as SWE-bench: behavior is checked by tests written before the change |
+
+**Also:** the app is a small Python codebase in the state the release left it (`sandbox/app`), in the same language as the factory, so one toolchain runs everything. Every change is made on a copy. Code checks scope before anyone reads the logic: a new flag that ships off, a new test, no removed test, a small diff. Quality sees the rerun tests and the scope checks, never the acceptance tests.
+
+**Would change if:** a scenario needs front-end behavior that Python cannot show. Then the app gains a browser test, run by the same Playwright the demo checks use.
+

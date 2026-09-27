@@ -1,0 +1,19 @@
+{
+  "name": "calendar-skip-microsoft",
+  "message": "Restore Skip for now on calendar connect for Microsoft calendar users, behind calendar_skip_microsoft (off)",
+  "edits": [
+    {
+      "path": "tallybird/flags.yaml",
+      "old": "  description: The notetaker joins Microsoft Teams calls through the new bot. Beta for Business and Enterprise.\n",
+      "new": "  description: The notetaker joins Microsoft Teams calls through the new bot. Beta for Business and Enterprise.\n\ncalendar_skip_microsoft:\n  enabled: false\n  rules:\n    - {calendar_provider: [microsoft]}\n  description: Rolls back rel_0412 for Microsoft calendar users. Restores Skip for now on calendar connect, since many need admin consent first.\n"
+    },
+    {
+      "path": "tallybird/onboarding.py",
+      "old": "             \"Tallybird joins the meetings on your calendar and writes the notes for you.\"),",
+      "new": "             \"Tallybird joins the meetings on your calendar and writes the notes for you.\",\n             skippable=flags.is_on(\"calendar_skip_microsoft\", user)),"
+    }
+  ],
+  "new_files": {
+    "tests/test_calendar_skip.py": "from tallybird.flags import Flags\nfrom tallybird.onboarding import steps\n\nMICROSOFT = {\"calendar_provider\": \"microsoft\", \"plan\": \"pro\"}\nGOOGLE = {\"calendar_provider\": \"google\", \"plan\": \"pro\"}\n\n\ndef test_microsoft_users_can_skip_calendar_when_the_flag_is_on():\n    flags = Flags.load(overrides={\"calendar_skip_microsoft\": True})\n    assert steps(MICROSOFT, flags)[0].skippable\n    assert not steps(GOOGLE, flags)[0].skippable\n\n\ndef test_nothing_changes_while_the_flag_is_off():\n    assert not steps(MICROSOFT, Flags.load())[0].skippable\n"
+  }
+}

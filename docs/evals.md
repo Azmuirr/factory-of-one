@@ -66,6 +66,7 @@ Real headless runs on the subscription, graded with the same code graders. Costs
 | 2026-09-26 | Chief v0.4, morning, s01 | 36/36 | All of the above fixed. 59 turns, 6 minutes, about $0.83 |
 | 2026-09-26 | Loop, s01, live-1 | Stopped | Relative run folder broke every path; then Quality returned FIX on a correct packet because the numbers check read "Microsoft 365" as data |
 | 2026-09-26 | Loop, s01, live-2 | Full loop | Signal 12/13 (joined a release title and its notes into one quote; Quality caught it and returned FIX). Builder 8/8. Quality 4/4 on the planted-quote task and SHIP on the build. Microsoft activation 30.5% to 38.2%, prediction hit, Brier 0.04, 7.2 PM minutes, about $0.82 |
+| 2026-09-26 | Builder v0.2, build-s01 | 100% after a grader fix | A 5-line change behind `calendar_skip_fallback_microsoft` (off), 3 new tests, all hidden acceptance tests passed. A design of the calendar step with an admin-approval banner and Skip for now, system classes only. About $0.22 |
 
 ## Grader changes
 
@@ -81,3 +82,4 @@ Graders have bugs too. Each fix is logged, and saved transcripts are regraded wi
 | 2026-09-26 | Numbers check (`factory/numbers.py`) | Read "Microsoft 365" as an untraced data number, so Quality had to return FIX on a correct packet | The first live loop | Known product names with numbers are skipped. "Microsoft 30 workspaces" is still checked |
 | 2026-09-26 | `brief_open_loops`, `brief_meeting_prep` | Failed a brief that tracked the PM's promise through its commitment (`cmt:cmt_0004`) instead of the mail it was made in | Chief's first live brief | Commitment refs resolve to their source before grading and rendering, so the brief also links to the mail |
 | 2026-09-26 | New: `no_unsourced_cause` | Chief drafted "the dip is mostly immature cohorts" to the VP, a planted trap, and no grader noticed | Reading Chief's first live brief | A sentence that blames a trap cause for the drop fails. Chief's skill now says it has no metrics and leaves the cause to the readout |
+| 2026-09-26 | `mvp_change_passes` scope check | Counted `CHANGE.md`, the change description the code tool writes, as a file outside the app's folders | Builder's first live trial (94%) | The description is metadata, excluded from diffs and scope. Regraded: 100% |
