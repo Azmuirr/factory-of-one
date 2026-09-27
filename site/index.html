@@ -276,8 +276,7 @@ function renderBuild(i) {
   document.querySelectorAll("[data-build]").forEach(el => el.setAttribute("aria-pressed", el.dataset.build == i));
   let body = "";
   if (b.kind === "mvp") {
-    body = `<p>${esc(b.message)}</p><p class="small muted">Tests pass: ${b.checks.tests_passed ? "yes" : "no"}, rerun by code. The flag ships off. Hidden acceptance tests that Builder never saw decide the grade.</p><div id="diffbox" class="muted small">Loading the diff...</div>`;
-    fetch(b.path).then(r => r.text()).then(t => $("#diffbox").outerHTML = diff(t)).catch(() => $("#diffbox").innerHTML = `<a href="${esc(b.path)}">Open the diff</a> (serve the folder over http to show it inline).`);
+    body = `<p>${esc(b.message)}</p><p class="small muted">Tests pass: ${b.checks.tests_passed ? "yes" : "no"}, rerun by code. The flag ships off. Hidden acceptance tests that Builder never saw decide the grade.</p>${diff(b.diff || "")}`;
   } else if (b.kind === "design") {
     body = `<p class="small muted">What a blocked Microsoft user sees with the flag on. Built only from Tallybird's design system; code rejects inline styles and unknown classes.</p><figure><img src="${esc(b.path)}" alt="Design of the calendar step with an admin-approval banner and a Skip for now button"></figure>`;
   } else {

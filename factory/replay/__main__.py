@@ -79,20 +79,21 @@ def build(loop_dir: Path, chief_dir: Path | None, out: Path) -> dict:
 
     builds = []
     for b in by_type("build"):
-        p, site_path = b["payload"], None
+        p, site_path, diff_text = b["payload"], None, None
         src = loop_dir / p["location"]
         if p["kind"] == "prototype":
             site_path = copy(src.parent, data / "demo") + "/" + src.name
         elif p["kind"] == "design":
             site_path = copy(src.parent / "screen.png", data / "design.png")
         elif p["kind"] == "mvp":
-            (data / "change.diff").write_text(code.diff(code.APP, src), encoding="utf-8")
+            diff_text = code.diff(code.APP, src)
+            (data / "change.diff").write_text(diff_text, encoding="utf-8")
             site_path = (data / "change.diff").as_posix()
         review = next((r["payload"] for r in by_type("review") if b["id"] in r["refs"]), None)
         builds.append({"id": b["id"], "kind": p["kind"], "honesty": p["honesty_label"], "checks": p.get("checks", {}),
                        "path": Path(site_path).relative_to(out).as_posix() if site_path else None,
                        "message": (src / "CHANGE.md").read_text(encoding="utf-8").strip() if (src / "CHANGE.md").is_file() else None,
-                       "review": review})
+                       "diff": diff_text, "review": review})
 
     releases = {r["id"]: r for r in scenario["releases"]}
     release = releases[truth["cause"]["release"]]
