@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Microsoft calendar activation drop — rollback ask</title>
+<style>
+  :root {
+    --ink: #17202A; --muted: #5A6572; --canvas: #F5F6F4; --surface: #FFFFFF;
+    --border: #DDE1DC; --brand: #0E6B5C; --brand-strong: #0A5246; --warn-soft: #FFF4DC; --warn-ink: #7A4E00;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; width: 1280px; height: 800px; overflow: hidden; }
+  body {
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    background: var(--canvas); color: var(--ink);
+    display: flex; align-items: center; justify-content: center;
+  }
+  main {
+    width: 1120px; background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+    padding: 40px 56px; display: flex; flex-direction: column; gap: 20px;
+  }
+  .eyebrow { font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin: 0; }
+  h1 { font-size: 28px; margin: 0; line-height: 1.25; }
+  .number-row { display: flex; align-items: baseline; gap: 16px; background: #E3F1EE; border-radius: 12px; padding: 20px 24px; }
+  .number { font-size: 40px; font-weight: 700; color: var(--brand-strong); }
+  .number-label { font-size: 15px; color: var(--muted); }
+  .ask { border: 1px solid var(--border); border-radius: 12px; padding: 20px 24px; }
+  .ask h2 { font-size: 16px; margin: 0 0 6px 0; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+  .ask p { font-size: 18px; margin: 0; }
+  button.evidence-toggle {
+    align-self: flex-start; background: var(--brand); color: white; border: none; border-radius: 8px;
+    padding: 10px 18px; font-size: 14px; cursor: pointer;
+  }
+  button.evidence-toggle:hover { background: var(--brand-strong); }
+  #evidence { display: none; border-left: 3px solid var(--brand); padding: 4px 20px; background: var(--canvas); border-radius: 0 8px 8px 0; }
+  #evidence.shown { display: block; }
+  #evidence ul { margin: 8px 0; padding-left: 20px; font-size: 14px; color: var(--ink); }
+  #evidence li { margin-bottom: 6px; }
+  blockquote {
+    font-style: italic; font-size: 14px; color: var(--warn-ink); background: var(--warn-soft);
+    border-radius: 8px; padding: 12px 16px; margin: 10px 0 4px 0;
+  }
+  cite { display: block; font-size: 12px; color: var(--muted); margin-top: 6px; font-style: normal; }
+</style>
+</head>
+<body>
+<main data-decision="pkt_0001" data-honesty="hardcoded">
+  <p class="eyebrow">Activation · calendar_provider = microsoft</p>
+  <h1>Since rel_0412 removed the skip button, Microsoft-calendar signups are getting stuck at "connect your calendar" and never make it to their first meeting.</h1>
+
+  <div class="number-row">
+    <span class="number">$24,783</span>
+    <span class="number-label">in new ARR at risk per week from this segment</span>
+  </div>
+
+  <div class="ask">
+    <h2>The ask</h2>
+    <p>Roll back rel_0412 for calendar_provider = microsoft: restore the skip option so Outlook users blocked on IT admin approval can proceed, while leaving the calendar-first flow unchanged for everyone else.</p>
+  </div>
+
+  <button class="evidence-toggle" data-action="toggle-evidence" onclick="document.getElementById('evidence').classList.toggle('shown'); this.textContent = document.getElementById('evidence').classList.contains('shown') ? 'Hide evidence' : 'Show evidence';">Show evidence</button>
+
+  <div id="evidence">
+    <ul>
+      <li>activation_rate_7d for calendar_provider=microsoft fell from 0.3937 to 0.3061 (−22.25% relative, p=0.0), while google and none did not move significantly.</li>
+      <li>first_meeting_rate_7d fell 14.84% for microsoft, even though calendar_connect_rate_1d rose 60.04% — the block happens right after calendar connect.</li>
+      <li>21 distinct Microsoft-calendar workspaces filed support tickets describing an "admin consent required" wall with no way to skip past it.</li>
+    </ul>
+    <blockquote>"Getting "admin consent required" when I connect Outlook. Our IT team takes a week to approve new apps. Any workaround so I can use the trial meanwhile?"</blockquote>
+    <cite>— support ticket t_c082072dd6</cite>
+  </div>
+</main>
+</body>
+</html>

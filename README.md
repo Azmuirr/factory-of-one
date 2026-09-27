@@ -26,6 +26,10 @@ python -m factory.chief --fixture agents/chief/evals/fixtures/reference-brief.js
 python -m factory.evals run signal --trials 3                                    # score an agent against the answer key
 ```
 
+## Watch a run
+
+Open [site/index.html](site/index.html): play the PM through a real live run, see Chief's Monday, and every run where an agent was wrong. Rebuild it from any run with `python -m factory.replay --loop runs/loop/<run> --chief runs/chief/<run>`.
+
 Agents run through Claude Code in headless mode on an existing subscription. See [docs/evals.md](docs/evals.md).
 
 ## Design

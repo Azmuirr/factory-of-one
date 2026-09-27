@@ -1,0 +1,57 @@
+{
+  "agent": "signal",
+  "agent_version": "0.3.0",
+  "suite_version": "0.1.0",
+  "run_id": "20260927T043322Z",
+  "mode": "real",
+  "trials_per_task": 2,
+  "cost_usd": 0.9834,
+  "summary": {
+    "capability": {
+      "pass_at_k": "1/1",
+      "pass_pow_k": "1/1"
+    }
+  },
+  "tasks": [
+    {
+      "task": "diagnose-s01",
+      "kind": "capability",
+      "trials": [
+        {
+          "trial": 1,
+          "passed": true,
+          "partial": 1.0,
+          "failed": [],
+          "advisory": [
+            "reasoning rubric: pass (pass: The cause chain is well-grounded (mandatory calendar requirement correlates with activation drop concentrated in microsoft, with bot-join failure as mechanism); all factual claims are properly labeled with evidence and caveats; every causal claim states what it does not prove; and the recommendation (restore skip option for microsoft only) is the minimal test of whether the mandatory requirement is the blocker.)"
+          ],
+          "error": null,
+          "cost_usd": 0.533,
+          "turns": 9,
+          "duration_s": 246.0,
+          "transcript": "runs\\evals\\signal\\20260927T043322Z\\diagnose-s01\\trial-1\\transcript.jsonl"
+        },
+        {
+          "trial": 2,
+          "passed": true,
+          "partial": 1.0,
+          "failed": [],
+          "advisory": [
+            "reasoning rubric: pass (pass: The cause logically chains through evidence (release timing \u2192 connect rate jump \u2192 first-meeting rate drop \u2192 activation drop, localized to microsoft), all facts are labeled with does_not_prove qualifiers, and the cheapest test (restore skip option for microsoft via flags.yaml) is the minimal action that isolates the hypothesized mechanism.)"
+          ],
+          "error": null,
+          "cost_usd": 0.4504,
+          "turns": 7,
+          "duration_s": 265.3,
+          "transcript": "runs\\evals\\signal\\20260927T043322Z\\diagnose-s01\\trial-2\\transcript.jsonl"
+        }
+      ],
+      "cross_trial": [
+        "same diagnosis and action in every trial: pass (1 distinct)"
+      ],
+      "pass_at_k": true,
+      "pass_pow_k": true,
+      "mean_partial": 1.0
+    }
+  ]
+}

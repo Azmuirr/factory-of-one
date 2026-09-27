@@ -1,0 +1,62 @@
+--- a/tallybird/flags.yaml
++++ b/tallybird/flags.yaml
+@@ -11,3 +11,9 @@
+   rules:
+     - {plan: [business, enterprise]}
+   description: The notetaker joins Microsoft Teams calls through the new bot. Beta for Business and Enterprise.
++
++calendar_connect_skip_microsoft:
++  enabled: false
++  rules:
++    - {calendar_provider: [microsoft]}
++  description: Restores the skip option on the calendar-connect step for calendar_provider=microsoft workspaces, so users blocked by Outlook admin-consent approval can proceed to record a meeting instead of being stuck. Rollback of rel_0412's skip removal, scoped to microsoft per pkt_0001.
+--- a/tallybird/onboarding.py
++++ b/tallybird/onboarding.py
+@@ -21,9 +21,11 @@
+ 
+ def steps(user: dict, flags: Flags) -> list[Step]:
+     """The steps for this user, in order. `user` carries calendar_provider (google or microsoft) and plan."""
++    calendar_connect_skippable = flags.is_on("calendar_connect_skip_microsoft", user)
+     return [
+         Step("calendar_connect", "Connect your calendar",
+-             "Tallybird joins the meetings on your calendar and writes the notes for you."),
++             "Tallybird joins the meetings on your calendar and writes the notes for you.",
++             skippable=calendar_connect_skippable),
+         Step("welcome", "Welcome to Tallybird", "Here is what a recap looks like."),
+         Step("first_meeting", "Record your first meeting", "Start a meeting, or paste a meeting link."),
+     ]
+--- a/tests/test_calendar_connect_skip_microsoft.py
++++ b/tests/test_calendar_connect_skip_microsoft.py
+@@ -0,0 +1,32 @@
++from tallybird.flags import Flags
++from tallybird.onboarding import steps
++from tallybird.screens import render_step
++
++MICROSOFT_USER = {"calendar_provider": "microsoft", "plan": "pro"}
++GOOGLE_USER = {"calendar_provider": "google", "plan": "pro"}
++
++
++def test_flag_off_by_default_microsoft_still_cannot_skip():
++    flags = Flags.load()
++    first = steps(MICROSOFT_USER, flags)[0]
++    assert first.id == "calendar_connect" and not first.skippable
++
++
++def test_flag_on_lets_microsoft_users_skip_calendar_connect():
++    flags = Flags.load(overrides={"calendar_connect_skip_microsoft": True})
++    first = steps(MICROSOFT_USER, flags)[0]
++    assert first.skippable
++    assert 'data-action="skip"' in render_step(first)
++
++
++def test_flag_on_does_not_affect_google_users():
++    flags = Flags.load(overrides={"calendar_connect_skip_microsoft": True})
++    first = steps(GOOGLE_USER, flags)[0]
++    assert not first.skippable
++    assert 'data-action="skip"' not in render_step(first)
++
++
++def test_other_steps_unaffected_by_the_flag():
++    flags = Flags.load(overrides={"calendar_connect_skip_microsoft": True})
++    rest = steps(MICROSOFT_USER, flags)[1:]
++    assert [s.skippable for s in rest] == [False, False]

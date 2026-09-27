@@ -72,7 +72,8 @@ Real headless runs on the subscription, graded with the same code graders. Costs
 | 2026-09-26 | Loop, s01, live-4 | Full loop | All three builds SHIP. Quality returned FIX on the packet: a ruled-out claim used Microsoft's -22.25% without citing its query. Microsoft activation 30.5% to 38.2%, Brier 0.04, 7.3 PM minutes, about $0.97 |
 | 2026-09-26 | Signal v0.3.2, diagnose-s01 | 100%, then 87% on regrade | Its own graders passed a card labeled "Microsoft" that held overall numbers, and a ruled-out claim with an untraced 15.46. Quality's checks caught both |
 | 2026-09-26 | Signal v0.3.3, diagnose-s01 | 93% | Card fixed. Reported "12 distinct workspaces" by merging 12 separate searches itself. The search tool now takes `any_of`, so code counts across phrasings |
-| 2026-09-27 | Signal v0.3.4, diagnose-s01, 2 trials | Invalid run | My edit put a helper under `@server.tool()`, so `search_tickets` stopped being a tool. Signal reported 0 customer-voice workspaces rather than invent any. A new contract test checks every mapped tool is registered on its server |
+| 2026-09-27 | Signal v0.3.4, diagnose-s01, 2 trials | Invalid run | An edit put a helper under `@server.tool()`, so `search_tickets` stopped being a tool. Signal reported 0 customer-voice workspaces rather than invent any. A new contract test checks every mapped tool is registered on its server |
+| 2026-09-27 | Signal v0.3.4, diagnose-s01, 2 trials | 2/2, 100% | Both trials pass every grader, including Quality's code checks. First pass^k run |
 
 ## Grader changes
 

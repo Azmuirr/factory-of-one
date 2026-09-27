@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Factory of One: Replay</title>
+<meta name="description" content="Play the PM through a real run: agents diagnose, build, and prove; you make the calls.">
+<style>
+:root {
+  --paper: #F7F6F2; --card: #FFFFFF; --ink: #1B1D21; --muted: #5F6570; --rule: #E3E1DA; --soft: #EFEDE6;
+  --accent: #2B4EDB; --accent-soft: #E6EBFD; --ms: #C2410C; --ms-soft: #FDEBDD; --goog: #2F6F4E; --ghost: #9AA0A8;
+  --ok: #1F7A4D; --ok-soft: #E1F2E8; --warn: #9A5B00; --warn-soft: #FDF1DC; --bad: #B42318; --bad-soft: #FBE4E1;
+  --mono: ui-monospace, "SF Mono", Consolas, monospace;
+  --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #121316; --card: #1B1D22; --ink: #ECEDEF; --muted: #A1A6AF; --rule: #2C2F36; --soft: #22252B;
+    --accent: #8FA6FF; --accent-soft: #232B47; --ms: #FB923C; --ms-soft: #3A2616; --goog: #6BC49A; --ghost: #6B717A;
+    --ok: #6BC49A; --ok-soft: #173024; --warn: #F2B35B; --warn-soft: #362914; --bad: #F2877D; --bad-soft: #3A1C1A;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #121316; --card: #1B1D22; --ink: #ECEDEF; --muted: #A1A6AF; --rule: #2C2F36; --soft: #22252B;
+  --accent: #8FA6FF; --accent-soft: #232B47; --ms: #FB923C; --ms-soft: #3A2616; --goog: #6BC49A; --ghost: #6B717A;
+  --ok: #6BC49A; --ok-soft: #173024; --warn: #F2B35B; --warn-soft: #362914; --bad: #F2877D; --bad-soft: #3A1C1A;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.55 var(--sans); }
+a { color: var(--accent); }
+header.top { position: sticky; top: 0; z-index: 5; background: var(--paper); border-bottom: 1px solid var(--rule); }
+.bar { max-width: 1040px; margin: 0 auto; padding: 12px 16px; display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+.brand { font-weight: 700; letter-spacing: -0.01em; }
+.brand span { color: var(--muted); font-weight: 500; }
+nav.tabs { display: flex; gap: 4px; flex-wrap: wrap; margin-left: auto; }
+nav.tabs button { font: inherit; font-size: 14px; border: 1px solid transparent; background: none; color: var(--muted); padding: 6px 10px; border-radius: 8px; cursor: pointer; }
+nav.tabs button[aria-selected="true"] { color: var(--ink); background: var(--card); border-color: var(--rule); }
+main { max-width: 1040px; margin: 0 auto; padding: 24px 16px 96px; }
+.progress { display: flex; gap: 6px; margin-bottom: 20px; }
+.progress i { flex: 1; height: 4px; border-radius: 4px; background: var(--rule); }
+.progress i.done { background: var(--accent); }
+.eyebrow { font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin: 0 0 6px; }
+h1 { font-size: clamp(26px, 4vw, 38px); line-height: 1.15; letter-spacing: -0.02em; margin: 0 0 12px; }
+h2 { font-size: 20px; margin: 28px 0 10px; letter-spacing: -0.01em; }
+h3 { font-size: 16px; margin: 0 0 6px; }
+p { margin: 0 0 12px; }
+.lede { font-size: 18px; color: var(--muted); max-width: 720px; }
+.card { background: var(--card); border: 1px solid var(--rule); border-radius: 14px; padding: 18px 20px; margin: 0 0 14px; }
+.grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+.stat { font-size: 30px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.1; }
+.stat small { font-size: 14px; font-weight: 500; color: var(--muted); }
+.muted { color: var(--muted); }
+.small { font-size: 14px; }
+.mono { font-family: var(--mono); font-size: 13px; }
+.chip { display: inline-block; font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: var(--soft); color: var(--muted); vertical-align: middle; }
+.chip.ok { background: var(--ok-soft); color: var(--ok); } .chip.warn { background: var(--warn-soft); color: var(--warn); }
+.chip.bad { background: var(--bad-soft); color: var(--bad); } .chip.accent { background: var(--accent-soft); color: var(--accent); }
+.who { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; margin-bottom: 8px; }
+.claim { border-left: 3px solid var(--rule); padding: 2px 0 2px 12px; margin: 0 0 14px; }
+.claim.fact { border-color: var(--accent); } .claim.assumption { border-color: var(--warn); }
+.evidence { font-size: 14px; color: var(--muted); margin-top: 4px; }
+blockquote { margin: 6px 0; padding: 8px 12px; background: var(--soft); border-radius: 8px; font-size: 14px; }
+.callout { border-radius: 12px; padding: 14px 16px; margin: 0 0 14px; background: var(--warn-soft); color: var(--ink); }
+.callout.ok { background: var(--ok-soft); }
+.actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
+.btn { font: inherit; font-weight: 600; border-radius: 10px; padding: 10px 18px; border: 1px solid var(--rule); background: var(--card); color: var(--ink); cursor: pointer; }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+:root[data-theme="dark"] .btn.primary { color: #0E1220; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .btn.primary { color: #0E1220; } }
+td.date { white-space: nowrap; }
+.btn[aria-pressed="true"] { outline: 2px solid var(--accent); outline-offset: 1px; }
+.field { margin: 14px 0; }
+.field label { display: flex; justify-content: space-between; font-weight: 600; font-size: 14px; margin-bottom: 4px; gap: 12px; }
+input[type=range] { width: 100%; accent-color: var(--accent); }
+details { margin: 6px 0; } summary { cursor: pointer; font-weight: 600; font-size: 14px; }
+.diff { font-family: var(--mono); font-size: 12.5px; line-height: 1.5; background: var(--soft); border-radius: 10px; padding: 10px 0; overflow-x: auto; }
+.diff div { padding: 0 12px; white-space: pre; }
+.diff .add { background: var(--ok-soft); color: var(--ok); } .diff .del { background: var(--bad-soft); color: var(--bad); }
+.diff .hunk { color: var(--accent); } .diff .file { font-weight: 700; color: var(--ink); }
+.subtabs { display: flex; gap: 6px; flex-wrap: wrap; margin: 0 0 12px; }
+figure { margin: 0; }
+figure img, iframe { width: 100%; border: 1px solid var(--rule); border-radius: 10px; background: #fff; display: block; }
+.scaler { position: relative; width: 100%; aspect-ratio: 1280 / 800; overflow: hidden; border: 1px solid var(--rule); border-radius: 10px; }
+.scaler iframe { position: absolute; top: 0; left: 0; width: 1280px; height: 800px; border: 0; border-radius: 0; transform-origin: 0 0; }
+iframe.brief { height: 78vh; }
+svg.chart { width: 100%; height: auto; display: block; }
+svg.chart text { fill: var(--muted); font: 12px var(--sans); }
+.legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 13px; color: var(--muted); margin-top: 6px; }
+.legend b { display: inline-block; width: 18px; height: 3px; vertical-align: middle; margin-right: 6px; border-radius: 2px; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+th { font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+.tablewrap { overflow-x: auto; }
+.hidden { display: none !important; }
+@media (max-width: 640px) { .card { padding: 14px; } .stat { font-size: 24px; } nav.tabs { margin-left: 0; } }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="bar">
+    <div class="brand">Factory of One <span>replay</span></div>
+    <nav class="tabs" role="tablist">
+      <button role="tab" data-tab="play" aria-selected="true">Play the PM</button>
+      <button role="tab" data-tab="chief" aria-selected="false">Chief's Monday</button>
+      <button role="tab" data-tab="wrong" aria-selected="false">Where agents were wrong</button>
+      <button role="tab" data-tab="how" aria-selected="false">How it works</button>
+    </nav>
+  </div>
+</header>
+<main>
+  <section id="play"></section>
+  <section id="chief" class="hidden"></section>
+  <section id="wrong" class="hidden"></section>
+  <section id="how" class="hidden"></section>
+</main>
+<script src="data/run.js"></script>
+<script>
+const R = window.RUN;
+const $ = (s, el = document) => el.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]));
+const pct = (v, d = 1) => v == null ? "n/a" : (v * 100).toFixed(d) + "%";
+const usd = v => "$" + (v < 10 ? v.toFixed(2) : Math.round(v).toLocaleString("en-US"));
+const seg = s => Object.entries(s || {}).map(([k, v]) => `${k} = ${[].concat(v).join(", ")}`).join("; ") || "everyone";
+const verdictChip = v => `<span class="chip ${v === "SHIP" ? "ok" : v === "FIX" || v === "PROVE" ? "warn" : "bad"}">${esc(v)}</span>`;
+
+// ---- State: what the visitor decided -----------------------------------------------------
+const bet = R.bet.payload, verdict = R.verdict.payload, packet = R.packet.payload, card = R.card.payload;
+const W = R.weeks, actionWeek = W.indexOf(R.today);
+const S = { step: 0, approve: null, call: null, expected: bet.prediction.expected, confidence: bet.confidence };
+
+// ---- Chart ------------------------------------------------------------------------------------
+function chart({ series, upto = W.length, markers = [], height = 260 }) {
+  const w = 900, h = height, L = 44, Rr = 16, T = 14, B = 30, y0 = 0.25, y1 = 0.45;
+  const x = i => L + (i / (W.length - 1)) * (w - L - Rr);
+  const y = v => T + (1 - (v - y0) / (y1 - y0)) * (h - T - B);
+  const dayX = iso => { const d = (new Date(iso) - new Date(W[0])) / 864e5 / 7; return x(d); };
+  let g = "";
+  for (let v = 0.25; v <= 0.4501; v += 0.05) g += `<line x1="${L}" x2="${w - Rr}" y1="${y(v)}" y2="${y(v)}" stroke="var(--rule)"/><text x="${L - 8}" y="${y(v) + 4}" text-anchor="end">${Math.round(v * 100)}%</text>`;
+  W.forEach((d, i) => { if (i % 2 === 0) g += `<text x="${x(i)}" y="${h - 8}" text-anchor="middle">${d.slice(5).replace("-", "/")}</text>`; });
+  markers.forEach(m => { const X = dayX(m.date); g += `<line x1="${X}" x2="${X}" y1="${T}" y2="${h - B}" stroke="${m.color || "var(--muted)"}" stroke-dasharray="3 4"/><text x="${X + 6}" y="${T + 12}" style="fill:${m.color || "var(--muted)"}">${esc(m.label)}</text>`; });
+  series.forEach(s => {
+    const pts = s.values.map((v, i) => v == null || i >= (s.upto ?? upto) ? null : [x(i), y(v)]).filter(Boolean);
+    if (!pts.length) return;
+    g += `<polyline fill="none" stroke="${s.color}" stroke-width="${s.width || 2.5}" ${s.dash ? `stroke-dasharray="${s.dash}"` : ""} points="${pts.map(p => p.join(",")).join(" ")}"/>`;
+    pts.forEach(p => g += `<circle cx="${p[0]}" cy="${p[1]}" r="3" fill="${s.color}"/>`);
+  });
+  const legend = series.map(s => `<span><b style="background:${s.color}"></b>${esc(s.name)}</span>`).join("");
+  return `<svg class="chart" viewBox="0 0 ${w} ${h}" role="img" aria-label="Weekly 7-day activation">${g}</svg><div class="legend">${legend}</div>`;
+}
+const releaseMarker = { date: R.release.date, label: R.release.id + " ships" };
+const actionMarker = { date: R.today, label: "rollback", color: "var(--accent)" };
+const lastMature = R.series.with_action.all.findIndex((v, i) => i >= actionWeek - 1 && v == null);
+const visibleOnMonday = actionWeek - 1; // the newest mature weekly cohort on Monday
+
+// ---- Pieces ---------------------------------------------------------------------------------------
+function review(entryId) {
+  const r = R.reviews[entryId];
+  if (!r) return `<p class="muted small">No review.</p>`;
+  const checks = Object.entries(r.correctness).map(([k, v]) => `<span class="chip ${v === "pass" ? "ok" : v === "fail" ? "bad" : ""}">${esc(k)}: ${esc(v)}</span>`).join(" ");
+  const findings = r.findings.map(f => `<div class="claim assumption"><strong>${esc(f.severity)}</strong>: ${esc(f.claim)}
+     <div class="evidence">${esc(f.evidence)}</div><div class="evidence"><strong>Smallest fix:</strong> ${esc(f.smallest_action)}</div></div>`).join("");
+  return `<div class="who"><h3>Quality ${verdictChip(r.verdict)}</h3><span class="small muted">Code checks first, then an Elon Mode review</span></div>
+    <p>${checks}</p>${findings || `<p class="small muted">No findings.</p>`}`;
+}
+function claim(c) {
+  const quotes = (c.evidence || []).filter(e => e.quote).map(e => `<blockquote>"${esc(e.quote)}" <span class="mono">${esc(e.ref)}</span></blockquote>`).join("");
+  const values = (c.evidence || []).filter(e => !e.quote).map(e => `<span class="mono">${esc(e.ref)}</span> = ${esc(e.value)}`).join(" &middot; ");
+  const ev = values + quotes;
+  return `<div class="claim ${esc(c.class)}"><span class="chip">${esc(c.class)}</span> ${esc(c.text)}
+    <div class="evidence">${ev}</div>${c.does_not_prove ? `<div class="evidence"><em>Does not prove:</em> ${esc(c.does_not_prove)}</div>` : ""}</div>`;
+}
+function diff(text) {
+  return `<div class="diff">${text.split("\n").map(l => {
+    const cls = l.startsWith("+++") || l.startsWith("---") ? "file" : l.startsWith("@@") ? "hunk" : l.startsWith("+") ? "add" : l.startsWith("-") ? "del" : "";
+    return `<div class="${cls}">${esc(l) || " "}</div>`; }).join("")}</div>`;
+}
+function nav(backOk = true, nextLabel = "Next") {
+  return `<div class="actions">${backOk && S.step > 0 ? `<button class="btn" data-go="-1">Back</button>` : ""}<button class="btn primary" data-go="1">${nextLabel}</button></div>`;
+}
+
+// ---- Steps ------------------------------------------------------------------------------------------
+const steps = [
+  () => `<p class="eyebrow">A real run, replayed</p>
+    <h1>You're the PM. Four agents did the work. You make two calls.</h1>
+    <p class="lede">Tallybird is a simulated AI meeting notetaker with a problem planted in its data. On Monday ${R.today}, Signal found it, Quality checked it, Builder built the fix, and the world moved on two weeks. Every number here came from code, not from a model.</p>
+    <div class="grid">
+      <div class="card"><div class="stat">${R.summary.pm_minutes} <small>PM minutes</small></div><p class="small muted">Reading and deciding at two gates</p></div>
+      <div class="card"><div class="stat">${Object.values(R.agents).reduce((a, b) => a + b.runs, 0)} <small>agent runs</small></div><p class="small muted">${Object.entries(R.agents).map(([k, v]) => `${k} ${v.runs}`).join(", ")}</p></div>
+      <div class="card"><div class="stat">${usd(Object.values(R.agents).reduce((a, b) => a + b.cost_usd, 0))} <small>list price</small></div><p class="small muted">Run on a Claude subscription; nothing billed beyond it</p></div>
+    </div>${nav(false, "Start Monday")}`,
+
+  () => `<p class="eyebrow">Monday ${R.today}, 8:30</p><h1>Activation dipped. Your VP wants to know why.</h1>
+    ${R.messages.map(m => `<div class="card"><div class="who"><h3>${esc(m.from_role.replace("_", " "))}</h3><span class="small muted">${esc(m.subject)}</span></div><p>${esc(m.body)}</p></div>`).join("")}
+    <div class="card"><h3>7-day activation, weekly signup cohorts</h3><p class="small muted">What the dashboard shows this morning: cohorts younger than 7 days are not counted yet.</p>
+    ${chart({ series: [{ name: "All workspaces", values: R.series.with_action.all, color: "var(--ink)", upto: visibleOnMonday }] })}</div>
+    <p class="muted">${esc(R.company)}</p>${nav()}`,
+
+  () => `<p class="eyebrow">Signal, the analyst</p><h1>Activation fell for ${esc((v => v.charAt(0).toUpperCase() + v.slice(1))(seg(packet.diagnosis.segment).split(" = ")[1] || "one segment"))} calendar workspaces after ${esc(packet.diagnosis.release_id)}.</h1>
+    <p class="lede">Signal's headline: "${esc(card.headline)}"</p>
+    <div class="grid">
+      <div class="card"><div class="stat">${pct(card.before.value)} &rarr; ${pct(card.after.value)}</div><p class="small muted">Activation, ${card.before.period.start} to ${card.before.period.end} vs ${card.after.period.start} to ${card.after.period.end}. p = ${card.change.p_value}</p></div>
+      <div class="card"><div class="stat">${usd(packet.size.value)} <small>a week</small></div><p class="small muted">New ARR at risk. ${esc(packet.size.method)}</p></div>
+      <div class="card"><div class="stat">${packet.diagnosis.voice_workspaces} <small>workspaces</small></div><p class="small muted">Filed tickets describing the mechanism</p></div>
+    </div>
+    <div class="card"><h3>Split by calendar provider</h3>
+    ${chart({ series: [{ name: "Microsoft calendar", values: R.series.with_action.microsoft, color: "var(--ms)", upto: visibleOnMonday },
+                       { name: "Google calendar", values: R.series.with_action.google, color: "var(--goog)", upto: visibleOnMonday }], markers: [releaseMarker] })}</div>
+    <div class="card"><h3>Diagnosis</h3><p><strong>${esc(packet.diagnosis.metric)}</strong> fell for <strong>${esc(seg(packet.diagnosis.segment))}</strong> after <strong>${esc(packet.diagnosis.release_id)}</strong>. Mechanism: <strong>${esc(packet.diagnosis.mechanism_metric)}</strong>.</p>
+      ${packet.cause.map(claim).join("")}
+      <details><summary>Ruled out (${(packet.ruled_out || []).length})</summary>${(packet.ruled_out || []).map(claim).join("")}</details>
+      <details><summary>Unknowns and what would change the call</summary><ul>${(packet.unknowns || []).map(u => `<li>${esc(u)}</li>`).join("")}</ul><p>${esc(packet.would_change_if)}</p></details>
+    </div>
+    <div class="card"><h3>Recommendation</h3><p>${esc(packet.recommendation)}</p><p class="small muted">Cheapest test: ${esc(packet.cheapest_test)}</p></div>${nav()}`,
+
+  () => `<p class="eyebrow">Quality, the reviewer</p><h1>Before it reaches you, Quality checks the packet.</h1>
+    <p class="lede">Code recomputes the card, replays every cited query, and matches every quote to its source. Then Quality tries to disprove the story.</p>
+    <div class="card">${review(R.packet.id)}</div>
+    ${R.reviews[R.packet.id]?.verdict !== "SHIP" ? `<div class="callout">In this run, the flag was about one number in a supporting claim, not the diagnosis. The PM approved anyway. Would you?</div>` : ""}${nav()}`,
+
+  () => `<p class="eyebrow">Gate 1 of 2: decide</p><h1>Roll back ${esc(R.release.id)} for Microsoft calendar workspaces?</h1>
+    <div class="card"><p>The action Signal recommends: <span class="mono">${esc(packet.recommended_action.name)}</span> ${esc(R.release.id)} for ${esc(seg(packet.recommended_action.params.segment))}. Everyone else keeps onboarding v2.</p>
+      <div class="actions"><button class="btn" data-approve="yes" aria-pressed="${S.approve === "yes"}">Approve</button><button class="btn" data-approve="no" aria-pressed="${S.approve === "no"}">Decline</button></div></div>
+    <div class="card ${S.approve === "yes" ? "" : "hidden"}" id="predict"><h3>Your bet</h3><p class="small muted">Predict Microsoft activation for the first cohort after the rollback. You are scored when the data matures, with a tolerance of ${pct(bet.prediction.tolerance)}.</p>
+      <div class="field"><label>Predicted activation <span id="ev">${pct(S.expected)}</span></label><input type="range" id="expected" min="0.28" max="0.44" step="0.005" value="${S.expected}"></div>
+      <div class="field"><label>Your confidence it lands within ${pct(bet.prediction.tolerance)} <span id="cv">${Math.round(S.confidence * 100)}%</span></label><input type="range" id="confidence" min="0.5" max="0.99" step="0.01" value="${S.confidence}"></div>
+      <p class="small muted">The PM in this run predicted ${pct(bet.prediction.expected)} at ${Math.round(bet.confidence * 100)}% confidence. Baseline before the release: ${pct(R.series.with_action.microsoft.slice(0, 5).reduce((a, b) => a + b, 0) / 5)} across weeks 1 to 5.</p></div>
+    <div class="actions"><button class="btn" data-go="-1">Back</button><button class="btn primary" data-go="1" ${S.approve ? "" : "disabled"}>${S.approve === "no" ? "Skip to two weeks later" : "Send to Builder"}</button></div>`,
+
+  () => {
+    const action = R.actions.find(a => a.payload.status === "proposed");
+    const tabs = R.builds.map((b, i) => `<button class="btn" data-build="${i}" aria-pressed="${i === 0}">${{ mvp: "Code change", design: "Design", prototype: "Demo for the VP" }[b.kind] || b.kind} ${verdictChip(b.review?.verdict)}</button>`).join("");
+    return `<p class="eyebrow">Builder, the engineer and designer</p><h1>Three builds for three readers, one approved action.</h1>
+    <div class="card"><p>Proposed action, checked by code against what you approved: <span class="mono">${esc(action.payload.name)} ${esc(action.payload.params.release_id)} for ${esc(seg(action.payload.params.segment))}</span> <span class="chip ok">matches</span></p></div>
+    <div class="subtabs">${tabs}</div><div id="buildview"></div>${nav()}`;
+  },
+
+  () => {
+    const mine = S.approve === "yes" ? R.series.with_action.microsoft : R.series.no_action.microsoft;
+    const other = S.approve === "yes" ? R.series.no_action.microsoft : R.series.with_action.microsoft;
+    const outcome = mine[actionWeek];
+    return `<p class="eyebrow">Two weeks later</p><h1>${S.approve === "yes" ? `Microsoft activation: ${pct(verdict.before)} &rarr; ${pct(verdict.after)}` : `You declined. Microsoft activation stayed at ${pct(outcome)}.`}</h1>
+    <div class="card"><h3>Microsoft calendar workspaces, both worlds</h3><p class="small muted">The same simulated users and the same randomness. The only difference is the decision.</p>
+    ${chart({ series: [{ name: S.approve === "yes" ? "Your world: rolled back" : "Your world: no action", values: mine, color: "var(--ms)" },
+                       { name: S.approve === "yes" ? "Had you declined" : "Had you approved", values: other, color: "var(--ghost)", dash: "5 5", width: 2 },
+                       { name: "Google calendar", values: R.series.with_action.google, color: "var(--goog)", width: 1.5 }], markers: [releaseMarker, actionMarker] })}</div>
+    <div class="card"><h3>The verdict, computed by code</h3><p>${esc(verdict.method)}</p><p class="small muted">Does not prove: ${esc(verdict.does_not_prove)}</p></div>${nav(true, "See your score")}`;
+  },
+
+  () => {
+    const approved = S.approve === "yes";
+    const outcome = approved ? verdict.after : R.series.no_action.microsoft[actionWeek];
+    const hit = approved && Math.abs(outcome - S.expected) <= bet.prediction.tolerance;
+    const brier = approved ? Math.pow(S.confidence - (hit ? 1 : 0), 2) : null;
+    const lost = packet.size.value * 2;
+    const calls = [["ship", "Ship", "Keep the rollback and stop here"], ["iterate", "Iterate", "Keep the rollback; retest v2 behind a flag with a fallback"], ["kill", "Kill", "Undo the rollback"]];
+    if (approved && !S.call) return `<p class="eyebrow">Gate 2 of 2: the call</p><h1>The rollback worked. What now?</h1>
+      <div class="card">${calls.map(([k, l, d]) => `<p><button class="btn" data-call="${k}">${l}</button> <span class="muted small">${d}</span></p>`).join("")}</div>
+      <div class="actions"><button class="btn" data-go="-1">Back</button></div>`;
+    return `<p class="eyebrow">${approved ? "Gate 2 of 2: the call, and your score" : "Your score"}</p><h1>${approved ? (hit ? "Your prediction landed." : "The fix worked. Your prediction missed.") : "Declining cost two weeks."}</h1>
+    ${approved ? `<div class="callout ${S.call === R.call.payload.decision ? "ok" : ""}">You chose <strong>${esc(S.call)}</strong>. The run's PM chose <strong>${esc(R.call.payload.decision)}</strong>: ${esc(R.call.payload.rationale)}</div>` : ""}
+    <div class="grid">
+      ${approved ? `<div class="card"><div class="stat">${brier.toFixed(2)} <small>your Brier score</small></div><p class="small muted">0 is perfect calibration. You said ${pct(S.expected)} at ${Math.round(S.confidence * 100)}%; the outcome was ${pct(outcome)}.</p></div>` :
+        `<div class="card"><div class="stat">~${usd(lost)} <small>ARR at risk, 2 weeks</small></div><p class="small muted">Signal's weekly size, times the two weeks you waited.</p></div>`}
+      <div class="card"><div class="stat">${R.summary.brier.toFixed(2)} <small>the run's PM</small></div><p class="small muted">Predicted ${pct(bet.prediction.expected)} at ${Math.round(bet.confidence * 100)}%, hit: ${R.summary.prediction_hit ? "yes" : "no"}</p></div>
+    </div>
+    <h2>What was planted</h2>
+    <div class="card"><p><strong>Cause:</strong> ${esc(R.truth.cause.mechanism)}</p><p><strong>Release:</strong> ${esc(R.truth.cause.release)} &middot; <strong>Size:</strong> Microsoft activation ${pct(R.truth.cause.size.microsoft_activation_7d.before, 0)} &rarr; ${pct(R.truth.cause.size.microsoft_activation_7d.after, 0)}</p>
+      <details><summary>Traps in the data (${R.truth.traps.length})</summary><ul>${R.truth.traps.map(t => `<li>${esc(t)}</li>`).join("")}</ul></details>
+      <details><summary>What a correct analysis finds</summary><ul>${R.truth.findings.map(f => `<li><span class="mono">${esc(f.id)}</span> ${esc(f.finding)}</li>`).join("")}</ul></details></div>
+    <div class="actions"><button class="btn" data-go="-1">Back</button><button class="btn" data-restart>Play again</button><button class="btn primary" data-tab-go="wrong">Where the agents were wrong</button></div>`;
+  },
+];
+
+function renderBuild(i) {
+  const b = R.builds[i], box = $("#buildview");
+  document.querySelectorAll("[data-build]").forEach(el => el.setAttribute("aria-pressed", el.dataset.build == i));
+  let body = "";
+  if (b.kind === "mvp") {
+    body = `<p>${esc(b.message)}</p><p class="small muted">Tests pass: ${b.checks.tests_passed ? "yes" : "no"}, rerun by code. The flag ships off. Hidden acceptance tests that Builder never saw decide the grade.</p><div id="diffbox" class="muted small">Loading the diff...</div>`;
+    fetch(b.path).then(r => r.text()).then(t => $("#diffbox").outerHTML = diff(t)).catch(() => $("#diffbox").innerHTML = `<a href="${esc(b.path)}">Open the diff</a> (serve the folder over http to show it inline).`);
+  } else if (b.kind === "design") {
+    body = `<p class="small muted">What a blocked Microsoft user sees with the flag on. Built only from Tallybird's design system; code rejects inline styles and unknown classes.</p><figure><img src="${esc(b.path)}" alt="Design of the calendar step with an admin-approval banner and a Skip for now button"></figure>`;
+  } else {
+    body = `<p class="small muted">A one-screen page for the VP: one number, one ask. Label: ${esc(b.honesty)}. Code clicks every control; dead clicks: ${b.checks.dead_clicks ?? 0}.</p><div class="scaler"><iframe src="${esc(b.path)}" title="Builder's demo, shown at its real 1280 by 800 size, scaled to fit"></iframe></div>`;
+  }
+  box.innerHTML = `<div class="card">${body}</div><div class="card">${b.review ? review(R.builds[i].id) : ""}</div>`;
+  fitDemo();
+}
+function fitDemo() {
+  document.querySelectorAll(".scaler").forEach(el => { el.firstElementChild.style.transform = `scale(${el.clientWidth / 1280})`; });
+}
+window.addEventListener("resize", fitDemo);
+
+function renderPlay() {
+  const el = $("#play");
+  el.innerHTML = `<div class="progress">${steps.map((_, i) => `<i class="${i <= S.step ? "done" : ""}"></i>`).join("")}</div>` + steps[S.step]();
+  if (S.step === 5) renderBuild(0);
+  window.scrollTo({ top: 0 });
+}
+
+// ---- Other tabs ------------------------------------------------------------------------------------
+function renderChief() {
+  const c = R.chief;
+  $("#chief").innerHTML = c ? `<p class="eyebrow">Chief, the chief of staff</p><h1>The same Monday, from your inbox.</h1>
+    <p class="lede">Chief read mail, chat, calendar, and meeting transcripts, and wrote this brief. It sends nothing except one note to your own channel. It scored 36 of 36 checks on this planted Monday, including never repeating a trap as the cause.</p>
+    ${c.note ? `<div class="card"><h3>The note Chief posted to you</h3><p style="white-space:pre-line">${esc(c.note)}</p></div>` : ""}
+    <iframe class="brief" src="${esc(c.brief)}" title="Chief's morning brief"></iframe>` : `<p>No Chief run in this replay.</p>`;
+}
+function renderWrong() {
+  $("#wrong").innerHTML = `<p class="eyebrow">Every live run, including the bad ones</p><h1>Where the agents were wrong, and what changed.</h1>
+    <p class="lede">A failure found in a live run becomes a fix and, where it can recur, a new eval case. Graders had bugs too; those are logged in the repo.</p>
+    <div class="card tablewrap"><table><thead><tr><th>Date</th><th>Run</th><th>Result</th><th>What it found</th></tr></thead><tbody>
+    ${R.live_runs.map(r => `<tr><td class="small date">${esc(r.date)}</td><td>${esc(r.run)}</td><td>${esc(r.result)}</td><td class="small">${esc(r.found).replace(/`([^`]+)`/g, "<code>$1</code>")}</td></tr>`).join("")}
+    </tbody></table></div>`;
+}
+function renderHow() {
+  const rows = [["Signal", "Finds what changed and why, with numbers and customer voice", "Every number, by replaying the query it cites"],
+    ["Quality", "Reviews every artifact before you see it (Elon Mode)", "Numbers, quotes, fields, privacy; refuses SHIP when a check fails"],
+    ["Builder", "Code change behind a flag, a design, a demo", "Reruns tests, checks scope, hidden acceptance tests"],
+    ["Chief", "Your brief: triage, open loops, meeting prep, replies in your voice", "Sender weight, conflicts, free time, staleness"]];
+  $("#how").innerHTML = `<p class="eyebrow">How it works</p><h1>Agents do the work. Code owns the facts. You own the calls.</h1>
+    <div class="card tablewrap"><table><thead><tr><th>Agent</th><th>Does</th><th>Code checks</th></tr></thead><tbody>${rows.map(r => `<tr><td><strong>${r[0]}</strong></td><td>${r[1]}</td><td class="small">${r[2]}</td></tr>`).join("")}</tbody></table></div>
+    <div class="grid">
+      <div class="card"><h3>A simulated company</h3><p class="small">Tallybird's data comes from a seeded model with problems planted on purpose, so every answer can be graded. Change one decision and only the future changes.</p></div>
+      <div class="card"><h3>Your tools, not ours</h3><p class="small">Agents name capabilities, like "search tickets". Each install maps them to real tools in one file: the sandbox, or your company's Slack, Zendesk, and Gmail.</p></div>
+      <div class="card"><h3>Evals, not vibes</h3><p class="small">Every agent has tasks, graders, and answer keys. Live runs are regraded when a grader changes, and every failure is logged.</p></div>
+    </div>
+    <p><a href="https://github.com/Azmuirr/factory-of-one">Read the code and run it yourself</a></p>`;
+}
+
+// ---- Events -------------------------------------------------------------------------------------------
+document.addEventListener("click", e => {
+  const t = e.target.closest("button, [data-tab-go]");
+  if (!t) return;
+  if (t.dataset.tab || t.dataset.tabGo) {
+    const tab = t.dataset.tab || t.dataset.tabGo;
+    document.querySelectorAll("nav.tabs button").forEach(b => b.setAttribute("aria-selected", b.dataset.tab === tab));
+    ["play", "chief", "wrong", "how"].forEach(id => $("#" + id).classList.toggle("hidden", id !== tab));
+    window.scrollTo({ top: 0 });
+  } else if (t.dataset.go) {
+    let next = S.step + Number(t.dataset.go);
+    if (S.step === 4 && t.dataset.go === "1" && S.approve === "no") next = 6; // declined: nothing gets built
+    if (S.step === 6 && t.dataset.go === "-1" && S.approve === "no") next = 4;
+    S.step = Math.max(0, Math.min(steps.length - 1, next)); renderPlay();
+  } else if (t.dataset.call) {
+    S.call = t.dataset.call; renderPlay();
+  } else if (t.dataset.approve) {
+    S.approve = t.dataset.approve; renderPlay();
+  } else if (t.dataset.build) {
+    renderBuild(Number(t.dataset.build));
+  } else if ("restart" in t.dataset) {
+    Object.assign(S, { step: 0, approve: null, call: null, expected: bet.prediction.expected, confidence: bet.confidence }); renderPlay();
+  }
+});
+document.addEventListener("input", e => {
+  if (e.target.id === "expected") { S.expected = Number(e.target.value); $("#ev").textContent = pct(S.expected); }
+  if (e.target.id === "confidence") { S.confidence = Number(e.target.value); $("#cv").textContent = Math.round(S.confidence * 100) + "%"; }
+});
+renderPlay(); renderChief(); renderWrong(); renderHow();
+</script>
+</body>
+</html>
