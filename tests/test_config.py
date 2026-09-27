@@ -76,3 +76,21 @@ def test_prompts_carry_the_tool_table_and_company_context(signal_command):
     assert "mcp__support__search_tickets" in subagents["qual"]["tools"]
     assert "mcp__metrics__get_metric" not in subagents["qual"]["tools"]
     assert "mcp__metrics__get_metric" in subagents["quant"]["prompt"]
+
+
+def test_every_mapped_tool_is_a_real_tool_on_its_server():
+    """A helper placed under @server.tool() once replaced search_tickets. Check the registrations, not the functions."""
+    import asyncio
+    import importlib
+
+    sandbox = install.load(ROOT / "config" / "sandbox.yaml")
+    registered = {}
+    for name, spec in sandbox.servers.items():
+        module = importlib.import_module(spec["args"][spec["args"].index("-m") + 1])
+        registered[name] = {t.name for t in asyncio.run(module.server.list_tools())}
+    missing = []
+    for capability, tool in sandbox.capabilities.items():
+        _, server, tool_name = tool.split("__", 2)
+        if tool_name not in registered[server]:
+            missing.append(f"{capability} -> {tool}")
+    assert not missing, missing

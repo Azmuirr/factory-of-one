@@ -1,0 +1,62 @@
+{
+  "agent": "signal",
+  "agent_version": "0.3.0",
+  "suite_version": "0.1.0",
+  "run_id": "20260927T041711Z",
+  "mode": "real",
+  "trials_per_task": 2,
+  "cost_usd": 1.6001,
+  "summary": {
+    "capability": {
+      "pass_at_k": "0/1",
+      "pass_pow_k": "0/1"
+    }
+  },
+  "tasks": [
+    {
+      "task": "diagnose-s01",
+      "kind": "capability",
+      "trials": [
+        {
+          "trial": 1,
+          "passed": false,
+          "partial": 0.867,
+          "failed": [
+            "customer voice: 0 workspaces",
+            "decision_packet passes Quality's code checks: '0.4059' in \"For the microsoft segment, weekly activation was stable (0.3\" is not in its evidence; '15' in \"For the microsoft segment, weekly activation was stable (0.3\" is not in its evidence; '22' in \"For the microsoft segment, weekly activation was stable (0.3\" is not in its evidence; Permission to use mcp__support__contains_all has been denied because Claude Code is running in don't ask mode."
+          ],
+          "advisory": [
+            "reasoning rubric: pass (pass: The cause (rel_0412's forced Microsoft calendar connection blocking first meetings) follows from the evidence chain; facts, assumptions, and unknowns are correctly labeled; every claim declares what it does not prove; and the recommendation (microsoft-only flag-gate restoring skip) is the smallest action that directly tests the hypothesized mechanism.)"
+          ],
+          "error": null,
+          "cost_usd": 0.871,
+          "turns": 10,
+          "duration_s": 432.8,
+          "transcript": "runs\\evals\\signal\\20260927T041711Z\\diagnose-s01\\trial-1\\transcript.jsonl"
+        },
+        {
+          "trial": 2,
+          "passed": false,
+          "partial": 0.933,
+          "failed": [
+            "customer voice: 0 workspaces"
+          ],
+          "advisory": [
+            "reasoning rubric: fail (fail: The recommendation field presents two options ('roll back or flag-exempt') when the criterion requires the single smallest action that tests the cause\u2014here, the flag-gated exemption test described in cheapest_test is smallest, but the recommendation also offers a full rollback, which fixes without testing.)"
+          ],
+          "error": null,
+          "cost_usd": 0.7291,
+          "turns": 11,
+          "duration_s": 361.1,
+          "transcript": "runs\\evals\\signal\\20260927T041711Z\\diagnose-s01\\trial-2\\transcript.jsonl"
+        }
+      ],
+      "cross_trial": [
+        "same diagnosis and action in every trial: pass (1 distinct)"
+      ],
+      "pass_at_k": false,
+      "pass_pow_k": false,
+      "mean_partial": 0.9
+    }
+  ]
+}

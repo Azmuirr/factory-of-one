@@ -15,12 +15,12 @@ def connect() -> sqlite3.Connection:
     return sqlite3.connect(f"file:{Path(os.environ['FACTORY_WORLD']).as_posix()}?mode=ro", uri=True)
 
 
-@server.tool()
 def contains_all(words: list[str]) -> tuple[str, list]:
     clause = " AND ".join("(lower(t.subject) LIKE ? OR lower(t.body) LIKE ?)" for _ in words)
     return f"({clause})", [p for w in words for p in (f"%{w}%", f"%{w}%")]
 
 
+@server.tool()
 def search_tickets(query: str = "", start: str | None = None, end: str | None = None,
                    calendar_provider: str | None = None, any_of: list[str] | None = None) -> dict:
     """Find tickets containing every word in query (subject or body). any_of: several phrasings; a ticket matches if it
