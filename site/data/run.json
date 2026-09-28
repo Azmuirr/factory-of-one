@@ -131,26 +131,31 @@
      "end": "2026-03-01",
      "start": "2026-02-09"
     },
-    "query_id": "q_57d29a14f692",
-    "value": 0.3717
+    "query_id": "q_48b8a02dc5de",
+    "value": 0.3061
    },
    "before": {
     "period": {
      "end": "2026-02-08",
      "start": "2026-01-05"
     },
-    "query_id": "q_57d29a14f692",
-    "value": 0.4011
+    "query_id": "q_48b8a02dc5de",
+    "value": 0.3937
    },
    "change": {
-    "absolute": -0.0294,
-    "p_value": 5e-06,
-    "query_id": "q_57d29a14f692",
-    "relative": -0.0733
+    "absolute": -0.0876,
+    "p_value": 0,
+    "query_id": "q_48b8a02dc5de",
+    "relative": -0.2225
    },
    "confidence": "validated",
-   "headline": "activation_rate_7d fell materially (-7.33% relative, p=5e-6), concentrated in calendar_provider=microsoft workspaces (-22.25%, p=0.0), coinciding with rel_0412's mandatory calendar-connect-first onboarding change.",
-   "metric": "activation_rate_7d"
+   "headline": "7-day activation fell sharply for Microsoft-calendar workspaces after onboarding v2 forced calendar-connect-first; Google and no-calendar segments were flat",
+   "metric": "activation_rate_7d",
+   "segment": {
+    "calendar_provider": [
+     "microsoft"
+    ]
+   }
   },
   "refs": [],
   "ts": "2026-03-02T00:00:00Z",
@@ -166,41 +171,31 @@
    "cause": [
     {
      "class": "fact",
-     "does_not_prove": "That this release caused the activation drop by itself; timing alone is not causation.",
+     "does_not_prove": "That this release caused the drop by itself, only that its timing aligns with the onset.",
      "evidence": [
       {
        "quote": "New users connect their calendar before anything else, so the notetaker joins their next meeting automatically. The skip option is removed.",
        "ref": "rel_0412",
-       "source": "release"
+       "source": "releases"
       }
      ],
-     "text": "Release rel_0412, shipped 2026-02-10, changed onboarding so new users must connect their calendar before anything else, and removed the skip option."
+     "text": "Tallybird shipped rel_0412 ('Onboarding v2: connect calendar first') on 2026-02-10, forcing calendar connection before anything else and removing the skip option; this lands at the start of the decline window (recent period begins 2026-02-09)."
     },
     {
      "class": "fact",
-     "does_not_prove": "That calendar_provider=microsoft is causally distinct from other explanations; it only shows where the change concentrates.",
+     "does_not_prove": "That microsoft-calendar users are inherently less likely to activate; the comparison is before vs. after within the same segment, not microsoft vs. other providers.",
      "evidence": [
       {
        "ref": "q_48b8a02dc5de",
        "source": "metrics",
        "value": -0.2225
-      },
-      {
-       "ref": "q_48b8a02dc5de",
-       "source": "metrics",
-       "value": 0.838747
-      },
-      {
-       "ref": "q_48b8a02dc5de",
-       "source": "metrics",
-       "value": 0.281091
       }
      ],
-     "text": "activation_rate_7d for calendar_provider=microsoft fell from 0.3937 to 0.3061 (-22.25% relative, p_value 0.0) between baseline and recent periods, while google (p_value 0.838747) and none (p_value 0.281091) did not move significantly."
+     "text": "In the calendar_provider=microsoft segment, activation_rate_7d fell from 0.3937 to 0.3061 (-22.25% relative, p=0.0), while google (p=0.838747) and none (p=0.281091) segments were not significant."
     },
     {
      "class": "fact",
-     "does_not_prove": "That the first-meeting drop is caused specifically by the calendar-first flow rather than some other change on the meeting-recording path.",
+     "does_not_prove": "That the connect step itself is bug-free; it only shows the break happens after connect and before the first recorded meeting.",
      "evidence": [
       {
        "ref": "q_d8a47fa2b61c",
@@ -213,27 +208,29 @@
        "value": -0.1484
       }
      ],
-     "text": "For calendar_provider=microsoft, calendar_connect_rate_1d rose from 0.3321 to 0.5315 (+60.04%, p=0.0), moving opposite to activation, while first_meeting_rate_7d fell from 0.5248 to 0.4469 (-14.84%, p=0.0), the same direction as the activation decline, making it the earliest funnel step consistent with the drop."
+     "text": "Within calendar_provider=microsoft, calendar_connect_rate_1d rose +60.04% (0.3321 to 0.5315, p=0.0) after rel_0412, while first_meeting_rate_7d fell -14.84% (0.5248 to 0.4469, p=0.0) -- the earliest funnel step moving in the same direction as the activation decline."
     },
     {
      "class": "fact",
-     "does_not_prove": "The full scope of affected workspaces - 21 tickets is a lower bound; most blocked workspaces likely never file a ticket.",
+     "does_not_prove": "That every affected workspace filed a ticket; 7 accounts is likely a fraction of the segment's activation loss, and ticket text alone doesn't confirm whether the failure is an OAuth scope issue, a tenant admin consent block, or a Tallybird-side bug.",
      "evidence": [
       {
-       "quote": "Getting \"admin consent required\" when I connect Outlook. Our IT team takes a week to approve new apps. Any workaround so I can use the trial meanwhile?",
-       "ref": "t_c082072dd6",
-       "source": "support_ticket"
+       "quote": "Is there a way to record a meeting without connecting my calendar? The Outlook step keeps failing with a permissions message.",
+       "ref": "q_33b9b06c27c6",
+       "source": "support",
+       "value": 7
       },
       {
-       "quote": "Connect Outlook fails with an admin approval message. A colleague signed up last month and says she didn't have to do this step. Did something change?",
-       "ref": "t_337d1e80d1",
-       "source": "support_ticket"
+       "quote": "The Tallybird bot didn't join my Teams call this morning. It was on my calendar. Can you check what happened?",
+       "ref": "q_33b9b06c27c6",
+       "source": "support",
+       "value": 7
       }
      ],
-     "text": "21 distinct Microsoft-calendar workspaces filed tickets between 2026-02-12 and 2026-03-01 describing being blocked in onboarding by an Outlook 'admin consent required' error with no way to skip past it."
+     "text": "Support tickets from calendar_provider=microsoft workspaces after rel_0412 describe being stuck at the forced calendar-connect step with a permissions failure, and the notetaker bot not joining scheduled Teams meetings."
     }
    ],
-   "cheapest_test": "Gate rel_0412's removal of the skip option behind a flag scoped to calendar_provider=microsoft (restore the skip option or add a fallback path for Outlook admin-consent-blocked users), then compare first_meeting_rate_7d and activation_rate_7d for that segment over the next 1-2 weeks against the pre-rel_0412 baseline.",
+   "cheapest_test": "Flip a feature flag to restore the skip option / non-forced calendar connect for calendar_provider=microsoft only (leave rel_0412 on for google), and watch first_meeting_rate_7d and activation_rate_7d for that segment over the next week.",
    "diagnosis": {
     "mechanism_metric": "first_meeting_rate_7d",
     "metric": "activation_rate_7d",
@@ -243,10 +240,11 @@
       "microsoft"
      ]
     },
-    "voice_workspaces": 21
+    "voice_ref": "q_33b9b06c27c6",
+    "voice_workspaces": 7
    },
-   "question": "Did 7-day activation change in the last few weeks, and if so why?",
-   "recommendation": "Roll back or flag-gate rel_0412's removal of the skip option for calendar_provider=microsoft workspaces so users hitting the Outlook 'admin consent required' wall can proceed to record a meeting without waiting on IT admin approval, while leaving the calendar-first flow in place for google and none, where it shows no significant harm.",
+   "question": "Did 7-day activation change in the last few weeks? If so, why?",
+   "recommendation": "Roll back or flag off rel_0412's forced calendar-connect-first flow for Microsoft-calendar workspaces specifically; it correlates with a 22% activation drop driven by a failure between calendar connect and first meeting, and support tickets confirm users are stuck on an Outlook permissions error with no way to skip.",
    "recommended_action": {
     "name": "rollback",
     "params": {
@@ -261,30 +259,20 @@
    "ruled_out": [
     {
      "class": "fact",
-     "does_not_prove": "That channel or company_size play no role at all - s51_plus shows a larger-than-average drop - but neither dimension shows the concentrated, near-zero-p_value break that calendar_provider=microsoft does.",
+     "does_not_prove": "rel_0318 shipped two weeks before the decline window started and is not calendar-provider specific; the google segment (which includes Zoom-using workspaces) shows no significant change (p=0.838747), so a platform-wide join-speed change doesn't explain a Microsoft-only effect. meeting_platform is rejected as a dimension at the wrong grain for this metric, so this is ruled out via the calendar_provider grain rather than chased further.",
      "evidence": [
       {
-       "ref": "q_9732131dfcbb",
-       "source": "metrics",
-       "value": -0.0719
+       "quote": "The notetaker joins Zoom calls about 20 seconds sooner.",
+       "ref": "rel_0318",
+       "source": "releases"
       },
       {
-       "ref": "q_9732131dfcbb",
+       "ref": "q_48b8a02dc5de",
        "source": "metrics",
-       "value": -0.0748
-      },
-      {
-       "ref": "q_8cdc348a1919",
-       "source": "metrics",
-       "value": -0.0664
-      },
-      {
-       "ref": "q_8cdc348a1919",
-       "source": "metrics",
-       "value": -0.1546
+       "value": 0.838747
       }
      ],
-     "text": "Channel and company_size splits show broad, roughly uniform declines across nearly all their values (channel: direct -7.19%, organic -7.48%, paid_search -8.17%, recap_link -7.71%; company_size: s11_50 -6.64%, s2_10 -7.28%, s51_plus -15.46%, solo -5.96%), not a single standout segment the way calendar_provider=microsoft is a standout (-22.25%, p=0.0)."
+     "text": "The earlier Zoom-bot faster-join release (rel_0318, shipped 2026-01-27) caused the activation drop."
     }
    ],
    "size": {
@@ -295,12 +283,12 @@
     "value": 24783
    },
    "unknowns": [
-    "Total number of Microsoft-calendar workspaces silently blocked without filing a ticket - the 21 tickets are a lower bound on scope.",
-    "Whether workspaces that eventually get IT admin approval go on to activate normally, or whether the delay itself causes lasting drop-off."
+    "Whether the Outlook 'permissions message' failure is an OAuth scope issue, a tenant admin consent block, or a Tallybird-side bug in the connect flow.",
+    "How many affected Microsoft workspaces abandoned onboarding silently without filing a support ticket."
    ],
    "would_change_if": [
-    "If first_meeting_rate_7d for microsoft recovers to baseline without any onboarding change (e.g., as IT admins approve the app over following weeks), that would suggest a temporary lag rather than a structural block, lowering urgency for rollback.",
-    "If reverting the skip removal for microsoft-only does not raise first_meeting_rate_7d back toward baseline within 1-2 weeks, that would suggest the admin-consent wall is not the actual mechanism and another cause should be sought."
+    "If first_meeting_rate_7d for microsoft workspaces recovers over the next week without any product change, rel_0412 may not be the cause.",
+    "If flagging off the forced-connect flow for microsoft does not restore first_meeting_rate_7d and activation_rate_7d, the mechanism is not the onboarding change itself."
    ]
   },
   "refs": [
@@ -314,27 +302,32 @@
    "dimension": "calendar_provider",
    "value": "google",
    "before": 0.4087,
-   "after": 0.4038,
-   "relative": -0.012,
-   "p_value": 0.504696
+   "after": 0.407,
+   "relative": -0.0042,
+   "p_value": 0.838747
   },
   {
    "dimension": "calendar_provider",
    "value": "microsoft",
    "before": 0.3937,
-   "after": 0.3052,
-   "relative": -0.2248,
+   "after": 0.3061,
+   "relative": -0.2225,
    "p_value": 0.0
   },
   {
    "dimension": "calendar_provider",
    "value": "none",
    "before": 0.3653,
-   "after": 0.3812,
-   "relative": 0.0435,
-   "p_value": 0.518535
+   "after": 0.3956,
+   "relative": 0.0829,
+   "p_value": 0.281091
   }
  ],
+ "voice": {
+  "reported": 7,
+  "ref": "q_33b9b06c27c6",
+  "replayed": 11
+ },
  "reviews": {
   "pkt_0001": {
    "id": "rev_0001",
@@ -350,12 +343,12 @@
    },
    "findings": [
     {
-     "claim": "The ruled_out section states channel/company_size show broad uniform declines 'not a single standout segment the way calendar_provider=microsoft is a standout (-22.25%, p=0.0)' as if that number is evidenced by this finding.",
-     "evidence": "review.check_entry numbers check: '22.25' in that text is not in its evidence array (which only cites q_9732131dfcbb and q_8cdc348a1919, the channel/company_size queries, not the microsoft query q_48b8a02dc5de).",
-     "impact": "A code check failure blocks SHIP outright and, more importantly, a reader can't verify the comparison number cited to justify ruling out channel/company_size without tracing back to a different finding's evidence.",
-     "proof_required": "Re-run review.check_entry after the edit and confirm numbers: pass.",
+     "claim": "7 microsoft-segment workspaces filed the cited permissions/no-show support tickets (voice_workspaces: 7, evidence value 7 for q_33b9b06c27c6).",
+     "evidence": "review.check numbers=fail: replaying q_33b9b06c27c6 returns 11 distinct workspaces, not 7.",
+     "impact": "The voice-of-customer count is understated by ~36%, which is a factual error in an otherwise-approved recommendation; it doesn't change the diagnosis (mechanism proof via first_meeting_rate_7d and calendar_connect_rate_1d shifts, segment-specific significance, and ruled-out rel_0318 all still hold) but every number in a packet must be correct before it reaches the PM.",
+     "proof_required": "review.check numbers=pass on resubmission.",
      "severity": "correctness",
-     "smallest_action": "Add q_48b8a02dc5de to this finding's evidence list (it's already cited correctly in the cause section), or drop the parenthetical and just say 'unlike the concentrated break seen in calendar_provider=microsoft above.'"
+     "smallest_action": "Update voice_workspaces and the two evidence values from 7 to 11 (or re-run the query and cite the correct count), then re-submit for check."
     }
    ],
    "verdict": "FIX"
@@ -518,8 +511,8 @@
     "tests_passed": true
    },
    "path": "data/change.diff",
-   "message": "Add calendar_connect_skip_microsoft flag (off by default) to restore the skip option on the calendar-connect step for calendar_provider=microsoft workspaces, per pkt_0001 / bet_0001. Users on other calendar providers are unaffected; when the flag is off, behavior is identical to today for everyone.",
-   "diff": "--- a/tallybird/flags.yaml\n+++ b/tallybird/flags.yaml\n@@ -11,3 +11,9 @@\n   rules:\n     - {plan: [business, enterprise]}\n   description: The notetaker joins Microsoft Teams calls through the new bot. Beta for Business and Enterprise.\n+\n+calendar_connect_skip_microsoft:\n+  enabled: false\n+  rules:\n+    - {calendar_provider: [microsoft]}\n+  description: Restores the skip option on the calendar-connect step for calendar_provider=microsoft workspaces, so users blocked by Outlook admin-consent approval can proceed to record a meeting instead of being stuck. Rollback of rel_0412's skip removal, scoped to microsoft per pkt_0001.\n--- a/tallybird/onboarding.py\n+++ b/tallybird/onboarding.py\n@@ -21,9 +21,11 @@\n \n def steps(user: dict, flags: Flags) -> list[Step]:\n     \"\"\"The steps for this user, in order. `user` carries calendar_provider (google or microsoft) and plan.\"\"\"\n+    calendar_connect_skippable = flags.is_on(\"calendar_connect_skip_microsoft\", user)\n     return [\n         Step(\"calendar_connect\", \"Connect your calendar\",\n-             \"Tallybird joins the meetings on your calendar and writes the notes for you.\"),\n+             \"Tallybird joins the meetings on your calendar and writes the notes for you.\",\n+             skippable=calendar_connect_skippable),\n         Step(\"welcome\", \"Welcome to Tallybird\", \"Here is what a recap looks like.\"),\n         Step(\"first_meeting\", \"Record your first meeting\", \"Start a meeting, or paste a meeting link.\"),\n     ]\n--- a/tests/test_calendar_connect_skip_microsoft.py\n+++ b/tests/test_calendar_connect_skip_microsoft.py\n@@ -0,0 +1,32 @@\n+from tallybird.flags import Flags\n+from tallybird.onboarding import steps\n+from tallybird.screens import render_step\n+\n+MICROSOFT_USER = {\"calendar_provider\": \"microsoft\", \"plan\": \"pro\"}\n+GOOGLE_USER = {\"calendar_provider\": \"google\", \"plan\": \"pro\"}\n+\n+\n+def test_flag_off_by_default_microsoft_still_cannot_skip():\n+    flags = Flags.load()\n+    first = steps(MICROSOFT_USER, flags)[0]\n+    assert first.id == \"calendar_connect\" and not first.skippable\n+\n+\n+def test_flag_on_lets_microsoft_users_skip_calendar_connect():\n+    flags = Flags.load(overrides={\"calendar_connect_skip_microsoft\": True})\n+    first = steps(MICROSOFT_USER, flags)[0]\n+    assert first.skippable\n+    assert 'data-action=\"skip\"' in render_step(first)\n+\n+\n+def test_flag_on_does_not_affect_google_users():\n+    flags = Flags.load(overrides={\"calendar_connect_skip_microsoft\": True})\n+    first = steps(GOOGLE_USER, flags)[0]\n+    assert not first.skippable\n+    assert 'data-action=\"skip\"' not in render_step(first)\n+\n+\n+def test_other_steps_unaffected_by_the_flag():\n+    flags = Flags.load(overrides={\"calendar_connect_skip_microsoft\": True})\n+    rest = steps(MICROSOFT_USER, flags)[1:]\n+    assert [s.skippable for s in rest] == [False, False]\n",
+   "message": "Add flag microsoft_calendar_connect_skip (off by default, scoped to calendar_provider=microsoft) that restores the skip option on the calendar-connect step for that segment only, per bet_0001 / pkt_0001's approved rollback action for rel_0412.",
+   "diff": "--- a/tallybird/flags.yaml\n+++ b/tallybird/flags.yaml\n@@ -11,3 +11,11 @@\n   rules:\n     - {plan: [business, enterprise]}\n   description: The notetaker joins Microsoft Teams calls through the new bot. Beta for Business and Enterprise.\n+\n+microsoft_calendar_connect_skip:\n+  enabled: false\n+  rules:\n+    - {calendar_provider: [microsoft]}\n+  description: >\n+    Rollback of rel_0412 for calendar_provider=microsoft only: restores the skip option on the\n+    calendar-connect onboarding step. Everyone else keeps the forced connect-first flow.\n--- a/tallybird/onboarding.py\n+++ b/tallybird/onboarding.py\n@@ -20,10 +20,17 @@\n \n \n def steps(user: dict, flags: Flags) -> list[Step]:\n-    \"\"\"The steps for this user, in order. `user` carries calendar_provider (google or microsoft) and plan.\"\"\"\n+    \"\"\"The steps for this user, in order. `user` carries calendar_provider (google or microsoft) and plan.\n+\n+    When microsoft_calendar_connect_skip is on for this user (calendar_provider=microsoft), the\n+    calendar-connect step is skippable again, rolling back rel_0412's forced connect for that segment.\n+    Every other user still sees the connect-first, unskippable step exactly as today.\n+    \"\"\"\n+    can_skip_connect = flags.is_on(\"microsoft_calendar_connect_skip\", user)\n     return [\n         Step(\"calendar_connect\", \"Connect your calendar\",\n-             \"Tallybird joins the meetings on your calendar and writes the notes for you.\"),\n+             \"Tallybird joins the meetings on your calendar and writes the notes for you.\",\n+             skippable=can_skip_connect),\n         Step(\"welcome\", \"Welcome to Tallybird\", \"Here is what a recap looks like.\"),\n         Step(\"first_meeting\", \"Record your first meeting\", \"Start a meeting, or paste a meeting link.\"),\n     ]\n--- a/tests/test_microsoft_calendar_connect_skip.py\n+++ b/tests/test_microsoft_calendar_connect_skip.py\n@@ -0,0 +1,35 @@\n+from tallybird.flags import Flags\n+from tallybird.onboarding import steps\n+from tallybird.screens import render_step\n+\n+MS_USER = {\"calendar_provider\": \"microsoft\", \"plan\": \"pro\"}\n+GOOGLE_USER = {\"calendar_provider\": \"google\", \"plan\": \"pro\"}\n+\n+\n+def test_flag_off_by_default_microsoft_still_forced():\n+    flags = Flags.load()\n+    assert not flags.is_on(\"microsoft_calendar_connect_skip\", MS_USER)\n+    first = steps(MS_USER, flags)[0]\n+    assert first.id == \"calendar_connect\" and not first.skippable\n+\n+\n+def test_flag_on_restores_skip_for_microsoft_only():\n+    flags = Flags.load(overrides={\"microsoft_calendar_connect_skip\": True})\n+    ms_first = steps(MS_USER, flags)[0]\n+    google_first = steps(GOOGLE_USER, flags)[0]\n+    assert ms_first.id == \"calendar_connect\" and ms_first.skippable\n+    assert google_first.id == \"calendar_connect\" and not google_first.skippable\n+\n+\n+def test_flag_on_renders_skip_button_for_microsoft_only():\n+    flags = Flags.load(overrides={\"microsoft_calendar_connect_skip\": True})\n+    ms_html = render_step(steps(MS_USER, flags)[0])\n+    google_html = render_step(steps(GOOGLE_USER, flags)[0])\n+    assert 'data-action=\"skip\"' in ms_html\n+    assert 'data-action=\"skip\"' not in google_html\n+\n+\n+def test_order_and_step_count_unchanged_for_everyone():\n+    flags = Flags.load(overrides={\"microsoft_calendar_connect_skip\": True})\n+    for user in (MS_USER, GOOGLE_USER):\n+        assert [s.id for s in steps(user, flags)] == [\"calendar_connect\", \"welcome\", \"first_meeting\"]\n",
    "review": {
     "correctness": {
      "fields": "pass",
@@ -531,7 +524,7 @@
     "verdict": "SHIP"
    },
    "new_flags": [
-    "calendar_connect_skip_microsoft"
+    "microsoft_calendar_connect_skip"
    ],
    "new_tests": 4
   },
@@ -627,13 +620,14 @@
   "seed": 1,
   "brier": 0.04,
   "prediction_hit": true,
-  "pm_minutes": 7.3,
+  "pm_minutes": 6.8,
   "gates": [
    {
     "gate": "decide",
-    "pm_minutes": 6.0,
-    "words_shown": 492,
+    "pm_minutes": 5.5,
+    "words_shown": 393,
     "inputs": 7,
+    "scripted": true,
     "wall_seconds": 0.0
    },
    {
@@ -641,35 +635,36 @@
     "pm_minutes": 1.3,
     "words_shown": 55,
     "inputs": 2,
+    "scripted": true,
     "wall_seconds": 0.0
    }
   ],
-  "agent_cost_usd": 0.973,
+  "agent_cost_usd": 1.0112,
   "ledger_entries": 15
  },
  "agents": {
   "signal": {
    "runs": 1,
    "turns": 7,
-   "seconds": 218.5,
-   "cost_usd": 0.5172
+   "seconds": 233.5,
+   "cost_usd": 0.4604
   },
   "quality": {
    "runs": 4,
-   "turns": 19,
-   "seconds": 138.0,
-   "cost_usd": 0.2497
+   "turns": 22,
+   "seconds": 139.5,
+   "cost_usd": 0.27
   },
   "builder": {
    "runs": 1,
-   "turns": 17,
-   "seconds": 88.7,
-   "cost_usd": 0.206
+   "turns": 20,
+   "seconds": 106.8,
+   "cost_usd": 0.2808
   }
  },
  "trace": [
   {
-   "at": "2026-09-27T03:46:59+00:00",
+   "at": "2026-09-28T01:11:35+00:00",
    "station": "setup",
    "event": "world ready",
    "scenario": "s01-calendar-gate",
@@ -677,30 +672,30 @@
    "data_through": "2026-03-02T00:00:00Z"
   },
   {
-   "at": "2026-09-27T03:46:59+00:00",
+   "at": "2026-09-28T01:11:35+00:00",
    "station": "sense",
    "event": "start"
   },
   {
-   "at": "2026-09-27T03:50:38+00:00",
+   "at": "2026-09-28T01:15:28+00:00",
    "station": "sense",
    "event": "signal finished",
-   "cost_usd": 0.5172,
+   "cost_usd": 0.4604,
    "turns": 7,
-   "seconds": 218.5,
+   "seconds": 233.5,
    "error": null
   },
   {
-   "at": "2026-09-27T03:51:17+00:00",
+   "at": "2026-09-28T01:15:55+00:00",
    "station": "review",
    "event": "quality finished",
-   "cost_usd": 0.0523,
-   "turns": 4,
-   "seconds": 38.6,
+   "cost_usd": 0.0628,
+   "turns": 5,
+   "seconds": 26.0,
    "error": null
   },
   {
-   "at": "2026-09-27T03:51:17+00:00",
+   "at": "2026-09-28T01:15:55+00:00",
    "station": "review",
    "event": "review",
    "entry": "pkt_0001",
@@ -713,31 +708,31 @@
    }
   },
   {
-   "at": "2026-09-27T03:51:21+00:00",
+   "at": "2026-09-28T01:15:59+00:00",
    "station": "decide",
    "event": "bet placed",
    "bet": "bet_0001"
   },
   {
-   "at": "2026-09-27T03:52:50+00:00",
+   "at": "2026-09-28T01:17:46+00:00",
    "station": "build",
    "event": "builder finished",
-   "cost_usd": 0.206,
-   "turns": 17,
-   "seconds": 88.7,
+   "cost_usd": 0.2808,
+   "turns": 20,
+   "seconds": 106.8,
    "error": null
   },
   {
-   "at": "2026-09-27T03:53:34+00:00",
+   "at": "2026-09-28T01:18:23+00:00",
    "station": "build",
    "event": "quality finished",
-   "cost_usd": 0.0803,
-   "turns": 6,
-   "seconds": 43.8,
+   "cost_usd": 0.0674,
+   "turns": 4,
+   "seconds": 37.1,
    "error": null
   },
   {
-   "at": "2026-09-27T03:53:34+00:00",
+   "at": "2026-09-28T01:18:23+00:00",
    "station": "build",
    "event": "review",
    "entry": "bld_0001",
@@ -750,16 +745,16 @@
    }
   },
   {
-   "at": "2026-09-27T03:54:00+00:00",
+   "at": "2026-09-28T01:18:58+00:00",
    "station": "build",
    "event": "quality finished",
-   "cost_usd": 0.0568,
-   "turns": 4,
-   "seconds": 26.4,
+   "cost_usd": 0.0677,
+   "turns": 8,
+   "seconds": 35.0,
    "error": null
   },
   {
-   "at": "2026-09-27T03:54:00+00:00",
+   "at": "2026-09-28T01:18:58+00:00",
    "station": "build",
    "event": "review",
    "entry": "bld_0002",
@@ -772,16 +767,16 @@
    }
   },
   {
-   "at": "2026-09-27T03:54:29+00:00",
+   "at": "2026-09-28T01:19:40+00:00",
    "station": "build",
    "event": "quality finished",
-   "cost_usd": 0.0603,
+   "cost_usd": 0.0721,
    "turns": 5,
-   "seconds": 29.2,
+   "seconds": 41.4,
    "error": null
   },
   {
-   "at": "2026-09-27T03:54:29+00:00",
+   "at": "2026-09-28T01:19:40+00:00",
    "station": "build",
    "event": "review",
    "entry": "bld_0003",
@@ -794,20 +789,20 @@
    }
   },
   {
-   "at": "2026-09-27T03:54:31+00:00",
+   "at": "2026-09-28T01:19:41+00:00",
    "station": "build",
    "event": "proposal matches the approved decision",
    "action": "act_0002"
   },
   {
-   "at": "2026-09-27T03:54:51+00:00",
+   "at": "2026-09-28T01:20:02+00:00",
    "station": "apply",
    "event": "world advanced with the action",
    "data_through": "2026-03-16T00:00:00Z",
-   "seconds": 18.2
+   "seconds": 19.2
   },
   {
-   "at": "2026-09-27T03:54:54+00:00",
+   "at": "2026-09-28T01:20:06+00:00",
    "station": "prove",
    "event": "verdict written",
    "verdict": "ver_0001",
@@ -817,32 +812,32 @@
    "prediction_hit": true
   },
   {
-   "at": "2026-09-27T03:54:56+00:00",
+   "at": "2026-09-28T01:20:08+00:00",
    "station": "call",
    "event": "call made",
    "call": "call_0001",
    "decision": "iterate"
   },
   {
-   "at": "2026-09-27T03:54:56+00:00",
+   "at": "2026-09-28T01:20:08+00:00",
    "station": "tell",
    "event": "Comms is not built yet. Nothing is sent."
   },
   {
-   "at": "2026-09-27T03:54:56+00:00",
+   "at": "2026-09-28T01:20:08+00:00",
    "station": "learn",
    "event": "loop scored",
    "brier": 0.04,
    "prediction_hit": true,
-   "pm_minutes": 7.3,
-   "agent_cost_usd": 0.973
+   "pm_minutes": 6.8,
+   "agent_cost_usd": 1.0112
   }
  ],
  "usage": {
   "signal": {
    "turns": 7,
-   "seconds": 123.2,
-   "cost_usd": 0.5172,
+   "seconds": 130.8,
+   "cost_usd": 0.4604,
    "tools": [
     {
      "tool": "compare_periods",
@@ -857,44 +852,44 @@
      "calls": 6
     },
     {
-     "tool": "search_tickets",
-     "capability": "support.search",
-     "what": "Search support tickets by keywords, dates, and segment. Returns distinct accounts",
-     "calls": 5
-    },
-    {
      "tool": "Agent",
      "capability": "sub-agent",
      "what": "Handed one focused question to a sub-agent: quant for numbers, qual for customer voice",
-     "calls": 4
+     "calls": 3
     },
     {
      "tool": "list_releases",
      "capability": "releases.list",
      "what": "Release notes in a date range",
-     "calls": 3
-    },
-    {
-     "tool": "get_ticket",
-     "capability": "support.get",
-     "what": "Fetch one ticket",
-     "calls": 3
+     "calls": 1
     },
     {
      "tool": "estimate_weekly_arr_impact",
      "capability": "metrics.size_impact",
      "what": "Weekly revenue at stake from a change in the key metric in a segment",
      "calls": 1
+    },
+    {
+     "tool": "search_tickets",
+     "capability": "support.search",
+     "what": "Search support tickets by keywords, dates, and segment. Returns distinct accounts",
+     "calls": 1
     }
    ],
-   "calls": 28,
+   "calls": 18,
    "rejected_writes": 4
   },
   "quality_packet": {
-   "turns": 4,
-   "seconds": 34.2,
-   "cost_usd": 0.0523,
+   "turns": 5,
+   "seconds": 21.5,
+   "cost_usd": 0.0628,
    "tools": [
+    {
+     "tool": "read_entries",
+     "capability": "ledger.read",
+     "what": "Read ledger entries",
+     "calls": 1
+    },
     {
      "tool": "check_entry",
      "capability": "review.check",
@@ -902,9 +897,9 @@
      "calls": 1
     },
     {
-     "tool": "read_entries",
-     "capability": "ledger.read",
-     "what": "Read ledger entries",
+     "tool": "search_tickets",
+     "capability": "support.search",
+     "what": "Search support tickets by keywords, dates, and segment. Returns distinct accounts",
      "calls": 1
     },
     {
@@ -914,13 +909,13 @@
      "calls": 1
     }
    ],
-   "calls": 3,
+   "calls": 4,
    "rejected_writes": 0
   },
   "builder": {
-   "turns": 17,
-   "seconds": 84.3,
-   "cost_usd": 0.206,
+   "turns": 20,
+   "seconds": 102.5,
+   "cost_usd": 0.2808,
    "tools": [
     {
      "tool": "read_file",
@@ -935,21 +930,33 @@
      "calls": 4
     },
     {
+     "tool": "read_entries",
+     "capability": "ledger.read",
+     "what": "Read ledger entries",
+     "calls": 2
+    },
+    {
      "tool": "propose_change",
      "capability": "code.propose",
      "what": "Propose a change on a copy of the codebase, as a pull request; runs the tests and reports the diff, new flags, and scope problems. Never merges",
      "calls": 2
     },
     {
-     "tool": "read_entries",
-     "capability": "ledger.read",
-     "what": "Read ledger entries",
-     "calls": 1
+     "tool": "publish_demo",
+     "capability": "demo.publish",
+     "what": "Save a self-contained, one-screen HTML demo and run the code checks (honesty label, decision link, one screen, offline, no dead clicks)",
+     "calls": 2
     },
     {
      "tool": "list_files",
      "capability": "code.list",
      "what": "List the files in the product codebase",
+     "calls": 1
+    },
+    {
+     "tool": "flag_state",
+     "capability": "flags.state",
+     "what": "Current and past feature-flag settings",
      "calls": 1
     },
     {
@@ -963,21 +970,15 @@
      "capability": "design.render",
      "what": "Render a design built from the design system, save a screenshot, and run the checks (system classes only, no inline styles, one screen)",
      "calls": 1
-    },
-    {
-     "tool": "publish_demo",
-     "capability": "demo.publish",
-     "what": "Save a self-contained, one-screen HTML demo and run the code checks (honesty label, decision link, one screen, offline, no dead clicks)",
-     "calls": 1
     }
    ],
-   "calls": 16,
+   "calls": 19,
    "rejected_writes": 0
   },
   "quality_build": {
    "turns": 5,
-   "seconds": 24.7,
-   "cost_usd": 0.0603,
+   "seconds": 36.9,
+   "cost_usd": 0.0721,
    "tools": [
     {
      "tool": "check_entry",
@@ -1809,6 +1810,24 @@
    "run": "Signal v0.3.4, diagnose-s01, 2 trials",
    "result": "2/2, 100%",
    "found": "Both trials pass every grader, including Quality's code checks. First pass^k run"
+  },
+  {
+   "date": "2026-09-28",
+   "run": "Chief v0.4, morning, s01, from a fresh clone",
+   "result": "35/36",
+   "found": "Relayed Aiko's caveat as a reason: \"the dip reads worse than it is\". The ledger now rejects a brief sentence that explains a metric's move without citing a decision packet"
+  },
+  {
+   "date": "2026-09-28",
+   "run": "Loop, s01, live-5",
+   "result": "Stopped at a gate",
+   "found": "Signal's packet passed every check; its voice count (8) cites the search it came from, where the old showcase showed a merged 21. Quality returned PROVE on the code change because none of its tools showed the diff. With no scripted answer, the gate took the safe default and applied nothing. Quality's code checks now include the diff, the new flags, and the test run"
+  },
+  {
+   "date": "2026-09-28",
+   "run": "Loop, s01, live-6 (the showcase)",
+   "result": "Full loop",
+   "found": "Quality returned FIX on the packet: Signal reported 7 Microsoft workspaces, but the search it cited returned 11 across all providers. It had filtered the results by hand. The new replay check caught it. All three builds SHIP once Quality could read the diff. Microsoft activation 30.5% to 38.2%. Gate answers scripted"
   }
  ]
 }

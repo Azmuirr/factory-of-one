@@ -18,7 +18,7 @@ import yaml
 
 from collections import Counter
 
-from factory import code, ledger
+from factory import code, ledger, queries, support
 from factory import config as install
 from factory.chief.html import Links
 from factory.evals.runner import Trial, parse_transcript
@@ -160,6 +160,13 @@ def build(loop_dir: Path, chief_dir: Path | None, out: Path) -> dict:
                     providers.append({"dimension": dim, "value": value, "before": r["before"], "after": r["after"],
                                       "relative": r["relative"], "p_value": r.get("p_value")})
 
+    voice = None
+    diag = (first("decision_packet") or {}).get("payload", {}).get("diagnosis", {})
+    logged = queries.load(loop_dir / "queries.jsonl").get(diag.get("voice_ref"))
+    if diag.get("voice_workspaces") is not None:
+        replayed = support.search(world.path, **logged["args"])["distinct_workspaces"] if logged and logged["tool"] == "search_tickets" else None
+        voice = {"reported": diag["voice_workspaces"], "ref": diag.get("voice_ref"), "replayed": replayed}
+
     releases = {r["id"]: r for r in scenario["releases"]}
     release = releases[truth["cause"]["release"]]
     agents = {}
@@ -190,7 +197,7 @@ def build(loop_dir: Path, chief_dir: Path | None, out: Path) -> dict:
         "series": {"with_action": with_action, "no_action": no_action},
         "release": {"id": release["id"], "title": release["title"], "notes": release["notes"],
                     "date": (FIRST_WEEK + timedelta(weeks=release["at"]["week"] - 1, days=release["at"]["day"] - 1)).isoformat()},
-        "card": first("signal_card"), "packet": first("decision_packet"), "providers": providers,
+        "card": first("signal_card"), "packet": first("decision_packet"), "providers": providers, "voice": voice,
         "reviews": {r["refs"][0]: {"id": r["id"], "author": r["author"], **r["payload"]} for r in by_type("review")},
         "bet": first("bet"), "actions": by_type("action"), "builds": builds,
         "verdict": first("verdict"), "call": first("call"),

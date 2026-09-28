@@ -248,9 +248,11 @@ function renderDay() {
     title: `Activation fell for ${cap(seg(packet.diagnosis.segment).split(" = ")[1] || "one segment")} calendar users after ${esc(packet.diagnosis.release_id)}`,
     body: `<p class="why">A dashboard shows the dip, not the cause. Signal asks the metrics layer for the numbers, reads support tickets for the customers' words, and checks every release in the window. It hands focused questions to two sub-agents: one for numbers, one for customer voice.</p>
     <div class="grid" style="margin-bottom:12px">
-      <div class="card"><div class="stat">${pct(card.before.value)} &rarr; ${pct(card.after.value)}</div><p class="small muted">All workspaces, before vs after the release</p></div>
+      <div class="card"><div class="stat">${pct(card.before.value)} &rarr; ${pct(card.after.value)}</div><p class="small muted">${card.segment && Object.keys(card.segment).length ? esc(cap(seg(card.segment).split(" = ")[1] || "")) + " calendar users" : "All workspaces"}, before vs after the release</p></div>
       <div class="card"><div class="stat">${usd(packet.size.value)} <small>a week</small></div><p class="small muted">New revenue at risk, from the sizing tool</p></div>
-      <div class="card"><div class="stat">${packet.diagnosis.voice_workspaces} <small>workspaces</small></div><p class="small muted">Filed tickets describing the block</p></div>
+      <div class="card"><div class="stat">${packet.diagnosis.voice_workspaces} <small>workspaces</small></div><p class="small muted">${R.voice && R.voice.replayed !== R.voice.reported
+        ? `<span class="chip warn">Flagged</span> Signal's count. Code reran the search it cited and got ${R.voice.replayed ?? "nothing"}`
+        : "Filed tickets describing the block. Code reran the cited search and got the same count"}</p></div>
     </div>
     <div class="card">${chart({ series: [{ name: "Microsoft calendar", values: R.series.with_action.microsoft, color: "var(--ms)", upto: actionWeek - 1 },
       { name: "Google calendar", values: R.series.with_action.google, color: "var(--goog)", upto: actionWeek - 1 }], markers: [releaseMarker] })}</div>

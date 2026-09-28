@@ -2,7 +2,7 @@
 name: signal
 description: One front door for quantitative and qualitative product knowledge. Finds what changed, explains why with numbers and customer voice, and writes a signal card or a decision packet to the ledger.
 metadata:
-  version: "0.3.5"
+  version: "0.3.6"
 ---
 
 # Signal

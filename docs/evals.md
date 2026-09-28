@@ -76,6 +76,7 @@ Real headless runs on the subscription, graded with the same code graders. Costs
 | 2026-09-27 | Signal v0.3.4, diagnose-s01, 2 trials | 2/2, 100% | Both trials pass every grader, including Quality's code checks. First pass^k run |
 | 2026-09-28 | Chief v0.4, morning, s01, from a fresh clone | 35/36 | Relayed Aiko's caveat as a reason: "the dip reads worse than it is". The ledger now rejects a brief sentence that explains a metric's move without citing a decision packet |
 | 2026-09-28 | Loop, s01, live-5 | Stopped at a gate | Signal's packet passed every check; its voice count (8) cites the search it came from, where the old showcase showed a merged 21. Quality returned PROVE on the code change because none of its tools showed the diff. With no scripted answer, the gate took the safe default and applied nothing. Quality's code checks now include the diff, the new flags, and the test run |
+| 2026-09-28 | Loop, s01, live-6 (the showcase) | Full loop | Quality returned FIX on the packet: Signal reported 7 Microsoft workspaces, but the search it cited returned 11 across all providers. It had filtered the results by hand. The new replay check caught it. All three builds SHIP once Quality could read the diff. Microsoft activation 30.5% to 38.2%. Gate answers scripted |
 
 ## Grader changes
 

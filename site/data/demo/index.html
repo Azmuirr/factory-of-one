@@ -1,73 +1,83 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Microsoft calendar activation drop — rollback ask</title>
+<meta charset="utf-8">
+<title>Microsoft onboarding: restore the skip</title>
 <style>
   :root {
-    --ink: #17202A; --muted: #5A6572; --canvas: #F5F6F4; --surface: #FFFFFF;
-    --border: #DDE1DC; --brand: #0E6B5C; --brand-strong: #0A5246; --warn-soft: #FFF4DC; --warn-ink: #7A4E00;
+    --ink:#17202A; --muted:#5A6572; --canvas:#F5F6F4; --surface:#FFFFFF; --border:#DDE1DC;
+    --brand:#0E6B5C; --brand-strong:#0A5246; --brand-soft:#E3F1EE; --danger:#B3372D; --success:#1E7D4A;
   }
   * { box-sizing: border-box; }
-  html, body { margin: 0; padding: 0; width: 1280px; height: 800px; overflow: hidden; }
+  html, body { margin:0; padding:0; height:800px; width:1280px; overflow:hidden; }
   body {
     font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-    background: var(--canvas); color: var(--ink);
-    display: flex; align-items: center; justify-content: center;
+    color: var(--ink); background: var(--canvas);
   }
-  main {
-    width: 1120px; background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
-    padding: 40px 56px; display: flex; flex-direction: column; gap: 20px;
-  }
-  .eyebrow { font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin: 0; }
-  h1 { font-size: 28px; margin: 0; line-height: 1.25; }
-  .number-row { display: flex; align-items: baseline; gap: 16px; background: #E3F1EE; border-radius: 12px; padding: 20px 24px; }
-  .number { font-size: 40px; font-weight: 700; color: var(--brand-strong); }
-  .number-label { font-size: 15px; color: var(--muted); }
-  .ask { border: 1px solid var(--border); border-radius: 12px; padding: 20px 24px; }
-  .ask h2 { font-size: 16px; margin: 0 0 6px 0; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
-  .ask p { font-size: 18px; margin: 0; }
-  button.evidence-toggle {
-    align-self: flex-start; background: var(--brand); color: white; border: none; border-radius: 8px;
-    padding: 10px 18px; font-size: 14px; cursor: pointer;
-  }
-  button.evidence-toggle:hover { background: var(--brand-strong); }
-  #evidence { display: none; border-left: 3px solid var(--brand); padding: 4px 20px; background: var(--canvas); border-radius: 0 8px 8px 0; }
+  header { padding: 16px 48px; border-bottom: 1px solid var(--border); background: var(--surface); }
+  .logo { font-weight: 700; color: var(--brand-strong); font-size: 18px; }
+  main { max-width: 980px; margin: 0 auto; padding: 32px 48px; }
+  h1 { font-size: 28px; line-height: 1.25; margin: 0 0 20px; }
+  .stat-row { display:flex; gap:24px; align-items:stretch; margin-bottom: 24px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 24px; }
+  .stat-card { flex: 0 0 300px; }
+  .stat-label { font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; margin: 0 0 8px; }
+  .stat-value { font-size: 40px; font-weight: 700; color: var(--danger); margin: 0; }
+  .stat-sub { font-size: 14px; color: var(--muted); margin-top: 8px; }
+  .ask-card { flex: 1; }
+  .ask-label { font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; margin: 0 0 8px; }
+  .ask-text { font-size: 18px; margin: 0 0 16px; }
+  .ask-meta { font-size: 13px; color: var(--muted); margin-bottom: 16px; }
+  .btn { font-size: 15px; font-weight: 600; padding: 10px 20px; border-radius: 10px; border: 1px solid transparent; cursor: pointer; }
+  .btn-primary { background: var(--brand); color: #fff; }
+  .btn-primary:hover { background: var(--brand-strong); }
+  .btn-primary.approved { background: var(--success); }
+  .btn-ghost { background: transparent; color: var(--brand-strong); border-color: var(--border); margin-left: 8px; }
+  #evidence { display: none; margin-top: 4px; }
   #evidence.shown { display: block; }
-  #evidence ul { margin: 8px 0; padding-left: 20px; font-size: 14px; color: var(--ink); }
-  #evidence li { margin-bottom: 6px; }
-  blockquote {
-    font-style: italic; font-size: 14px; color: var(--warn-ink); background: var(--warn-soft);
-    border-radius: 8px; padding: 12px 16px; margin: 10px 0 4px 0;
-  }
-  cite { display: block; font-size: 12px; color: var(--muted); margin-top: 6px; font-style: normal; }
+  .cause-list { margin: 0; padding-left: 18px; font-size: 14px; color: var(--ink); }
+  .cause-list li { margin-bottom: 8px; }
+  blockquote { border-left: 3px solid var(--brand); margin: 16px 0 0; padding: 8px 16px; font-style: italic; color: var(--ink); background: var(--brand-soft); border-radius: 0 8px 8px 0; }
+  cite { display:block; margin-top:6px; font-style: normal; font-size: 12px; color: var(--muted); }
+  #approve-status { display:none; font-size: 13px; color: var(--success); font-weight: 600; margin-top: 10px; }
+  #approve-status.shown { display:block; }
 </style>
 </head>
 <body>
 <main data-decision="pkt_0001" data-honesty="hardcoded">
-  <p class="eyebrow">Activation · calendar_provider = microsoft</p>
-  <h1>Since rel_0412 removed the skip button, Microsoft-calendar signups are getting stuck at "connect your calendar" and never make it to their first meeting.</h1>
+  <header><span class="logo">Tallybird</span></header>
+  <div style="padding: 32px 48px 0;">
+    <h1>Onboarding v2 forced Microsoft-calendar workspaces to connect first with no skip option &mdash; and their 7-day activation fell 22.3% since it shipped.</h1>
 
-  <div class="number-row">
-    <span class="number">$24,783</span>
-    <span class="number-label">in new ARR at risk per week from this segment</span>
-  </div>
+    <div class="stat-row">
+      <div class="card stat-card">
+        <p class="stat-label">New ARR at risk</p>
+        <p class="stat-value">$24,783<span style="font-size:16px; font-weight:600; color:var(--muted);">/week</span></p>
+        <p class="stat-sub">Microsoft-calendar segment, since rel_0412 (2026-02-10)</p>
+      </div>
+      <div class="card ask-card">
+        <p class="ask-label">The ask</p>
+        <p class="ask-text">Roll back rel_0412's forced calendar-connect-first flow for <strong>calendar_provider = microsoft</strong> only &mdash; restore the skip option for that segment. Everyone else is unaffected.</p>
+        <p class="ask-meta">Ships off, behind a new flag scoped to Microsoft workspaces. Google and no-calendar segments keep today's flow.</p>
+        <button class="btn btn-primary" id="approve-btn" data-action="approve" onclick="this.textContent='Approved'; this.classList.add('approved'); this.disabled=true; document.getElementById('approve-status').classList.add('shown');">Approve rollback for Microsoft</button>
+        <button class="btn btn-ghost" data-action="toggle-evidence" onclick="var e=document.getElementById('evidence'); var open=e.classList.toggle('shown'); this.textContent = open ? 'Hide evidence' : 'Show evidence';">Show evidence</button>
+        <p id="approve-status">Marked approved for this review &mdash; flag stays off until a person turns it on.</p>
+      </div>
+    </div>
 
-  <div class="ask">
-    <h2>The ask</h2>
-    <p>Roll back rel_0412 for calendar_provider = microsoft: restore the skip option so Outlook users blocked on IT admin approval can proceed, while leaving the calendar-first flow unchanged for everyone else.</p>
-  </div>
-
-  <button class="evidence-toggle" data-action="toggle-evidence" onclick="document.getElementById('evidence').classList.toggle('shown'); this.textContent = document.getElementById('evidence').classList.contains('shown') ? 'Hide evidence' : 'Show evidence';">Show evidence</button>
-
-  <div id="evidence">
-    <ul>
-      <li>activation_rate_7d for calendar_provider=microsoft fell from 0.3937 to 0.3061 (−22.25% relative, p=0.0), while google and none did not move significantly.</li>
-      <li>first_meeting_rate_7d fell 14.84% for microsoft, even though calendar_connect_rate_1d rose 60.04% — the block happens right after calendar connect.</li>
-      <li>21 distinct Microsoft-calendar workspaces filed support tickets describing an "admin consent required" wall with no way to skip past it.</li>
-    </ul>
-    <blockquote>"Getting "admin consent required" when I connect Outlook. Our IT team takes a week to approve new apps. Any workaround so I can use the trial meanwhile?"</blockquote>
-    <cite>— support ticket t_c082072dd6</cite>
+    <div id="evidence" class="card">
+      <p class="stat-label" style="margin-bottom:12px;">Why we think this is the cause</p>
+      <ol class="cause-list">
+        <li>rel_0412 ("Onboarding v2: connect calendar first") shipped 2026-02-10, right at the start of the decline window, and removed the skip option.</li>
+        <li>In the Microsoft segment, activation_rate_7d fell from 39.4% to 30.6% (&minus;22.3% relative, p=0.0); Google and no-calendar segments were not significant.</li>
+        <li>Within Microsoft, calendar_connect_rate_1d rose 60.0% after rel_0412, while first_meeting_rate_7d fell 14.8% &mdash; the break is between connect and first meeting.</li>
+        <li>Support tickets from Microsoft workspaces describe being stuck at the forced connect step with a permissions error, and the notetaker bot not joining scheduled Teams meetings.</li>
+      </ol>
+      <blockquote>
+        &ldquo;Is there a way to record a meeting without connecting my calendar? The Outlook step keeps failing with a permissions message.&rdquo;
+        <cite>&mdash; Microsoft-calendar workspace, support ticket</cite>
+      </blockquote>
+    </div>
   </div>
 </main>
 </body>
