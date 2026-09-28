@@ -7,7 +7,7 @@ Each entry records the options, the choice, and what would reverse it. The reaso
 | Reader | What they need in 10 minutes | Where they start |
 |---|---|---|
 | Junior PM | How a real growth problem gets diagnosed and decided | Run scenario 1 on the easy tier. Read the decision packet |
-| Senior PM | An operating model and skills to reuse | `OPERATING.md` and `agents/` |
+| Senior PM | An operating model and skills to reuse | `docs/agents.md` and `agents/` (a separate `OPERATING.md` was planned and folded into these) |
 | VP or hiring manager | Evidence of judgment, and what this means for how a product org is built | The benchmark results and the org-design notes |
 
 **Choice:** one repo, three reading paths in the README. Scenario tiers (easy, medium, hard) double as a learning ladder.

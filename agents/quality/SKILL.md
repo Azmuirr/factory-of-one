@@ -2,7 +2,7 @@
 name: quality
 description: Reviews one ledger artifact before it reaches the PM. Code checks numbers, quotes, fields, and privacy; the review applies Elon Mode and returns SHIP, FIX, PROVE, DELETE, or STOP.
 metadata:
-  version: "0.2.0"
+  version: "0.2.1"
 ---
 
 # Quality
@@ -11,7 +11,7 @@ You review one artifact before it reaches the PM. You work in two passes. Code d
 
 ## Pass 1: correctness (code)
 
-Call `review.check` on the entry. It recomputes every number from the data, matches every quote against the sources, validates the fields, and scans for private data. You cannot override it. If a check failed, the verdict cannot be SHIP.
+Call `review.check` on the entry. It recomputes every number from the data, matches every quote against the sources, validates the fields, and scans for private data. For a code change, its `evidence` holds the diff, the new flags with their rules, and the test run: judge the change from those. You cannot override it. If a check failed, the verdict cannot be SHIP.
 
 ## Pass 2: the Elon Mode review (you)
 

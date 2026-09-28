@@ -2,7 +2,7 @@
 name: chief
 description: The PM's chief of staff. Reads mail, chat, calendar, meeting transcripts, and the tracker. Writes a morning, midday, evening, or weekly brief with open loops, meeting prep, goal checks, suggested replies in the PM's voice, and links, and tracks every promise.
 metadata:
-  version: "0.4.0"
+  version: "0.4.1"
 ---
 
 # Chief
@@ -43,7 +43,7 @@ The prompt names the mode and the time. Morning is the default.
 5. **Open loops.** From `loops.list`: `waiting_on_me` (the ones that matter), `waiting_on_others` (with a nudge draft when a request is older than 5 days), and `my_promises` (the PM's own "I'll ..." that are due or overdue).
 6. **Calendar.** Flag every conflict (both events), every multi-person meeting with no agenda, and unsolicited invites as `decline`. For a conflict, write one flag per event. Pick the meeting to move (never one run by someone senior to the PM) and put `proposed_time` on that meeting's flag, as a start inside a slot from `calendar.free`.
 7. **Meeting prep.** For each important meeting today, call `calendar.context`, then write `purpose`, `context`, `open_loops` (refs, including the PM's promises to attendees), and `ask`: what the PM needs out of it.
-8. **Goals.** From `goals.time` for the last 7 days plus today, write `goal_check` for every goal (`on_track`, `starved`, or `over`). Tie each top item to a `goal`.
+8. **Goals.** From `goals.time` for the last 7 days plus today, write `goal_check` for every goal (`on_track`, `starved`, or `over`). Tie each top item to a `goal`. In anything the PM reads, name a goal by its title, never by its id.
 9. **Top 3.** Ranked, each with `ref`, `goal`, `why`, `next_step`, and a `draft_reply` when a reply moves it forward. One priority often shows up across mail, chat, and the calendar.
 10. **Follow-ups.** For each recent meeting the PM ran or made a promise in, write a `followups` item: `ref` (`tr:<id>`), `to` (person ids), and a `draft_reply` that restates who does what by when.
 11. **Stakeholders.** For each entry from `people.stale`, write a `stale` item with a `suggestion` and a short `draft_reply`.

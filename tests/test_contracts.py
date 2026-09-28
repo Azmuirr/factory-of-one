@@ -91,3 +91,13 @@ def test_support_counts_distinct_workspaces_across_phrasings(monkeypatch, now_ru
     union = {t["workspace_id"] for r in single for t in r["tickets"]}
     combined = support_server.search_tickets(any_of=phrasings, start="2026-02-10")
     assert combined["distinct_workspaces"] == len(union) > max(r["distinct_workspaces"] for r in single)
+
+
+def test_a_ticket_search_is_logged_so_its_count_can_be_replayed(tmp_path, monkeypatch, now_run):
+    monkeypatch.setenv("FACTORY_WORLD", str(now_run / "world" / "world.db"))
+    monkeypatch.setenv("FACTORY_LEDGER", str(tmp_path / "ledger.jsonl"))
+    from factory import queries
+    from factory.servers import support_server
+    r = support_server.search_tickets("admin approval", start="2026-02-09", end="2026-03-01", calendar_provider="microsoft")
+    logged = queries.load(tmp_path / "queries.jsonl")[r["query_id"]]
+    assert logged["tool"] == "search_tickets" and r["distinct_workspaces"] == 12

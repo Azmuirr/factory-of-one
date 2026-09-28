@@ -8,7 +8,12 @@ TEXT_NUMBER = re.compile(r"(?<![A-Za-z_\d.])\$?(\d[\d,]*(?:\.\d+)?)(%|[kK]\b)?")
 NOT_NUMBERS = re.compile(
     r"<script.*?</script>|<style.*?</style>|<[^>]+>|\b[a-z]+_[a-z0-9]+\b|\d{4}-\d{2}-\d{2}|\d+(?:\.\d+)?e-?\d+"
     r"|\b(?:Microsoft|Office|Dynamics) 365\b|\bWindows 1[01]\b", re.S)  # product names, not data
-NARRATIVE_MAX = 14  # bare small integers such as "7 days" or "3 weeks" are narrative, not data
+NARRATIVE_MAX = 14  # a small bare integer is narrative only as a date, a time span, or a label ("Feb 10", "7 days", "week 6")
+TIME_AFTER = re.compile(r"^\s*-?\s*(?:days?|weeks?|months?|years?|hours?|minutes?|mins?|am|pm|of)\b", re.I)
+LABEL_BEFORE = re.compile(
+    r"(?:\b(?:jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec|january|february|march|april|june|july|august|september|"
+    r"october|november|december|week|weeks|day|days|step|top|q|v|version|phase|scenario|tier|of)"
+    r"|\b(?:weeks?|days?)\s+\d+\s*(?:to|-|through|and))\s*$", re.I)
 
 
 def field_numbers(payload) -> list[float]:
@@ -50,12 +55,15 @@ def texts(payload) -> list[str]:
 def text_numbers(text: str) -> list[tuple[float, float]]:
     """Numbers written in prose, each with the rounding tolerance its precision implies."""
     out = []
-    for digits, suffix in TEXT_NUMBER.findall(NOT_NUMBERS.sub(" ", text)):
+    clean = NOT_NUMBERS.sub(" ", text)
+    for m in TEXT_NUMBER.finditer(clean):
+        digits, suffix = m.group(1), m.group(2) or ""
         decimals = len(digits.split(".")[1]) if "." in digits else 0
         value, tolerance = float(digits.replace(",", "")), 0.5 * 10 ** -decimals
         if suffix.lower() == "k":
             value, tolerance = value * 1000, tolerance * 1000
-        if not suffix and decimals == 0 and value <= NARRATIVE_MAX:
+        small = not suffix and decimals == 0 and value <= NARRATIVE_MAX
+        if small and (TIME_AFTER.match(clean[m.end():]) or LABEL_BEFORE.search(clean[:m.start()])):
             continue
         out.append((value, tolerance + 1e-9))
     return out

@@ -190,3 +190,18 @@ def test_the_change_description_is_not_part_of_the_diff(tmp_path, monkeypatch):
     folder = tmp_path / "changes" / REFERENCE["name"]
     assert (folder / "CHANGE.md").is_file() and "CHANGE.md" not in result["diff"]
     assert code.scope(code.APP, folder) == []
+
+
+def test_tests_run_without_the_callers_secrets(tmp_path, monkeypatch):
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-should-not-leak")
+    probe = tmp_path / "app"
+    (probe / "tests").mkdir(parents=True)
+    (probe / "pytest.ini").write_text("[pytest]\ntestpaths = tests\n", encoding="utf-8")
+    (probe / "tests" / "test_env.py").write_text("import os\n\ndef test_no_secrets():\n    assert 'ANTHROPIC_API_KEY' not in os.environ\n", encoding="utf-8")
+    assert code.run_tests(probe)["passed"]
+
+
+def test_quality_sees_what_a_code_change_does(built):
+    result = checks(built, 0)
+    assert result["evidence"]["new_flags"] == ["calendar_skip_microsoft"]
+    assert "calendar_provider: [microsoft]" in result["evidence"]["diff"] and result["evidence"]["tests"]["passed"]

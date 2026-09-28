@@ -266,3 +266,16 @@ def test_commitments_are_sorted_by_due_date(tmp_path):
     due = ledger.commitments_due(tmp_path / "ledger.jsonl", "2026-03-02")
     assert {c["owner"] for c in due["due_today"]} == {"p_me", "p_sup"}
     assert [c["task"] for c in due["overdue"]] == ["Send Luis our security overview"]
+
+
+def test_the_ledger_bounces_a_brief_that_explains_a_metric(tmp_path, monkeypatch, now_run):
+    monkeypatch.setenv("FACTORY_WORLD", str(now_run / "world" / "world.db"))
+    monkeypatch.setenv("FACTORY_LEDGER", str(tmp_path / "ledger.jsonl"))
+    monkeypatch.setenv("FACTORY_AGENT", "chief")
+    from factory.servers import ledger_server
+    ok = brief(rows())
+    assert ledger_server.write_entry("brief", ok)["status"] == "value"
+    bad = copy.deepcopy(ok)
+    bad["top"][0]["next_step"] = "Send the readout, flagging Aiko's caveat that Feb 23+ cohorts are immature and the dip reads worse than it is."
+    result = ledger_server.write_entry("brief", bad)
+    assert result["status"] == "rejection" and "readout" in result["message"]

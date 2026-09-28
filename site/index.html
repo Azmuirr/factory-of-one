@@ -140,6 +140,9 @@ const prose = t => esc(t).replace(/\s?\(?\b((?:mail|chat|cal|tr|trk):[a-z0-9_]+)
 const bet = R.bet.payload, verdict = R.verdict.payload, packet = R.packet.payload, card = R.card.payload;
 const W = R.weeks, actionWeek = W.indexOf(R.today);
 const S = { approve: null, call: null, expected: bet.prediction.expected, confidence: bet.confidence };
+// Gate answers in a showcase run may come from a file written in advance. Say so, instead of calling it a PM's judgment.
+const scripted = R.summary.gates.every(g => g.scripted ?? g.wall_seconds === 0);
+const theirs = scripted ? "The scripted answers" : "The PM in this run";
 
 // ---- The clock: agent steps take their real run time; your steps take the measured PM minutes ------------------
 const secs = { chief: C?.usage?.seconds || 0, signal: R.agents.signal?.seconds || 0,
@@ -217,9 +220,9 @@ function renderDay() {
   const triaged = Object.values(tri).reduce((a, n) => a + n, 0);
 
   let html = `<p class="eyebrow">Monday, March 2</p><h1>A PM's Monday with four agents</h1>
-    <p class="lede">You're Sam, a growth PM at Tallybird, a simulated AI meeting notetaker. This is one real run: what each agent read, what it did, what code checked, and how long it took. The agents do the work. You make two calls.</p>
+    <p class="lede">You're Sam, a growth PM at Tallybird, a simulated AI meeting notetaker. This is one real run: what each agent read, what it did, what code checked, and how long it took. The agents do the work. You make two calls. Durations are the real run times; the clock is illustrative.</p>
     <div class="summary">
-      <div class="card"><div class="stat">${Math.round(you.brief + you.decide + you.call)} min <small>your time</small></div><p class="small muted">Reading and deciding</p></div>
+      <div class="card"><div class="stat">~${Math.round(you.brief + you.decide + you.call)} min <small>your time</small></div><p class="small muted">Estimated from what you read, at 200 words a minute, plus 30 seconds per answer</p></div>
       <div class="card"><div class="stat">${mins(secs.chief + secs.signal + secs.qpacket + secs.builder + secs.qbuilds)} min <small>agent time</small></div><p class="small muted">Chief, Signal, Quality, Builder</p></div>
       <div class="card"><div class="stat">${triaged} <small>emails triaged</small></div><p class="small muted">${C.drafts} replies drafted, none sent</p></div>
       <div class="card"><div class="stat">${pct(verdict.before)} &rarr; ${pct(verdict.after)}</div><p class="small muted">Microsoft activation, two weeks later</p></div>
@@ -252,7 +255,7 @@ function renderDay() {
     <div class="card">${chart({ series: [{ name: "Microsoft calendar", values: R.series.with_action.microsoft, color: "var(--ms)", upto: actionWeek - 1 },
       { name: "Google calendar", values: R.series.with_action.google, color: "var(--goog)", upto: actionWeek - 1 }], markers: [releaseMarker] })}</div>
     ${facts(["The metric catalog: 6 registered metrics", "Weekly signup cohorts by calendar provider, channel, and company size", "Every release in the window", "Support tickets, searched by phrase"],
-      [`Localized the drop to ${esc(seg(packet.diagnosis.segment))}; the other providers held flat`, `Tied the onset to ${esc(packet.diagnosis.release_id)}, shipped ${R.release.date}`, `Found the step that broke: ${esc(packet.diagnosis.mechanism_metric)}`, `Sized it and recommended a ${esc(packet.recommended_action.name)} for that segment only`],
+      [`Localized the drop: ${R.providers.map(v => `${esc(cap(v.value))} ${pct(v.before)} &rarr; ${pct(v.after)}${v.p_value > 0.01 ? ` (not significant, p ${v.p_value.toFixed(2)})` : ""}`).join("; ")}`, `Tied the onset to ${esc(packet.diagnosis.release_id)}, shipped ${R.release.date}`, `Found the step that broke: ${esc(packet.diagnosis.mechanism_metric)}`, `Sized it and recommended a ${esc(packet.recommended_action.name)} for that segment only`],
       ["Every number is replayed from the query it cites", "The headline is recomputed from its metric, periods, and segment", "Quotes match a real ticket or release note word for word", "Cohorts younger than 7 days are refused, not averaged in"])}
     <details><summary>The evidence: ${packet.cause.length} claims, what each does not prove, and what was ruled out</summary>${packet.cause.map(claim).join("")}${(packet.ruled_out || []).map(claim).join("")}</details>
     ${tools(R.usage.signal)}` });
@@ -272,7 +275,7 @@ function renderDay() {
       <p class="small muted">Predict Microsoft activation for the first cohort after the rollback. You're scored when the data matures, with a tolerance of ${pct(bet.prediction.tolerance)}.</p>
       <div class="field"><label>Predicted activation <span id="ev">${pct(S.expected)}</span></label><input type="range" id="expected" min="0.28" max="0.44" step="0.005" value="${S.expected}"></div>
       <div class="field"><label>Confidence it lands within ${pct(bet.prediction.tolerance)} <span id="cv">${Math.round(S.confidence * 100)}%</span></label><input type="range" id="confidence" min="0.5" max="0.99" step="0.01" value="${S.confidence}"></div>
-      <p class="small muted" style="margin:0">The PM in this run bet ${pct(bet.prediction.expected)} at ${Math.round(bet.confidence * 100)}%. Microsoft's baseline before the release was about ${pct(R.series.with_action.microsoft.slice(0, 5).reduce((a, v) => a + v, 0) / 5)}.</p></div></div>` });
+      <p class="small muted" style="margin:0">${theirs} bet ${pct(bet.prediction.expected)} at ${Math.round(bet.confidence * 100)}%.${scripted ? " They were written in advance, by the person who built this sandbox." : ""} Microsoft's baseline before the release was about ${pct(R.series.with_action.microsoft.slice(0, 5).reduce((a, v) => a + v, 0) / 5)}.</p></div></div>` });
 
   if (approved) {
     html += stop({ time: tick(mins(secs.builder)), sub: `${mins(secs.builder)} min`, who: "Builder &middot; engineer and designer", color: "--builder",
@@ -281,14 +284,16 @@ function renderDay() {
       <div class="subtabs">${R.builds.map((x, i) => `<button class="btn" data-build="${i}" aria-pressed="${i === 0}">${{ mvp: "Code change", design: "Design", prototype: "Demo for Dana" }[x.kind]} ${chipV(x.review?.verdict)}</button>`).join("")}</div>
       <div id="buildview"></div>
       ${facts(["The approved bet and Signal's packet", "The product code: onboarding, screens, feature flags, tests", "Tallybird's design system: tokens and components"],
-        ["Added a feature flag, off by default, scoped to Microsoft calendar users", "Wrote tests for it; every test passes", "Designed the step a blocked user sees, with an admin-approval banner", "Built a one-screen page for Dana: one number, one ask"],
+        [`Added the flag <span class="mono">${esc((R.builds.find(x => x.kind === "mvp")?.new_flags || [])[0] || "none")}</span>, off by default`,
+         `Wrote ${R.builds.find(x => x.kind === "mvp")?.new_tests ?? 0} new tests. Tests pass when code reruns them: ${R.builds.find(x => x.kind === "mvp")?.checks?.tests_passed ? "yes" : "no"}`,
+         "Designed the step a blocked user sees", "Built a one-screen page for Dana: one number, one ask"],
         ["Tests rerun by code, never taken on Builder's word", "Scope: the new flag ships off, a new test exists, no test was removed", "Hidden acceptance tests that Builder never sees", "The design uses only system components; the demo has no dead clicks"])}
       ${tools(R.usage.builder)}` });
     html += stop({ time: tick(mins(secs.qbuilds)), sub: `${mins(secs.qbuilds)} min`, who: "Quality &middot; reviewer", color: "--quality",
       title: `Quality reviews each build for its own reader: ${R.builds.map(x => x.review?.verdict).join(", ")}`,
       body: `<p class="why">Three builds for three readers: engineering, the user, and the VP. Each is judged against its own purpose. Its verdicts are on the tabs above.</p>${tools(R.usage.quality_build)}` });
     html += stop({ time: "09:30", sub: "then 11:00", who: "You", color: "--you", title: "You walk Dana through it, and the leadership sync approves",
-      body: `<p>You send Dana the readout with the demo, starting from Chief's drafted reply. At 11:00 the rollback is approved, engineering merges the change, and the flag turns on for Microsoft calendar users.</p>
+      body: `<p><span class="chip">Narration, not part of the run</span></p><p>You send Dana the readout with the demo, starting from Chief's drafted reply. At 11:00 the rollback is approved, engineering merges the change, and the flag turns on for Microsoft calendar users.</p>
       <p class="small muted">In the simulation, the rollback applies from Monday and the world runs forward two weeks with the same users.</p>` });
   }
 
@@ -316,9 +321,10 @@ function renderDay() {
 function score() {
   const hit = Math.abs(verdict.after - S.expected) <= bet.prediction.tolerance;
   const brier = Math.pow(S.confidence - (hit ? 1 : 0), 2);
-  return `<div class="callout ${S.call === R.call.payload.decision ? "ok" : ""}">You chose <strong>${esc(S.call)}</strong>. The run's PM chose <strong>${esc(R.call.payload.decision)}</strong>: ${esc(R.call.payload.rationale)}</div>
+  return `<div class="callout ${S.call === R.call.payload.decision ? "ok" : ""}">You chose <strong>${esc(S.call)}</strong>. ${theirs} chose <strong>${esc(R.call.payload.decision)}</strong>: ${esc(R.call.payload.rationale)}</div>
     <div class="grid"><div class="card"><div class="stat">${brier.toFixed(2)} <small>your Brier score</small></div><p class="small muted">0 is perfect. You bet ${pct(S.expected)} at ${Math.round(S.confidence * 100)}%; it came in at ${pct(verdict.after)}. ${hit ? "Landed." : "Missed."}</p></div>
-    <div class="card"><div class="stat">${R.summary.brier.toFixed(2)} <small>the run's PM</small></div><p class="small muted">Bet ${pct(bet.prediction.expected)} at ${Math.round(bet.confidence * 100)}%</p></div></div>${planted()}`;
+    <div class="card"><div class="stat">${R.summary.brier.toFixed(2)} <small>${scripted ? "scripted answers" : "the run's PM"}</small></div><p class="small muted">Bet ${pct(bet.prediction.expected)} at ${Math.round(bet.confidence * 100)}%${scripted ? ", written in advance" : ""}</p></div></div>
+    <p class="small muted">One prediction says little about calibration. A Brier score means something across many bets.</p>${planted()}`;
 }
 function planted() {
   return `<h3 style="margin-top:18px">What was planted in the data</h3><div class="card"><p><strong>Cause:</strong> ${esc(R.truth.cause.mechanism)}</p>
@@ -346,9 +352,9 @@ function renderWrong() {
     </tbody></table></div>`;
 }
 function renderHow() {
-  const rows = [["Chief", "Your morning: triage, open loops, meeting prep, replies in your voice", "Sender weight, conflicts, free time, staleness"],
+  const rows = [["Chief", "Your morning: triage, open loops, meeting prep, replies in your voice", "Sender weight, conflicts, free time, staleness. A brief that guesses why a metric moved is bounced when it's written"],
     ["Signal", "What changed and why, with numbers and customer voice", "Every number, by replaying the query it cites"],
-    ["Quality", "Reviews every artifact before you see it", "Numbers, quotes, fields, privacy; refuses SHIP when a check fails"],
+    ["Quality", "Reviews Signal's and Builder's work before you see it", "Numbers, quotes, fields, privacy; refuses SHIP when a check fails"],
     ["Builder", "A code change behind a flag, a design, a demo", "Reruns tests, checks scope, runs hidden acceptance tests"]];
   $("#how").innerHTML = `<p class="eyebrow">How it works</p><h1>Agents do the work. Code owns the facts. You own the calls.</h1>
     <div class="card"><table><thead><tr><th>Agent</th><th>Does</th><th>Code checks</th></tr></thead><tbody>${rows.map(r => `<tr><td><strong>${r[0]}</strong></td><td>${r[1]}</td><td class="small">${r[2]}</td></tr>`).join("")}</tbody></table></div>

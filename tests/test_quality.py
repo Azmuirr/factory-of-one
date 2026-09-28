@@ -116,3 +116,36 @@ def test_the_sibling_builds_fixture_passes_every_code_check(tmp_path):
         checks = review.correctness(entry, entries, tmp_path / "world.db", tmp_path)
         assert checks["fields"] == "pass" and checks["numbers"] != "fail", (entry["payload"]["kind"], checks)
     assert "sibling-builds" in {t.id for t in load_suite("quality").tasks}
+
+
+# The voice count, like every number, cites what produced it ------------------------------------------
+
+def clean_rows():
+    return [json.loads(l) for l in (FIXTURES / "clean.jsonl").read_text(encoding="utf-8").splitlines()]
+
+
+def test_a_voice_count_must_cite_the_search_it_came_from(world, run_dir):
+    rows = clean_rows()
+    del rows[1]["payload"]["diagnosis"]["voice_ref"]
+    result = review.correctness(rows[1], rows, world, run_dir)
+    assert any("voice_ref" in d for d in result["details"]["numbers"])
+
+
+def test_a_voice_count_that_merges_searches_fails(world, run_dir):
+    rows = clean_rows()
+    rows[1]["payload"]["diagnosis"]["voice_workspaces"] = 21  # what an agent gets by adding two searches itself
+    result = review.correctness(rows[1], rows, world, run_dir)
+    assert any("gives 12" in d for d in result["details"]["numbers"])
+
+
+# Small numbers in prose are data unless they are dates or time spans ----------------------------------
+
+@pytest.mark.parametrize("text, checked", [
+    ("12 distinct workspaces filed tickets", [12.0]),
+    ("cohorts need 7 days to mature", []),
+    ("released Feb 10, reviewed in week 6", []),
+    ("Step 1 of 3", []),
+])
+def test_only_dates_and_time_spans_skip_the_numbers_check(text, checked):
+    from factory import numbers as nums
+    assert [v for v, _ in nums.text_numbers(text)] == checked

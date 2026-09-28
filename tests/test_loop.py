@@ -81,3 +81,8 @@ def test_the_world_before_the_action_is_kept_so_earlier_artifacts_stay_checkable
         conn.close()
         return value
     assert data_through(out / "world-before" / "world.db") < data_through(out / "world" / "world.db")
+
+
+def test_the_summary_says_when_gate_answers_were_scripted(loop_run):
+    _, summary = loop_run
+    assert summary["gates"] and all(g["scripted"] for g in summary["gates"])

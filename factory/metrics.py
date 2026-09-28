@@ -142,6 +142,7 @@ def resolve_segment(metric: dict, segment: dict | None, group_by: list[str] | No
 
 class World:
     def __init__(self, db_path: Path):
+        self.path = Path(db_path)
         conn = sqlite3.connect(f"file:{Path(db_path).as_posix()}?mode=ro", uri=True)
         conn.executescript(FACTS_SQL)
         self.data_through = parse_ts(conn.execute("SELECT value FROM meta WHERE key = 'data_through'").fetchone()[0])

@@ -44,6 +44,10 @@ def world_problems(type: str, payload: dict) -> list[str]:
                 problems.append(f"segment dimension {dim} does not exist")
             elif set(values) - set(dims[dim]["values"]):
                 problems.append(f"segment values {sorted(set(values) - set(dims[dim]['values']))} are not values of {dim}")
+    if type == "brief":
+        from factory.review import unsourced_causes
+        problems += [f'This says why a metric moved, and you have no metrics: "{s}". Attribute it to the person who said it, '
+                     "or leave the cause to the readout." for s in unsourced_causes(payload)]
     if type == "build" and os.environ.get("FACTORY_DEMOS"):
         location = Path(os.environ["FACTORY_DEMOS"]).parent / payload.get("location", "")
         if payload.get("kind") == "mvp":

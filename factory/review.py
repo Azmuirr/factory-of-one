@@ -6,7 +6,7 @@ import re
 import sqlite3
 from pathlib import Path
 
-from factory import code, demos, design, ledger, queries, sizing
+from factory import code, demos, design, ledger, queries, sizing, support
 from factory import numbers as nums
 from factory.metrics import World, catalog
 
@@ -120,6 +120,28 @@ def voice_bound(world_path: Path, segment: dict, start: str, end: str) -> int:
     return n
 
 
+def voice_problems(world_path: Path, diagnosis: dict, log: dict) -> list[str]:
+    """The voice count must be one search's distinct_workspaces, replayed. Adding up separate searches double counts."""
+    voice, ref = diagnosis.get("voice_workspaces"), diagnosis.get("voice_ref")
+    if voice is None:
+        return []
+    q = log.get(ref)
+    if not q or q["tool"] != "search_tickets":
+        return ["voice_workspaces must cite the ticket search it came from as voice_ref"]
+    got = support.search(world_path, **q["args"])["distinct_workspaces"]
+    return [] if got == voice else [f"voice_workspaces is {voice}; replaying {ref} gives {got}"]
+
+
+METRIC_MOVE = re.compile(r"\b(?:dip|drop|dropped|decline|declined|fell|falling|reads worse|looks worse|recovered|recovery)\b", re.I)
+EXPLAINS = re.compile(r"\b(?:because|due to|mostly|driven by|caused by|comes from|is from|reads worse than|looks worse than|not real|isn't real)\b", re.I)
+
+
+def unsourced_causes(payload) -> list[str]:
+    """Sentences that say why a metric moved without citing a decision packet. Chief has no metrics, so it cannot know."""
+    sentences = [s for text in nums.texts(payload) for s in re.split(r"(?<=[.!?])\s+|\n", text)]
+    return [s.strip()[:140] for s in sentences if METRIC_MOVE.search(s) and EXPLAINS.search(s) and "pkt_" not in s]
+
+
 def correctness(entry: dict, entries: list[dict], world_path: Path, root: Path) -> dict:
     payload, kind = entry["payload"], entry["type"]
     earlier = [e for e in entries if e["id"] != entry["id"]]
@@ -141,12 +163,7 @@ def correctness(entry: dict, entries: list[dict], world_path: Path, root: Path) 
             details["fields"].append("a decision packet must reference its signal card")
         else:
             details["numbers"] += packet_numbers(World(world_path), payload, card["payload"], queries.load(queries.log_path(root / "ledger.jsonl")))
-            voice = payload.get("diagnosis", {}).get("voice_workspaces")
-            if voice is not None:
-                after = card["payload"]["after"]["period"]
-                bound = voice_bound(world_path, payload["diagnosis"].get("segment"), after["start"], after["end"])
-                if voice > bound:
-                    details["numbers"].append(f"voice_workspaces {voice} exceeds the {bound} accounts with any ticket")
+            details["numbers"] += voice_problems(world_path, payload.get("diagnosis", {}), queries.load(queries.log_path(root / "ledger.jsonl")))
             result["numbers"] = "pass"
 
     if kind in ("signal_card", "decision_packet"):
@@ -157,8 +174,13 @@ def correctness(entry: dict, entries: list[dict], world_path: Path, root: Path) 
             details["quotes"] += [q for q in quotes if " ".join(q.split()) not in corpus]
             result["quotes"] = "pass"
 
+    evidence = {}
     if kind == "build" and payload.get("kind") == "mvp":
         details["fields"] += mvp_problems(root / payload["location"], payload)
+        folder = root / payload["location"]
+        if folder.is_dir():  # what the change does, so the reviewer judges the code and not the description
+            evidence = {"diff": code.diff(code.APP, folder)[:8000], "new_flags": code.new_flags(code.APP, folder),
+                        "flags": {n: code.flags(folder)[n] for n in code.new_flags(code.APP, folder)}, "tests": code.run_tests(folder)}
 
     if kind == "build" and payload.get("kind") == "design":
         details["fields"] += design_problems(root / payload["location"], payload)
@@ -178,7 +200,8 @@ def correctness(entry: dict, entries: list[dict], world_path: Path, root: Path) 
     for c in CHECKS:
         if details[c]:
             result[c] = "fail"
-    return {**result, "details": {c: [str(d) for d in details[c]] for c in CHECKS if details[c]}}
+    out = {**result, "details": {c: [str(d) for d in details[c]] for c in CHECKS if details[c]}}
+    return {**out, "evidence": evidence} if evidence else out
 
 
 def mvp_problems(folder: Path, payload: dict) -> list[str]:

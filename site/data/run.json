@@ -309,6 +309,32 @@
   "ts": "2026-03-02T00:00:00Z",
   "type": "decision_packet"
  },
+ "providers": [
+  {
+   "dimension": "calendar_provider",
+   "value": "google",
+   "before": 0.4087,
+   "after": 0.4038,
+   "relative": -0.012,
+   "p_value": 0.504696
+  },
+  {
+   "dimension": "calendar_provider",
+   "value": "microsoft",
+   "before": 0.3937,
+   "after": 0.3052,
+   "relative": -0.2248,
+   "p_value": 0.0
+  },
+  {
+   "dimension": "calendar_provider",
+   "value": "none",
+   "before": 0.3653,
+   "after": 0.3812,
+   "relative": 0.0435,
+   "p_value": 0.518535
+  }
+ ],
  "reviews": {
   "pkt_0001": {
    "id": "rev_0001",
@@ -503,7 +529,11 @@
     },
     "findings": [],
     "verdict": "SHIP"
-   }
+   },
+   "new_flags": [
+    "calendar_connect_skip_microsoft"
+   ],
+   "new_tests": 4
   },
   {
    "id": "bld_0002",
@@ -522,7 +552,9 @@
     },
     "findings": [],
     "verdict": "SHIP"
-   }
+   },
+   "new_flags": [],
+   "new_tests": 0
   },
   {
    "id": "bld_0003",
@@ -543,7 +575,9 @@
     },
     "findings": [],
     "verdict": "SHIP"
-   }
+   },
+   "new_flags": [],
+   "new_tests": 0
   }
  ],
  "verdict": {

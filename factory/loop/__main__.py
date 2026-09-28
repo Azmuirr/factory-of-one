@@ -24,6 +24,10 @@ HUMAN = {"kind": "human", "name": "pm"}
 LOOP = {"kind": "code", "name": "loop"}  # the runner records approved and applied actions
 
 
+
+def segment_text(segment: dict | None) -> str:
+    return "; ".join(f"{k} = {', '.join(v)}" for k, v in (segment or {}).items()) or "everyone"
+
 class Loop:
     def __init__(self, scenario: str, seed: int, out: Path, gates: Gates, fixture: Path | None):
         self.scenario, self.seed, self.dir, self.gates = scenario, seed, out, gates
@@ -119,11 +123,12 @@ class Loop:
         briefing = "\n".join([
             f"Question: {p['question']}",
             f"Signal: {card['payload']['headline'] if card else 'none'}",
-            f"Diagnosis: {json.dumps(p['diagnosis'])}",
+            f"Diagnosis: {p['diagnosis']['metric']} moved for {segment_text(p['diagnosis'].get('segment'))} after {p['diagnosis'].get('release_id') or 'no release'}. "
+            f"Mechanism: {p['diagnosis'].get('mechanism_metric')}. Customer voice: {p['diagnosis'].get('voice_workspaces')} workspaces.",
             *[f"- {c['class'].upper()}: {c['text']}" for c in p["cause"]],
             *[f"- RULED OUT: {c['text']}" for c in p.get("ruled_out", [])],
             f"Size: {p['size']['value']} {p['size']['unit']} ({p['size']['method']})",
-            f"Recommended action: {json.dumps(p['recommended_action'])}",
+            f"Recommended action: {p['recommended_action']['name']} {p['recommended_action']['params'].get('release_id', '')} for {segment_text(p['recommended_action']['params'].get('segment'))}",
             f"Cheapest test: {p['cheapest_test']}",
             f"Would change if: {'; '.join(p['would_change_if'])}",
             f"Unknowns: {'; '.join(p.get('unknowns', [])) or 'none'}",
@@ -268,7 +273,7 @@ class Loop:
             "brier": result["brier"] if result else None,
             "prediction_hit": result["prediction_hit"] if result else None,
             "pm_minutes": round(sum(r.pm_minutes for r in self.gates.records), 1),
-            "gates": [{"gate": r.gate, "pm_minutes": r.pm_minutes, "words_shown": r.words_shown, "inputs": r.inputs,
+            "gates": [{"gate": r.gate, "pm_minutes": r.pm_minutes, "words_shown": r.words_shown, "inputs": r.inputs, "scripted": r.scripted,
                        "wall_seconds": r.wall_seconds} for r in self.gates.records],
             "agent_cost_usd": round(self.agent_cost, 4),
             "ledger_entries": len(ledger.read(self.ledger)),

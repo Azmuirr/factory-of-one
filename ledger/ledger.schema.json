@@ -600,6 +600,9 @@
               "type": "string",
               "description": "Catalog metric that shows the mechanism"
             },
+            "voice_ref": {
+              "type": "string"
+            },
             "voice_workspaces": {
               "type": "integer",
               "minimum": 0,

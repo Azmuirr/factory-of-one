@@ -23,7 +23,7 @@ from factory import config as install
 from factory.chief.html import Links
 from factory.evals.runner import Trial, parse_transcript
 from factory.evals.suite import Task
-from factory.metrics import World
+from factory.metrics import World, catalog
 from factory.workplace import Workplace
 from sandbox.generator.run import generate
 
@@ -142,7 +142,23 @@ def build(loop_dir: Path, chief_dir: Path | None, out: Path) -> dict:
         builds.append({"id": b["id"], "kind": p["kind"], "honesty": p["honesty_label"], "checks": p.get("checks", {}),
                        "path": Path(site_path).relative_to(out).as_posix() if site_path else None,
                        "message": (src / "CHANGE.md").read_text(encoding="utf-8").strip() if (src / "CHANGE.md").is_file() else None,
-                       "diff": diff_text, "review": review})
+                       "diff": diff_text, "review": review,
+                       "new_flags": re.findall(r"^\+([a-z0-9_]+):\s*$", diff_text or "", re.M),
+                       "new_tests": len(re.findall(r"^\+def test_", diff_text or "", re.M))})
+
+    # How every value of the diagnosed dimension moved, from the world as the agents saw it on Monday.
+    monday = loop_dir / "world-before" / "world.db"
+    world = World(monday if monday.exists() else loop_dir / "world" / "world.db")
+    card_p = (first("signal_card") or {}).get("payload", {})
+    providers = []
+    if card_p:
+        b, a = card_p["before"]["period"], card_p["after"]["period"]
+        for dim in (card_p.get("segment") or {"calendar_provider": []}):
+            for value in catalog()[1][dim]["values"]:
+                r = world.compare_periods(card_p["metric"], b["start"], b["end"], a["start"], a["end"], {dim: [value]})
+                if r["status"] == "value":
+                    providers.append({"dimension": dim, "value": value, "before": r["before"], "after": r["after"],
+                                      "relative": r["relative"], "p_value": r.get("p_value")})
 
     releases = {r["id"]: r for r in scenario["releases"]}
     release = releases[truth["cause"]["release"]]
@@ -174,7 +190,7 @@ def build(loop_dir: Path, chief_dir: Path | None, out: Path) -> dict:
         "series": {"with_action": with_action, "no_action": no_action},
         "release": {"id": release["id"], "title": release["title"], "notes": release["notes"],
                     "date": (FIRST_WEEK + timedelta(weeks=release["at"]["week"] - 1, days=release["at"]["day"] - 1)).isoformat()},
-        "card": first("signal_card"), "packet": first("decision_packet"),
+        "card": first("signal_card"), "packet": first("decision_packet"), "providers": providers,
         "reviews": {r["refs"][0]: {"id": r["id"], "author": r["author"], **r["payload"]} for r in by_type("review")},
         "bet": first("bet"), "actions": by_type("action"), "builds": builds,
         "verdict": first("verdict"), "call": first("call"),

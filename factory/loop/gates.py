@@ -16,6 +16,7 @@ class GateRecord:
     inputs: int
     wall_seconds: float
     answers: dict = field(default_factory=dict)
+    scripted: bool = False  # answers came from a file written in advance, not from a person at the keyboard
 
     @property
     def pm_minutes(self) -> float:
@@ -41,6 +42,6 @@ class Gates:
             else:
                 raw = input(f"{prompt} [{default}]: ").strip()
                 answers[key] = raw or default
-        record = GateRecord(gate, len(briefing.split()), len(questions), round(time.time() - started, 1), answers)
+        record = GateRecord(gate, len(briefing.split()), len(questions), round(time.time() - started, 1), answers, scripted is not None)
         self.records.append(record)
         return answers

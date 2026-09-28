@@ -20,6 +20,9 @@ SKIP = {"__pycache__", ".pytest_cache", "CHANGE.md"}  # CHANGE.md is the pull re
 IN_SCOPE = ("tallybird/", "tests/")
 MAX_CHANGED_LINES = 150
 TEST_DEF = re.compile(r"^def (test_\w+)", re.M)
+# Tests are code an agent wrote. They get only what Python needs to start, never the caller's tokens or keys.
+SAFE_ENV = ("PATH", "SYSTEMROOT", "SYSTEMDRIVE", "WINDIR", "TEMP", "TMP", "TMPDIR", "HOME", "USERPROFILE", "LANG", "LC_ALL",
+            "PYTHONIOENCODING", "VIRTUAL_ENV")
 
 
 def files(base: Path) -> list[str]:
@@ -74,7 +77,7 @@ def reject(out: Path, message: str) -> dict:
 
 def run_tests(folder: Path, extra_env: dict | None = None) -> dict:
     proc = subprocess.run([sys.executable, "-m", "pytest", "-q", "-p", "no:cacheprovider"], cwd=folder, capture_output=True,
-                          text=True, encoding="utf-8", timeout=180, env={**os.environ, **(extra_env or {})})
+                          text=True, encoding="utf-8", timeout=180, env={**{k: v for k, v in os.environ.items() if k in SAFE_ENV}, **(extra_env or {})})
     lines = [l for l in proc.stdout.splitlines() if l.strip()]
     return {"passed": proc.returncode == 0, "summary": lines[-1] if lines else proc.stderr[-300:], "output": "\n".join(lines[-40:])}
 

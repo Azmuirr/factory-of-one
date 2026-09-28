@@ -1,6 +1,6 @@
 # Agents
 
-8 agents run one loop. You touch 3 gates. Every agent writes to one shared ledger.
+The design has 8 agents in one loop, with you at 3 gates. Four are built: Chief, Signal, Quality, and Builder. Bet, Comms, Coach, and Retro are designed below but not built; until they are, you write the bet, and nothing is sent. Every agent writes to one shared ledger.
 
 Tool names below describe capabilities. Each install maps capabilities to real tools: see [install.md](install.md).
 

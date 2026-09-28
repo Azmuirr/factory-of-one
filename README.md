@@ -10,7 +10,7 @@ The PMs who last will be operators with strong judgment who run several agents a
 |---|---|---|
 | **Chief**, chief of staff | Morning brief: triage, open loops, commitments, meeting prep, goal check, replies drafted in your voice. Sends nothing except one note to you | Sender weight, suspicious senders, who replied, calendar conflicts, free slots, hours per goal, stakeholder staleness |
 | **Signal**, analyst | What changed and why, with numbers and customer voice. Writes a decision packet | Every number: each one cites a query that code replays |
-| **Quality**, reviewer | Reviews every artifact before you see it, with [Elon Mode](skills/elon-mode/SKILL.md) | Numbers, quotes, fields, privacy. It cannot return SHIP when a check fails |
+| **Quality**, reviewer | Reviews Signal's and Builder's work before you see it, with [Elon Mode](skills/elon-mode/SKILL.md). Chief's brief is checked by code when it is written | Numbers, quotes, fields, privacy. It cannot return SHIP when a check fails |
 | **Builder**, engineer and designer | A code change behind a flag, a design in the company's design system, a one-screen demo | Tests rerun by code, change scope, hidden acceptance tests, design system rules, dead clicks |
 
 You own two gates: **decide** (approve the action and place a bet with a prediction) and **call** (ship, iterate, or kill once the data is in). Your predictions are scored.
@@ -52,7 +52,7 @@ python -m factory.chief --fixture agents/chief/evals/fixtures/reference-brief.js
 python -m factory.chief --mode morning --open    # about 6 minutes: Chief live on the planted Monday
 python -m factory.loop                            # about 10 minutes: every agent live, you at the gates
 python -m factory.evals run signal --trials 3    # score an agent against the answer key
-python -m pytest                                  # 140 tests, about 4 minutes, no Claude
+python -m pytest                                  # 150 tests, about 5 minutes, no Claude
 ```
 
 On macOS or Linux, use `.venv/bin/python` in place of `python` if the venv isn't activated. Rebuild the replay page from any run with `python -m factory.replay --loop runs/loop/<run> --chief runs/chief/<run>`.
@@ -61,15 +61,15 @@ On macOS or Linux, use `.venv/bin/python` in place of `python` if the venv isn't
 
 Live runs on scenario 1, graded by the same code graders as the evals. Every run is logged, including the failures and what changed because of them: [docs/evals.md](docs/evals.md#live-runs).
 
-| Agent | Latest live result |
-|---|---|
-| Chief | 36 of 36 checks on the planted Monday (the first live run scored 30 of 35) |
-| Signal | 2 of 2 trials at 100%, including Quality's code checks |
-| Builder | 100% on one trial, including hidden acceptance tests |
-| Quality | 100% on one trial of the regression built from a real mistake |
-| The loop | Microsoft activation 30.5% to 38.2% two weeks after the fix. Prediction landed, Brier score 0.04, 7.3 minutes of PM time |
+| Agent | Trials | Result |
+|---|---|---|
+| Chief | 2 | 36 of 36 checks, then 35 of 36: the second run relayed a planted trap as a reason for the dip. The ledger now bounces that sentence when the brief is written |
+| Signal | 2 | Both at 100%, including Quality's code checks |
+| Builder | 1 | 100%, including hidden acceptance tests |
+| Quality | 1 | 100% on the regression built from a real mistake |
+| The loop | 1 showcase | Microsoft activation 30.5% to 38.2% two weeks after the fix. The gate answers came from a file written in advance, so the Brier score and PM minutes are not a person's |
 
-These are small samples on one scenario. Treat them as a working system, not a benchmark.
+Every agent was tuned on scenario 1, and every result above is on scenario 1. Treat them as a working system, not a benchmark. A scenario the agents were never tuned on is the honest test, and it isn't built yet.
 
 ## Built and not built
 
