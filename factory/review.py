@@ -103,6 +103,11 @@ def source_text(world_path: Path) -> str:
     conn = sqlite3.connect(f"file:{Path(world_path).as_posix()}?mode=ro", uri=True)
     parts = [f"{s} {b}" for s, b in conn.execute("SELECT subject, body FROM tickets")]
     parts += [f"{t} {n}" for t, n in conn.execute("SELECT title, notes FROM releases")]
+    for table, cols in (("docs", "title, body"), ("requests", "account, text"), ("mail", "subject, body"), ("chat", "text, ''")):
+        try:
+            parts += [" ".join(str(c or "") for c in row) for row in conn.execute(f"SELECT {cols} FROM {table}")]
+        except sqlite3.OperationalError:
+            pass  # an older world without the workplace tables
     conn.close()
     return " ".join(" ".join(p.split()) for p in parts)
 
@@ -142,6 +147,35 @@ def unsourced_causes(payload) -> list[str]:
     return [s.strip()[:140] for s in sentences if METRIC_MOVE.search(s) and EXPLAINS.search(s) and "pkt_" not in s]
 
 
+def candidate_problems(world_path: Path, payload: dict, log: dict) -> list[str]:
+    """Every size in a ranked list is replayed from the query or search it cites."""
+    problems = []
+    world = None
+    for item in payload.get("items", []):
+        size = item["size"]
+        q = log.get(size["ref"])
+        if not q:
+            problems.append(f"rank {item['rank']}: size {size['value']} does not cite a logged query or search")
+            continue
+        world = world or World(world_path)
+        got = queries.run(world, q["tool"], q["args"])
+        want = got.get("arr_at_stake") if q["tool"] == "search_requests" else got.get("usd_per_week", got.get("value"))
+        if want is None or not close(float(size["value"]), float(want)):
+            problems.append(f"rank {item['rank']}: size {size['value']}; replaying {size['ref']} gives {want}")
+        if q["tool"] == "search_requests" and size.get("accounts") is not None and size["accounts"] != got["distinct_accounts"]:
+            problems.append(f"rank {item['rank']}: {size['accounts']} accounts; replaying {size['ref']} gives {got['distinct_accounts']}")
+    for item in payload.get("items", []):
+        for ev in item.get("evidence", []):
+            q = log.get(ev.get("ref"))
+            if "value" in ev and q:
+                world = world or World(world_path)
+                got = queries.run(world, q["tool"], q["args"])
+                allowed = [got.get(k) for k in ("arr_at_stake", "distinct_accounts", "matches", "usd_per_week", "value") if got.get(k) is not None]
+                if not any(close(float(ev["value"]), float(a)) for a in allowed):
+                    problems.append(f"rank {item['rank']}: evidence {ev['value']} does not match {ev['ref']}")
+    return problems
+
+
 def correctness(entry: dict, entries: list[dict], world_path: Path, root: Path) -> dict:
     payload, kind = entry["payload"], entry["type"]
     earlier = [e for e in entries if e["id"] != entry["id"]]
@@ -175,6 +209,15 @@ def correctness(entry: dict, entries: list[dict], world_path: Path, root: Path) 
             result["quotes"] = "pass"
 
     evidence = {}
+    if kind == "candidates":
+        details["numbers"] += candidate_problems(world_path, payload, queries.load(queries.log_path(root / "ledger.jsonl")))
+        result["numbers"] = "pass"
+        quotes = [ev["quote"] for item in payload.get("items", []) for ev in item.get("evidence", []) if ev.get("quote")]
+        if quotes:
+            corpus = source_text(world_path)
+            details["quotes"] += [q for q in quotes if " ".join(q.split()) not in corpus]
+            result["quotes"] = "pass"
+
     if kind == "build" and payload.get("kind") == "mvp":
         details["fields"] += mvp_problems(root / payload["location"], payload)
         folder = root / payload["location"]

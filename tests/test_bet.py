@@ -1,0 +1,119 @@
+import json
+from pathlib import Path
+
+import pytest
+
+from factory import field_requests, queries
+from factory.workplace import Workplace
+
+ROOT = Path(__file__).resolve().parents[1]
+
+
+@pytest.fixture
+def world(now_run):
+    return now_run / "world" / "world.db"
+
+
+# The material Bet reads -----------------------------------------------------------------------------
+
+def test_the_workplace_has_strategy_docs_and_requests(world):
+    with Workplace(world) as wp:
+        docs = {d["id"]: d for d in wp.docs_list()}
+        assert {"d_strategy", "d_prd_v2", "d_prd_sso", "d_pipeline"} <= set(docs)
+        assert "webinars" in wp.doc_read("d_strategy")["body"]
+        assert wp.url("doc", "d_strategy").endswith("#doc-d_strategy")
+
+
+def test_a_request_search_counts_each_account_once(world):
+    r = field_requests.search(world, query="webinar")
+    assert r["matches"] == 2 and r["distinct_accounts"] == 1 and r["arr_at_stake"] == 172800
+
+
+def test_a_mislabeled_request_is_found_by_its_words(world):
+    r = field_requests.search(world, any_of=["admin approval", "calendar consent", "admin must approve"])
+    assert {x["account"] for x in r["requests"]} == {"Cobalt Ridge Logistics", "Quarry Analytics", "Oakridge Schools"}
+    assert r["arr_at_stake"] == 21600 + 4500 + 5400
+
+
+def test_a_request_search_is_logged_and_replayable(tmp_path, monkeypatch, world):
+    monkeypatch.setenv("FACTORY_WORLD", str(world))
+    monkeypatch.setenv("FACTORY_LEDGER", str(tmp_path / "ledger.jsonl"))
+    from factory.metrics import World
+    from factory.servers import requests_server
+    r = requests_server.search_requests(query="sso")
+    logged = queries.load(tmp_path / "queries.jsonl")[r["query_id"]]
+    assert queries.run(World(world), logged["tool"], logged["args"])["arr_at_stake"] == r["arr_at_stake"] == 64800
+
+
+def test_a_changed_scenario_regenerates_its_cached_world(tmp_path, monkeypatch):
+    from factory.evals import runner
+    from factory.evals.suite import Task
+    monkeypatch.setattr(runner, "ROOT", tmp_path)
+    task = Task("t", "capability", "s01-calendar-gate", 1, "", [])
+    first = runner.world_for(task)
+    stamp = (first.parent.parent / "fingerprint.txt").read_text(encoding="utf-8")
+    (first.parent.parent / "fingerprint.txt").write_text("stale", encoding="utf-8")
+    runner.world_for(task)
+    assert (first.parent.parent / "fingerprint.txt").read_text(encoding="utf-8") == stamp
+
+
+# Bet's ranked list, graded ----------------------------------------------------------------------------------
+
+import copy  # noqa: E402
+import shutil  # noqa: E402
+
+from factory.evals import graders  # noqa: E402
+from factory.evals.runner import Trial  # noqa: E402
+from factory.evals.suite import Task  # noqa: E402
+
+REFERENCE = ROOT / "agents" / "bet" / "evals" / "fixtures" / "reference-candidates.jsonl"
+KEY = graders.truth("s01-calendar-gate")
+GRADERS = [("bet_ranking", {}), ("passes_quality_checks", {"agent": "bet"})]
+
+
+def bet_trial(tmp_path, now_run, mutate=None):
+    (tmp_path / "world").mkdir()
+    shutil.copy(now_run / "world" / "world.db", tmp_path / "world" / "world.db")
+    shutil.copy(ROOT / "ledger" / "examples" / "queries.jsonl", tmp_path / "queries.jsonl")
+    rows = [json.loads(l) for l in REFERENCE.read_text(encoding="utf-8").splitlines()]
+    if mutate:
+        mutate(rows[-1]["payload"])
+    t = Trial(Task("t", "capability", "s01-calendar-gate", 1, "", []), 0, tmp_path)
+    t.ledger_path.write_text("".join(json.dumps(r) + "\n" for r in rows), encoding="utf-8")
+    return t
+
+
+def bet_failures(t):
+    return [n for g, p in GRADERS for n, ok, _ in graders.CODE[g](t, KEY, p) if not ok]
+
+
+def test_the_reference_ranking_passes(tmp_path, now_run):
+    assert bet_failures(bet_trial(tmp_path, now_run)) == []
+
+
+def test_ranking_the_loud_account_first_fails(tmp_path, now_run):
+    def plant(p):
+        loud = {**copy.deepcopy(p["items"][1]), "rank": 1, "title": "Webinars for Northwind", "sources": ["req:r_005", "req:r_011"], "evidence": []}
+        p["items"] = [loud] + [{**i, "rank": i["rank"] + 1} for i in p["items"]]
+        p["set_aside"] = []
+    failed = bet_failures(bet_trial(tmp_path, now_run, plant))
+    assert "no loud trap in the top 2" in failed and "the first bet is the one the numbers show" in failed
+
+
+def test_a_tag_only_search_misses_the_mislabeled_account(tmp_path, now_run):
+    from factory import field_requests
+    tagged = field_requests.search(now_run / "world" / "world.db", tag="calendar-consent")
+    def plant(p):
+        p["items"][0]["evidence"] = [{"source": "requests", "ref": tagged["query_id"], "value": tagged["arr_at_stake"]}]
+    t = bet_trial(tmp_path, now_run, plant)
+    with (tmp_path / "queries.jsonl").open("a", encoding="utf-8") as f:
+        f.write(json.dumps({"query_id": tagged["query_id"], "tool": "search_requests",
+                            "args": {"query": "", "any_of": None, "tag": "calendar-consent", "since": None, "until": None}}) + "\n")
+    assert tagged["distinct_accounts"] == 2
+    assert "requests are found by their words, not only their tags" in bet_failures(t)
+
+
+def test_a_size_that_does_not_replay_fails(tmp_path, now_run):
+    def plant(p):
+        p["items"][1]["size"]["value"] = 64800 * 2  # counting Northwind-style duplicates, or adding searches by hand
+    assert "candidates passes Quality's code checks" in bet_failures(bet_trial(tmp_path, now_run, plant))

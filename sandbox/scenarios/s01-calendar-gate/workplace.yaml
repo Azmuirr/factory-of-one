@@ -227,3 +227,68 @@ tracker:
   - {id: ONB-140, title: "Consent fallback: skip plus paste a meeting link", status: To Do, owner: p_eng, due: "2026-03-06", updated: "2026-02-28T15:10:00Z"}
   - {id: PLAT-88, title: "SSO for Business plan", status: Not started, owner: p_ppm, due: "2026-03-09", depends_on: "Growth requirements doc", updated: "2026-02-27T11:15:00Z"}
   - {id: GRO-55, title: "Q2 budget: tool spend", status: To Do, owner: p_me, due: "2026-03-06", updated: "2026-02-26T15:20:00Z"}
+
+# Docs the PM can read: strategy and product docs. Bet reads these to tie work to strategy.
+docs:
+  - id: d_strategy
+    title: "Tallybird H1 2026 strategy"
+    owner: p_ceo
+    updated: "2026-01-08T16:00:00Z"
+    body: |
+      Three bets for the first half.
+      1. Activation. Every new workspace records and shares a real meeting in its first week. We measure 7-day activation, and we want it at 45% by June.
+      2. Upmarket. Launch the Business plan with SSO and admin controls by the end of Q2, and sign 30 Business customers.
+      3. Hiring. Add a senior PM to Growth.
+      Not this half: new meeting formats such as webinars, custom work for a single customer, compliance programs such as HIPAA, and a mobile rewrite.
+      How we decide: prefer bets we can reverse, give each bet one number, and revisit the list every month.
+  - id: d_prd_v2
+    title: "PRD: Onboarding v2, connect calendar first"
+    owner: p_me
+    updated: "2026-01-20T18:00:00Z"
+    body: |
+      Problem: workspaces that skip calendar connect rarely record a meeting, so they rarely activate.
+      Proposal: make calendar connect the first step and remove the skip button, so the notetaker joins the user's next meeting on its own.
+      Success: calendar connect rises, and 7-day activation follows.
+      Risks: some Microsoft 365 tenants require an admin to approve calendar apps. We expect this to be rare and will watch support tickets.
+      Rollout: everyone at once, without a flag, to learn fast.
+  - id: d_prd_sso
+    title: "PRD draft: SSO for the Business plan"
+    owner: p_ppm
+    updated: "2026-02-20T15:00:00Z"
+    body: |
+      Goal: SSO and admin controls on the Business plan, launched by the end of Q2.
+      Open questions for Growth: which identity providers come first (Okta, Microsoft Entra ID, Google Workspace), whether SCIM provisioning is required at launch, and how trials of the Business plan work.
+      Platform plans the sprint starting March 9. Growth's requirements are needed by Wednesday, March 4, or the work moves to next quarter.
+  - id: d_pipeline
+    title: "Sales pipeline notes, Q1"
+    owner: p_sales
+    updated: "2026-02-26T19:00:00Z"
+    body: |
+      Most common blockers in open deals: SSO for the Business plan, and trials stuck on Outlook admin approval.
+      Northwind Health, our largest prospect, asks for Zoom webinar recording and a HIPAA agreement before it would sign 600 seats.
+      Smaller asks keep coming in for CRM sync and custom vocabulary.
+
+# Requests logged by Sales and Customer Success, modeled on a field-request tool. Tags are set by whoever logs them.
+requests:
+  - {id: r_001, ts: "2026-02-24T18:10:00Z", logged_by: p_sales, account: Cobalt Ridge Logistics, arr_at_stake: 21600, plan: team, tag: calendar-consent,
+     text: "Trial blocked: IT will not grant tenant-wide calendar consent. They need a way to use Tallybird without connecting calendars."}
+  - {id: r_002, ts: "2026-02-10T16:00:00Z", logged_by: p_sales, account: Harbor and Pine Legal, arr_at_stake: 11520, plan: business, tag: sso,
+     text: "Need SAML SSO with Okta before they can buy the Business plan."}
+  - {id: r_003, ts: "2026-02-13T20:30:00Z", logged_by: p_sales, account: Lumen Robotics, arr_at_stake: 23040, plan: business, tag: sso,
+     text: "Security review requires Microsoft Entra ID SSO."}
+  - {id: r_004, ts: "2026-02-18T15:45:00Z", logged_by: p_sales, account: Quarry Analytics, arr_at_stake: 4500, plan: team, tag: calendar-consent,
+     text: "New hires are stuck on Outlook admin approval during setup."}
+  - {id: r_005, ts: "2026-02-05T17:00:00Z", logged_by: p_sales, account: Northwind Health, arr_at_stake: 172800, plan: business, tag: webinar,
+     text: "Will sign 600 seats if we record Zoom webinars and sign a HIPAA agreement."}
+  - {id: r_006, ts: "2026-02-11T14:20:00Z", logged_by: p_sales, account: Brightline Studio, arr_at_stake: 2160, plan: team, tag: integration,
+     text: "Wants recaps synced to HubSpot."}
+  - {id: r_007, ts: "2026-02-19T22:00:00Z", logged_by: p_sales, account: Meridian Freight, arr_at_stake: 17280, plan: business, tag: sso,
+     text: "Needs Entra ID SSO and SCIM provisioning."}
+  - {id: r_008, ts: "2026-02-25T16:30:00Z", logged_by: p_coo, account: Oakridge Schools, arr_at_stake: 5400, plan: team, tag: other,
+     text: "Teachers cannot finish setup: Outlook says an admin must approve the calendar connection."}
+  - {id: r_009, ts: "2026-02-16T13:10:00Z", logged_by: p_sales, account: Pinecrest Dental, arr_at_stake: 1440, plan: team, tag: integration,
+     text: "Custom vocabulary for dental terms."}
+  - {id: r_010, ts: "2026-02-23T19:40:00Z", logged_by: p_sales, account: Vega Consulting, arr_at_stake: 12960, plan: business, tag: sso,
+     text: "Google Workspace SSO required."}
+  - {id: r_011, ts: "2026-02-26T21:00:00Z", logged_by: p_coo, account: Northwind Health, arr_at_stake: 172800, plan: business, tag: webinar,
+     text: "Their CIO asked again about webinar recording and HIPAA. Big logo; worth a look."}

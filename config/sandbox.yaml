@@ -18,6 +18,7 @@ servers:
   workplace: {command: "{python}", args: [-m, factory.servers.workplace_server]}
   code:      {command: "{python}", args: [-m, factory.servers.code_server]}
   design:    {command: "{python}", args: [-m, factory.servers.design_server]}
+  requests:  {command: "{python}", args: [-m, factory.servers.requests_server]}
 server_env:
   FACTORY_WORLD: "{world}"
   FACTORY_LEDGER: "{ledger}"
@@ -43,6 +44,9 @@ capabilities:
   flags.state: mcp__releases__flag_state
   demo.publish: mcp__demos__publish_demo
   demo.check: mcp__demos__check_demo
+  docs.list: mcp__workplace__docs_list
+  docs.read: mcp__workplace__doc_read
+  requests.search: mcp__requests__search_requests
   code.list: mcp__code__list_files
   code.read: mcp__code__read_file
   code.search: mcp__code__search_code

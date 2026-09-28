@@ -79,6 +79,29 @@ class Loop:
             return
         self.run_agent("signal", "diagnose-s01", "sense")
 
+    def frame(self) -> None:
+        """Bet ranks the work coming in: requests, docs, and Signal's packet. Quality reviews the list."""
+        self.log("frame", "start")
+        if self.fixture:
+            self.load_fixture(lambda row: row["type"] == "candidates")
+            self.log("frame", "bet output loaded from fixture")
+        else:
+            self.run_agent("bet", "frame-s01", "frame")
+        ranked = self.latest("candidates")
+        if ranked:
+            self.quality_review(ranked["id"], "frame")
+
+    def ranked_lines(self) -> list[str]:
+        ranked = self.latest("candidates")
+        if not ranked:
+            return []
+        p = ranked["payload"]
+        unit = {"usd_per_week": "a week", "usd_per_year": "a year"}
+        return ["Bet's ranking this week:",
+                *[f"  {i['rank']}. {i['title']} (${i['size']['value']:,.0f} {unit[i['size']['unit']]}). Needs from you: {i['needs_from_pm']}"
+                  for i in sorted(p["items"], key=lambda i: i["rank"])],
+                *[f"  Set aside: {a['title']}. {a['why']}" for a in p.get("set_aside", [])], ""]
+
     def load_fixture(self, keep) -> None:
         for line in self.fixture.read_text(encoding="utf-8").splitlines():
             if line.strip() and keep(json.loads(line)):
@@ -122,6 +145,7 @@ class Loop:
         p = packet["payload"]
         card = self.latest("signal_card")
         briefing = "\n".join([
+            *self.ranked_lines(),
             f"Question: {p['question']}",
             f"Signal: {card['payload']['headline'] if card else 'none'}",
             f"Diagnosis: {p['diagnosis']['metric']} moved for {segment_text(p['diagnosis'].get('segment'))} after {p['diagnosis'].get('release_id') or 'no release'}. "
@@ -320,8 +344,9 @@ class Loop:
         packet = self.latest("decision_packet")
         if packet:
             verdict_ = self.quality_review(packet["id"], "review")
+            self.frame()
             review_entry = next((e for e in reversed(ledger.read(self.ledger)) if e["type"] == "review" and packet["id"] in e["refs"]), None)
-            prepared = [e["id"] for e in ledger.read(self.ledger) if e["type"] in ("signal_card", "decision_packet")]
+            prepared = [e["id"] for e in ledger.read(self.ledger) if e["type"] in ("signal_card", "decision_packet", "candidates")]
             self.write("queue", AUTOPILOT, {"status": "waiting_for_pm", "packet": packet["id"], "prepared": prepared,
                                             "review": review_entry["id"] if review_entry else None,
                                             "reason": "Decision rights are prepare_only: the action waits for the PM"}, [packet["id"]])
@@ -361,6 +386,7 @@ class Loop:
         packet = self.latest("decision_packet")
         if packet:
             self.quality_review(packet["id"], "review")
+        self.frame()
         result = None
         if self.decide():
             self.build()

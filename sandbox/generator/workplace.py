@@ -16,6 +16,8 @@ CREATE TABLE chat (message_id TEXT PRIMARY KEY, ts TEXT, channel TEXT, dm_member
 CREATE TABLE calendar (event_id TEXT PRIMARY KEY, start TEXT, end TEXT, title TEXT, organizer_id TEXT, attendees TEXT, agenda TEXT);
 CREATE TABLE transcripts (transcript_id TEXT PRIMARY KEY, event_id TEXT, ts TEXT, text TEXT);
 CREATE TABLE tracker (issue_id TEXT PRIMARY KEY, title TEXT, status TEXT, owner_id TEXT, due TEXT, depends_on TEXT, updated TEXT);
+CREATE TABLE docs (doc_id TEXT PRIMARY KEY, title TEXT, owner_id TEXT, updated TEXT, body TEXT);
+CREATE TABLE requests (request_id TEXT PRIMARY KEY, ts TEXT, logged_by TEXT, account TEXT, arr_at_stake REAL, plan TEXT, tag TEXT, text TEXT);
 """
 
 
@@ -51,4 +53,12 @@ def write_workplace(conn: sqlite3.Connection, scenario_dir: Path, cutoff: str) -
         (i["id"], i["title"], i["status"], i["owner"], i.get("due"), i.get("depends_on"), i["updated"])
         for i in w["tracker"] if i["updated"] < cutoff
     ])
-    return {t: conn.execute(f"SELECT COUNT(*) FROM {t}").fetchone()[0] for t in ("people", "mail", "chat", "calendar", "transcripts", "tracker")}
+    conn.executemany("INSERT INTO docs VALUES (?,?,?,?,?)", [
+        (d["id"], d["title"], d["owner"], d["updated"], d["body"]) for d in w.get("docs", []) if d["updated"] < cutoff
+    ])
+    conn.executemany("INSERT INTO requests VALUES (?,?,?,?,?,?,?,?)", [
+        (r["id"], r["ts"], r["logged_by"], r["account"], r["arr_at_stake"], r["plan"], r["tag"], r["text"])
+        for r in w.get("requests", []) if r["ts"] < cutoff
+    ])
+    return {t: conn.execute(f"SELECT COUNT(*) FROM {t}").fetchone()[0]
+            for t in ("people", "mail", "chat", "calendar", "transcripts", "tracker", "docs", "requests")}

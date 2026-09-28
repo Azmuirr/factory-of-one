@@ -77,6 +77,12 @@ class Links:
         if kind == "tr":
             t = self.wp.transcript_get(rid)
             return f"Transcript: {t['title']}" if t else ref
+        if kind == "doc":
+            d = self.wp.doc_read(rid)
+            return f"Doc: {d['title']}" if d else ref
+        if kind == "req":
+            r = self.wp.conn.execute("SELECT account, text FROM requests WHERE request_id = ?", (rid,)).fetchone()
+            return f"{r['account']}: {r['text'][:70]}" if r else ref
         if kind == "trk":
             found = [i for i in self.wp.tracker_search() if i["issue_id"] == rid]
             return f"{rid}: {found[0]['title']}" if found else ref
@@ -201,7 +207,7 @@ def workplace_html(wp: Workplace) -> str:
     out = [f"<h1>Workplace: {escape(me)}</h1>",
            '<p class="muted">A read-only stand-in for mail, chat, calendar, transcripts, and the tracker. In a live install, links go to the real tools.</p>',
            '<nav><a href="#inbox">Inbox</a><a href="#sent">Sent</a><a href="#chat">Chat</a><a href="#calendar">Calendar</a>'
-           '<a href="#transcripts">Transcripts</a><a href="#tracker">Tracker</a></nav>']
+           '<a href="#transcripts">Transcripts</a><a href="#tracker">Tracker</a><a href="#docs">Docs</a><a href="#requests">Requests</a></nav>']
     for anchor, title, items in (("inbox", "Inbox", wp.mail_list()), ("sent", "Sent", wp.sent_list())):
         out.append(f'<h2 id="{anchor}">{title}</h2>')
         for m in sorted(items, key=lambda m: m["ts"], reverse=True):
@@ -228,6 +234,15 @@ def workplace_html(wp: Workplace) -> str:
     for i in wp.tracker_search():
         out.append(f'<article class="card" id="trk-{escape(i["issue_id"])}"><strong>{escape(i["issue_id"])}: {escape(i["title"])}</strong>'
                    f'<div class="muted">{escape(i["status"])} &middot; {escape(i["owner"]["name"])} &middot; due {escape(i["due"] or "none")}</div></article>')
+    out.append('<h2 id="docs">Docs</h2>')
+    for d in wp.docs_list():
+        full = wp.doc_read(d["id"])
+        out.append(f'<article class="card" id="doc-{escape(d["id"])}"><strong>{escape(d["title"])}</strong>'
+                   f'<div class="muted">{escape(d["owner"]["name"])} &middot; {escape(d["updated"])}</div><pre>{escape(full["body"])}</pre></article>')
+    out.append('<h2 id="requests">Customer requests</h2>')
+    for r in wp.conn.execute("SELECT * FROM requests WHERE ts <= ? ORDER BY ts", (wp.cutoff,)).fetchall():
+        out.append(f'<article class="card" id="req-{escape(r["request_id"])}"><strong>{escape(r["account"])}</strong>'
+                   f'<div class="muted">{escape(r["tag"])} &middot; ${int(r["arr_at_stake"]):,} a year &middot; {escape(r["ts"])}</div><pre>{escape(r["text"])}</pre></article>')
     return page(f"Workplace: {me}", "".join(out))
 
 

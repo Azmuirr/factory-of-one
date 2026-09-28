@@ -24,6 +24,8 @@ servers:
   calendar:  {command: "<your calendar MCP server>", args: []}
   meetings:  {command: "<your meeting transcripts MCP server>", args: []}
   tracker:   {command: "<your tracker MCP server>", args: []}
+  docs:      {command: "<your docs MCP server: Google Drive, Notion, Confluence>", args: []}
+  requests:  {command: "{python}", args: [-m, factory.servers.requests_server]}   # needs a CRM adapter (planned)
 server_env:
   FACTORY_WORLD: "{world}"   # the warehouse adapter replaces this (planned)
   FACTORY_LEDGER: "{ledger}"
@@ -49,6 +51,9 @@ capabilities:
   flags.state: mcp__releases__<read flag state tool>
   demo.publish: mcp__demos__publish_demo
   demo.check: mcp__demos__check_demo
+  docs.list: mcp__docs__<list or search docs tool>
+  docs.read: mcp__docs__<read doc tool>
+  requests.search: mcp__requests__search_requests
   code.list: mcp__code__list_files
   code.read: mcp__code__read_file
   code.search: mcp__code__search_code

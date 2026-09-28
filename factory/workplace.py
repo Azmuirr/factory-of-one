@@ -334,6 +334,16 @@ class Workplace:
                                     AND event_id NOT IN (SELECT event_id FROM transcripts)""", (self.cutoff, since)).fetchall()
         return [{"id": r["event_id"], "title": r["title"], "start": r["start"]} for r in rows]
 
+    def docs_list(self) -> list[dict]:
+        rows = self.conn.execute("SELECT doc_id, title, owner_id, updated FROM docs WHERE updated <= ? ORDER BY updated DESC", (self.cutoff,)).fetchall()
+        return [{"id": r["doc_id"], "url": self.url("doc", r["doc_id"]), "title": r["title"], "owner": self.person(r["owner_id"]),
+                 "updated": r["updated"]} for r in rows]
+
+    def doc_read(self, doc_id: str) -> dict | None:
+        r = self.conn.execute("SELECT * FROM docs WHERE doc_id = ? AND updated <= ?", (doc_id, self.cutoff)).fetchone()
+        return {"id": r["doc_id"], "url": self.url("doc", r["doc_id"]), "title": r["title"], "owner": self.person(r["owner_id"]),
+                "updated": r["updated"], "body": r["body"]} if r else None
+
     def tracker_search(self, query: str | None = None, status: str | None = None) -> list[dict]:
         rows = self.conn.execute("SELECT * FROM tracker WHERE updated <= ?", (self.cutoff,)).fetchall()
         q = (query or "").lower()

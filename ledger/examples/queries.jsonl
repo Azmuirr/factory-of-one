@@ -2,3 +2,6 @@
 {"args": {"after_end": "2026-02-22", "after_start": "2026-02-10", "before_end": "2026-02-08", "before_start": "2026-01-05", "group_by": null, "metric": "first_meeting_rate_7d", "segment": {"calendar_provider": ["microsoft"]}}, "query_id": "q_becfc6b20b99", "tool": "compare_periods"}
 {"args": {"after_end": "2026-02-22", "after_start": "2026-02-10", "before_end": "2026-02-08", "before_start": "2026-01-05", "segment": null}, "query_id": "q_beed673729b3", "tool": "estimate_weekly_arr_impact"}
 {"args": {"any_of": null, "calendar_provider": "microsoft", "end": "2026-03-01", "query": "admin approval", "start": "2026-02-09"}, "query_id": "q_085d27a2d3e1", "tool": "search_tickets"}
+{"args": {"any_of": ["admin approval", "calendar consent", "admin must approve"], "query": "", "since": null, "tag": null, "until": null}, "query_id": "q_ca150b5b47d0", "tool": "search_requests"}
+{"args": {"any_of": null, "query": "sso", "since": null, "tag": null, "until": null}, "query_id": "q_1dca312dcfaa", "tool": "search_requests"}
+{"args": {"any_of": null, "query": "webinar", "since": null, "tag": null, "until": null}, "query_id": "q_1d2ef9e1dcad", "tool": "search_requests"}

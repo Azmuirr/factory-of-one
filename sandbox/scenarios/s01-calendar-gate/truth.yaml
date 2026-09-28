@@ -147,3 +147,17 @@ grading:
     weekly:
       as_of: "2026-02-27T17:00:00Z"
       starved_goals: [g2]
+
+  # Bet's ranked list for Monday 2026-03-02. A candidate belongs to a theme if it cites any of the theme's refs.
+  bet:
+    themes:
+      consent: ["pkt_", "req:r_001", "req:r_004", "req:r_008", "mail:m_002", "mail:m_003", "chat:c_001"]
+      sso: ["req:r_002", "req:r_003", "req:r_007", "req:r_010", "mail:m_009", "doc:d_prd_sso", "trk:PLAT-88"]
+      webinar: ["req:r_005", "req:r_011"]
+    rank_1: consent
+    top_3_includes: [sso]
+    not_top_2: [webinar]
+    non_goal: {theme: webinar, doc: "doc:d_strategy"}
+    # The consent theme has 3 accounts, and one is tagged "other". A tag-only search finds 2.
+    consent_accounts_min: 3
+

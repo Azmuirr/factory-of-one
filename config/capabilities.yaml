@@ -43,6 +43,15 @@ capabilities:
   demo.check:
     description: Run the demo checks on an existing demo
     access: read
+  docs.list:
+    description: List strategy and product docs, with owner and last update
+    access: read
+  docs.read:
+    description: Read one strategy or product doc in full
+    access: read
+  requests.search:
+    description: Search customer requests logged by Sales and Customer Success. Returns distinct accounts and annual revenue at stake, counted once per account
+    access: read
   code.list:
     description: List the files in the product codebase
     access: read

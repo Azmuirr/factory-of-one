@@ -150,7 +150,7 @@ def passes_quality_checks(trial: Trial, key: dict, params: dict) -> list[Asserti
     from factory import review
 
     all_entries = entries(trial)
-    checked = [e for e in all_entries if e["type"] in ("signal_card", "decision_packet")]
+    checked = [e for e in all_entries if e["type"] in ("signal_card", "decision_packet", "candidates") and e["author"].get("name") == params.get("agent", e["author"].get("name"))]
     out = []
     for e in checked:
         result = review.correctness(e, all_entries, trial.world_path, trial.dir)
@@ -546,6 +546,42 @@ def brief_away_urgent(trial: Trial, key: dict, params: dict) -> list[Assertion]:
              f"{len(posts)} posts for {len(urgent)} urgent, limit {limit}, words {[len(p.split()) for p in posts]}")]
 
 
+def theme_of(item: dict, themes: dict) -> str | None:
+    refs = item.get("sources", []) + [e.get("ref", "") for e in item.get("evidence", [])]
+    for name, markers in themes.items():
+        if any(r.startswith(m) for r in refs for m in markers):
+            return name
+    return None
+
+
+def bet_ranking(trial: Trial, key: dict, params: dict) -> list[Assertion]:
+    """Bet's ranked list against the answer key: the right first bet, the deadline-driven second, and no loud trap near the top."""
+    want = key["bet"]
+    lists = entries(trial, "candidates")
+    if not lists:
+        return [("a ranked list was written", False, "no candidates entry")]
+    c = lists[-1]["payload"]
+    ranked = [theme_of(i, want["themes"]) for i in sorted(c["items"], key=lambda i: i["rank"])]
+    aside = [theme_of(a, want["themes"]) for a in c.get("set_aside", [])]
+    non_goal = want["non_goal"]
+    handled = non_goal["theme"] in aside and any(non_goal["doc"] in a.get("sources", []) for a in c.get("set_aside", []) if theme_of(a, want["themes"]) == non_goal["theme"])
+    # Replay every request search the consent bet cites: a tag-only search finds 2 of the 3 accounts.
+    from factory import queries
+    from factory.metrics import World
+    log = queries.load(trial.dir / "queries.jsonl")
+    consent_items = [i for i in c["items"] if theme_of(i, want["themes"]) == "consent"]
+    cited = [r for i in consent_items for r in [i["size"]["ref"], *[e.get("ref", "") for e in i.get("evidence", [])]]
+             if log.get(r, {}).get("tool") == "search_requests"]
+    accounts = max((queries.run(World(trial.world_path), "search_requests", log[r]["args"])["distinct_accounts"] for r in cited), default=0)
+    return [("a ranked list was written", True, str(ranked)),
+            ("the first bet is the one the numbers show", ranked[:1] == [want["rank_1"]], str(ranked)),
+            ("the deadline-driven goal is in the top 3", set(want["top_3_includes"]) <= set(ranked[:3]), str(ranked)),
+            ("no loud trap in the top 2", not set(want["not_top_2"]) & set(ranked[:2]), str(ranked)),
+            ("the strategy's non-goal is set aside, citing the strategy", handled, f"set aside: {aside}"),
+            ("requests are found by their words, not only their tags", accounts >= want["consent_accounts_min"],
+             f"the consent bet cites request searches finding {accounts} accounts")]
+
+
 def respects_lessons(trial: Trial, key: dict, params: dict) -> list[Assertion]:
     from factory import config as install
     from factory.workplace import Workplace
@@ -646,7 +682,7 @@ def findings_have_evidence(trial: Trial, key: dict, params: dict) -> list[Assert
 CODE = {f.__name__: f for f in (
     brief_top_themes, brief_triage, brief_needs_you, brief_calendar_flags, brief_replies, commitments_extracted, private_never_shown,
     brief_open_loops, brief_meeting_prep, brief_goal_check, brief_followups, brief_reschedule, drafts_in_voice, brief_stale,
-    notified_self, respects_lessons, no_unsourced_cause, brief_away_urgent, weekly_review,
+    notified_self, respects_lessons, no_unsourced_cause, brief_away_urgent, bet_ranking, weekly_review,
     review_verdict, findings_have_evidence,
     action_matches_decision, no_action_proposed, build_entry_valid, demo_passes_checks, demo_numbers_grounded,
     mvp_change_passes, design_passes_checks,

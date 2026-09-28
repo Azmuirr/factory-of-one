@@ -56,10 +56,27 @@ def claude_binary() -> str:
     return candidates[-1]
 
 
+def scenario_fingerprint(scenario: str) -> str:
+    """Changes whenever the scenario's files or the generator change, so a cached world is never stale."""
+    import hashlib
+
+    from sandbox.generator.run import GENERATOR_VERSION
+    folder = Path(__file__).resolve().parents[2] / "sandbox" / "scenarios" / scenario
+    h = hashlib.sha256(GENERATOR_VERSION.encode())
+    for f in sorted(p for p in folder.rglob("*") if p.is_file() and "acceptance" not in p.parts and p.name != "truth.yaml"):
+        h.update(f.relative_to(folder).as_posix().encode() + f.read_bytes())
+    return h.hexdigest()[:16]
+
+
 def world_for(task: Task) -> Path:
     run = ROOT / "runs" / task.scenario / f"seed-{task.seed}"
-    if not (run / "world" / "world.db").exists():
+    stamp = run / "fingerprint.txt"
+    want = scenario_fingerprint(task.scenario)
+    if not (run / "world" / "world.db").exists() or not stamp.exists() or stamp.read_text(encoding="utf-8") != want:
+        if run.exists():
+            shutil.rmtree(run)
         generate(task.scenario, seed=task.seed, out=run)
+        stamp.write_text(want, encoding="utf-8")
     return run / "world" / "world.db"
 
 

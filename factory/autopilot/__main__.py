@@ -40,6 +40,13 @@ def digest(run: Path) -> str:
                   f"  {d['metric']} moved for {segment_text(d.get('segment'))}; the step that broke is {d.get('mechanism_metric')}.",
                   f"  Quality: {r.get('verdict', 'no review')}. {' '.join(f['claim'] for f in r.get('findings', [])[:1])}",
                   f"  To decide: `python -m factory.loop --resume {run}`"]
+    ranked = next((e for e in reversed(entries) if e["type"] == "candidates"), None)
+    if ranked:
+        unit = {"usd_per_week": "a week", "usd_per_year": "a year"}
+        lines += ["", "## Bet's ranking for the week",
+                  *[f"{i['rank']}. **{i['title']}** (${i['size']['value']:,.0f} {unit[i['size']['unit']]}). Needs from you: {i['needs_from_pm']}"
+                    for i in sorted(ranked["payload"]["items"], key=lambda i: i["rank"])],
+                  *[f"- Set aside: {a['title']}. {a['why']}" for a in ranked["payload"].get("set_aside", [])]]
     if brief:
         tri = Counter(t["label"] for t in brief.get("triage", []))
         lines += ["", "## Chief handled", f"- Triaged {sum(tri.values())} emails: {', '.join(f"{n} {k.replace('_', ' ')}" for k, n in tri.items())}. Drafted replies; none were sent.",

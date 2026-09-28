@@ -9,7 +9,7 @@ from pathlib import Path
 from factory import sizing
 from factory.metrics import World, query_id
 
-TOOLS = ("get_metric", "compare_periods", "estimate_weekly_arr_impact", "search_tickets")
+TOOLS = ("get_metric", "compare_periods", "estimate_weekly_arr_impact", "search_tickets", "search_requests")
 
 
 def log_path(ledger_path: Path | None = None) -> Path:
@@ -44,6 +44,9 @@ def run(world: World, tool: str, args: dict) -> dict:
     if tool == "search_tickets":
         from factory import support
         return support.search(world.path, **args)
+    if tool == "search_requests":
+        from factory import field_requests
+        return field_requests.search(world.path, **args)
     raise ValueError(f"Unknown query tool {tool}")
 
 
