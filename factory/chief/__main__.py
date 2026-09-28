@@ -25,6 +25,7 @@ PROMPTS = {
     "midday": "It is {when}. Write the midday brief: only what changed since the morning.",
     "evening": "It is {when}. Write the evening wrap.",
     "weekly": "It is {when}. Write the weekly review.",
+    "away": "It is {when}. The PM is away today. Write the away brief.",
 }
 
 

@@ -11,7 +11,7 @@ from factory import ledger
 from factory.metrics import catalog
 
 # Humans write bets and calls. Reviews go through the review server, which runs the code checks.
-PREFIX = {k: v for k, v in ledger.PREFIX.items() if k not in ("bet", "call", "review")}
+PREFIX = {k: v for k, v in ledger.PREFIX.items() if k not in ("bet", "call", "review", "queue")}
 
 server = MCPServer(
     "ledger",

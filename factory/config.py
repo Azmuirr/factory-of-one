@@ -27,6 +27,7 @@ class Config:
     capabilities: dict
     goals: Path | None = None
     lessons: Path | None = None
+    decision_rights: Path | None = None
 
 
 @lru_cache(maxsize=None)
@@ -49,7 +50,8 @@ def load(path: Path | None = None) -> Config:
         raise ValueError(f"{path.name} maps capabilities that are not in the vocabulary: {unknown}")
     return Config(path, raw["mode"], ROOT / raw["company"], ROOT / raw["catalogs"], raw["servers"],
                   raw.get("server_env", {}), raw["capabilities"],
-                  ROOT / raw["goals"] if raw.get("goals") else None, ROOT / raw["lessons"] if raw.get("lessons") else None)
+                  ROOT / raw["goals"] if raw.get("goals") else None, ROOT / raw["lessons"] if raw.get("lessons") else None,
+                  ROOT / raw["decision_rights"] if raw.get("decision_rights") else None)
 
 
 def resolve(config: Config, capabilities: list[str]) -> dict[str, str]:

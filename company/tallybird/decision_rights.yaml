@@ -1,0 +1,22 @@
+# Who decides what while the PM is away. The autopilot enforces it, and every agent sees it in its prompt.
+# Decision D10. Change it here; nothing else in the factory needs to change.
+away:
+  # prepare_only: agents diagnose, review, and build proposals, and every action waits for the PM.
+  actions: prepare_only
+  # The one thing sent to the PM: a short message to their own Slack or Teams channel, through notify.self.
+  urgent:
+    max_per_day: 3
+    when:
+      - A request to the PM with a deadline in the next 24 hours
+      - A customer who is blocked from using the product
+      - A material change in a key metric
+      - Quality returned STOP on anything
+      - A kill trigger fired on a live bet
+  # Comms may send internal updates when every number matches the ledger. Everything else waits.
+  send:
+    team: when_numbers_match
+    manager: when_numbers_match
+    customer: wait_for_pm
+    external: wait_for_pm
+  # A colleague who may approve while the PM is away. None is set.
+  stand_in: null

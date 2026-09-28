@@ -4,6 +4,7 @@ company: company/tallybird/context.md
 catalogs: catalogs
 goals: company/tallybird/goals.yaml
 lessons: company/tallybird/lessons
+decision_rights: company/tallybird/decision_rights.yaml
 
 # MCP servers. Placeholders: {python}, {world}, {ledger}, {agent}, {catalogs}, {goals}, {demos}. ${NAME} reads an environment variable.
 servers:

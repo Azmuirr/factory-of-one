@@ -15,6 +15,8 @@ The PMs who last will be operators with strong judgment who run several agents a
 
 You own two gates: **decide** (approve the action and place a bet with a prediction) and **call** (ship, iterate, or kill once the data is in). Your predictions are scored.
 
+**When you're away,** the autopilot runs the loop to your decision and stops there: Chief sends up to three urgent items to your own channel, Signal and Quality prepare the decision, and a digest waits for you. Nothing is applied without you. The rules are one file you edit: [decision rights](company/tallybird/decision_rights.yaml).
+
 ## What's real and what's simulated
 
 | Real | Simulated |
@@ -51,8 +53,10 @@ python -m factory.loop --fixture ledger/examples/s01-happy-path.jsonl   # 1 minu
 python -m factory.chief --fixture agents/chief/evals/fixtures/reference-brief.jsonl --open   # a reference brief in your browser
 python -m factory.chief --mode morning --open    # about 6 minutes: Chief live on the planted Monday
 python -m factory.loop                            # about 10 minutes: every agent live, you at the gates
+python -m factory.autopilot                       # a day with you away: urgent items to you, the decision queued, a digest
+python -m factory.loop --resume runs/autopilot/<run>   # back at the keyboard: decide, and the loop continues
 python -m factory.evals run signal --trials 3    # score an agent against the answer key
-python -m pytest                                  # 150 tests, about 5 minutes, no Claude
+python -m pytest                                  # 162 tests, about 5 minutes, no Claude
 ```
 
 On macOS or Linux, use `.venv/bin/python` in place of `python` if the venv isn't activated. Rebuild the replay page from any run with `python -m factory.replay --loop runs/loop/<run> --chief runs/chief/<run>`.

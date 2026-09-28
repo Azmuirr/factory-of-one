@@ -525,6 +525,27 @@ def no_unsourced_cause(trial: Trial, key: dict, params: dict) -> list[Assertion]
     return [("no cause Chief cannot know, least of all a planted trap", not blamed, str(blamed))]
 
 
+def brief_away_urgent(trial: Trial, key: dict, params: dict) -> list[Assertion]:
+    """Away mode: the few urgent things reach the PM, one message each, and nothing else interrupts them."""
+    from factory import config as install
+    from factory import policy
+
+    want = key["chief"]["away"]
+    briefs = [e["payload"] for e in entries(trial, "brief") if e["payload"].get("mode") == "away"]
+    if not briefs:
+        return [("an away brief was written", False, "no brief with mode away")]
+    urgent = [u["ref"] for u in briefs[-1].get("urgent", [])]
+    cfg = install.load()
+    limit = policy.load(cfg.decision_rights)["away"]["urgent"]["max_per_day"] if cfg.decision_rights else 3
+    path = trial.dir / "outbox.jsonl"
+    posts = [json.loads(l)["text"] for l in path.read_text(encoding="utf-8").splitlines() if l.strip()] if path.exists() else []
+    return [("an away brief was written", True, f"{len(urgent)} urgent"),
+            ("the truly urgent items are flagged", len(set(urgent) & set(want["urgent_any"])) >= want["urgent_min"], str(urgent)),
+            ("nothing unimportant interrupts the PM", not set(urgent) & set(want["never_urgent"]), str(urgent)),
+            ("one short message per urgent item, within the limit", 0 < len(posts) == len(urgent) <= limit and all(len(p.split()) <= want["max_words"] for p in posts),
+             f"{len(posts)} posts for {len(urgent)} urgent, limit {limit}, words {[len(p.split()) for p in posts]}")]
+
+
 def respects_lessons(trial: Trial, key: dict, params: dict) -> list[Assertion]:
     from factory import config as install
     from factory.workplace import Workplace
@@ -625,7 +646,7 @@ def findings_have_evidence(trial: Trial, key: dict, params: dict) -> list[Assert
 CODE = {f.__name__: f for f in (
     brief_top_themes, brief_triage, brief_needs_you, brief_calendar_flags, brief_replies, commitments_extracted, private_never_shown,
     brief_open_loops, brief_meeting_prep, brief_goal_check, brief_followups, brief_reschedule, drafts_in_voice, brief_stale,
-    notified_self, respects_lessons, no_unsourced_cause, weekly_review,
+    notified_self, respects_lessons, no_unsourced_cause, brief_away_urgent, weekly_review,
     review_verdict, findings_have_evidence,
     action_matches_decision, no_action_proposed, build_entry_valid, demo_passes_checks, demo_numbers_grounded,
     mvp_change_passes, design_passes_checks,

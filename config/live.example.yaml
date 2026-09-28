@@ -6,6 +6,7 @@ company: company/<your-company>/context.md
 catalogs: company/<your-company>/catalogs
 goals: company/<your-company>/goals.yaml
 lessons: company/<your-company>/lessons
+decision_rights: company/<your-company>/decision_rights.yaml   # copy company/tallybird/decision_rights.yaml and edit
 
 servers:
   metrics:   {command: "{python}", args: [-m, factory.servers.metrics_server]}   # needs a warehouse adapter (planned)

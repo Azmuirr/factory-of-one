@@ -16,7 +16,7 @@
   "properties": {
     "id": {
       "type": "string",
-      "pattern": "^(sig|pkt|bet|act|bld|ver|rev|call|rdo|cmt|pch|brf)_[a-z0-9]{4,}$"
+      "pattern": "^(sig|pkt|bet|act|bld|ver|rev|call|rdo|cmt|pch|brf|que)_[a-z0-9]{4,}$"
     },
     "type": {
       "enum": [
@@ -31,7 +31,8 @@
         "readout",
         "commitment",
         "patch",
-        "brief"
+        "brief",
+        "queue"
       ]
     },
     "ts": {
@@ -307,12 +308,31 @@
           }
         }
       }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "queue"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "id": {
+            "pattern": "^que_"
+          },
+          "payload": {
+            "$ref": "#/$defs/queue"
+          }
+        }
+      }
     }
   ],
   "$defs": {
     "id_ref": {
       "type": "string",
-      "pattern": "^(sig|pkt|bet|act|bld|ver|rev|call|rdo|cmt|pch|brf)_[a-z0-9]{4,}$"
+      "pattern": "^(sig|pkt|bet|act|bld|ver|rev|call|rdo|cmt|pch|brf|que)_[a-z0-9]{4,}$"
     },
     "human": {
       "type": "object",
@@ -1193,7 +1213,8 @@
             "morning",
             "midday",
             "evening",
-            "weekly"
+            "weekly",
+            "away"
           ]
         },
         "meeting_prep": {
@@ -1362,6 +1383,38 @@
             "type": "string"
           },
           "description": "Weekly: at most 3 changes for next week"
+        },
+        "urgent": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "ref",
+              "why",
+              "do"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "ref": {
+                "type": "string"
+              },
+              "why": {
+                "type": "string"
+              },
+              "do": {
+                "type": "string"
+              },
+              "by": {
+                "type": "string"
+              },
+              "draft_reply": {
+                "type": "string"
+              },
+              "url": {
+                "type": "string"
+              }
+            }
+          }
         }
       }
     },
@@ -1392,6 +1445,42 @@
         },
         "draft_reply": {
           "type": "string"
+        }
+      }
+    },
+    "queue": {
+      "type": "object",
+      "required": [
+        "status",
+        "packet",
+        "reason",
+        "prepared"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "status": {
+          "enum": [
+            "waiting_for_pm",
+            "decided"
+          ]
+        },
+        "packet": {
+          "type": "string"
+        },
+        "reason": {
+          "type": "string"
+        },
+        "prepared": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "review": {
+          "type": [
+            "string",
+            "null"
+          ]
         }
       }
     }

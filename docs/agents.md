@@ -52,7 +52,7 @@ Protects the PM's attention and keeps promises from slipping. Reads mail, chat, 
 | Goal alignment | Meeting hours per goal, starved goals | Tying work to goals |
 | Meeting follow-ups | | Drafts that restate who does what by when |
 | Stakeholder staleness | Days since direct contact against the PM's cadence | What to say |
-| Modes: morning, midday, evening, weekly review | An "as of" time; each mode's window | The content per mode |
+| Modes: morning, midday, evening, weekly review, away | An "as of" time; each mode's window; the away limit on urgent messages | The content per mode; which items are urgent |
 | Learning from corrections | `python -m factory.chief.correct` saves a rule; rules load on every run; evals check them | Following them |
 
 Run it with `python -m factory.chief --mode morning|midday|evening|weekly`. Scheduling: [install.md](install.md#schedule-chief). Gate: escalations.

@@ -41,6 +41,16 @@ python -m factory.chief.correct --note "Never say 'circle back'."
 
 The rules land in `lessons/chief.yaml` for your install and load on every run.
 
+## Run the loop while you're away
+
+`python -m factory.autopilot` runs a day with nobody at the keyboard: Chief's away brief, urgent items to your own channel, Signal's check, and Quality's review. Any decision waits in the ledger, and nothing is applied. Your rules are in `decision_rights.yaml`. Schedule it like Chief:
+
+```text
+30 7 * * 1-5  cd /path/to/factory-of-one && .venv/bin/python -m factory.autopilot
+```
+
+When you're back, read `digest.md` in the run folder and continue with `python -m factory.loop --resume <run folder>`.
+
 ## Before you point Builder at a real repo
 
 Builder's `code.propose` runs the tests of a change an agent wrote, on your machine. Those tests get only a short allowlist of environment variables (the path, temp folders, your home folder), never your tokens or keys. They still run with your file access and network. On a real repo, run the factory inside a container or a throwaway VM.

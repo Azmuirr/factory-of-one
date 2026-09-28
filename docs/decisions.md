@@ -122,3 +122,21 @@ Each entry records the options, the choice, and what would reverse it. The reaso
 
 **Would change if:** a scenario needs front-end behavior that Python cannot show. Then the app gains a browser test, run by the same Playwright the demo checks use.
 
+## D10. When the PM is away, the factory prepares and never applies
+
+| Option | Verdict |
+|---|---|
+| Apply small, reversible, scoped actions alone | Rejected by the PM. Speed is not worth an action nobody approved |
+| Apply anything Quality ships | Rejected. It puts the agents' judgment where the PM's belongs |
+| **Prepare everything to the decision. Send urgent items to the PM's own channel. Queue the decision** | **Chosen** |
+
+**The rules** live in `company/<company>/decision_rights.yaml`, and every agent sees them in its prompt:
+- Actions: `prepare_only`. Code refuses to apply anything without the PM; the autopilot writes a `queue` entry instead, and only code can write one.
+- Urgent: at most 3 messages a day, to the PM's own Slack or Teams, for deadlines within 24 hours, blocked customers, material metric moves, a Quality STOP, or a fired kill trigger. Anything over the limit is held for the digest.
+- Sending: Comms may send internal updates to the team and the PM's manager when every number matches the ledger. Anything to customers or outside the company waits.
+- Stand-in: none set.
+
+**Back at the keyboard:** `python -m factory.loop --resume <run>` continues from the queued decision, with the same gates.
+
+**Would change if:** the PM names a stand-in, or trusts a class of action enough to delegate it. Both are one line in the policy file.
+

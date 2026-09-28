@@ -117,6 +117,9 @@ def system_prompt(agent: AgentConfig, config: install.Config, text: str, capabil
     references = [(ROOT / r).read_text(encoding="utf-8").strip() for r in agent.references]
     parts = [text.strip(), *references, install.tools_section(install.resolve(config, capabilities)), company.strip()]
     lessons = config.lessons / f"{agent.name}.yaml" if config.lessons else None
+    if config.decision_rights and config.decision_rights.exists():
+        from factory import policy
+        parts.append(policy.prompt_section(policy.load(config.decision_rights)))
     if lessons and lessons.exists():
         rules = lessons.read_text(encoding="utf-8").strip()
         parts.append("## Rules learned from the PM's corrections\n\nFollow these. They override your defaults.\n\n" + rules)

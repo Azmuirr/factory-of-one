@@ -1,5 +1,5 @@
 agent: chief
-version: 0.4.0
+version: 0.5.0
 defaults:
   trials: 3
   seed: 1
@@ -28,6 +28,20 @@ tasks:
       - respects_lessons
       - no_unsourced_cause
       - private_never_shown
+      - {type: code, name: tools_within_allowlist, params: {servers: [workplace, ledger]}}
+
+  - id: away-monday-s01
+    kind: capability
+    scenario: s01-calendar-gate
+    reference: agents/chief/evals/fixtures/reference-away.jsonl
+    prompt: It is Monday 2026-03-02, 07:30. The PM is away today. Write the away brief.
+    graders:
+      - brief_away_urgent
+      - brief_triage
+      - commitments_extracted
+      - private_never_shown
+      - respects_lessons
+      - no_unsourced_cause
       - {type: code, name: tools_within_allowlist, params: {servers: [workplace, ledger]}}
 
   - id: weekly-review-s01

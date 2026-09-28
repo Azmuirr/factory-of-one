@@ -22,6 +22,7 @@ from sandbox.generator import generate
 
 HUMAN = {"kind": "human", "name": "pm"}
 LOOP = {"kind": "code", "name": "loop"}  # the runner records approved and applied actions
+AUTOPILOT = {"kind": "code", "name": "autopilot"}  # queues decisions while the PM is away; never applies them
 
 
 
@@ -48,7 +49,7 @@ class Loop:
         return World(self.world).data_through.strftime("%Y-%m-%dT%H:%M:%SZ")
 
     def write(self, type: str, author: dict, payload: dict, refs: list[str]) -> str:
-        prefix = {"bet": "bet", "action": "act", "verdict": "ver", "call": "call"}[type]
+        prefix = {"bet": "bet", "action": "act", "verdict": "ver", "call": "call", "queue": "que"}[type]
         n = sum(1 for e in ledger.read(self.ledger) if e["type"] == type)
         entry = {"id": f"{prefix}_{n + 1:04d}", "type": type, "ts": self.sim_now(), "author": author, "refs": refs, "payload": payload}
         ledger.append(self.ledger, entry)
@@ -281,6 +282,79 @@ class Loop:
         self.log("learn", "loop scored", **{k: summary[k] for k in ("brier", "prediction_hit", "pm_minutes", "agent_cost_usd")})
         return summary
 
+    # The PM is away: prepare everything, apply nothing (decision D10) -------------
+
+    def chief_away(self, fixture: Path | None) -> None:
+        if fixture:
+            rows = [json.loads(l) for l in fixture.read_text(encoding="utf-8").splitlines() if l.strip()]
+            for row in rows:
+                ledger.append(self.ledger, row)
+            # In a replay, the urgent notes Chief would have posted are posted from its brief.
+            away = next((r["payload"] for r in reversed(rows) if r["type"] == "brief" and r["payload"].get("mode") == "away"), {})
+            for u in away.get("urgent", []):
+                self.notify(f"{u['why']} {u['do']}")
+            self.log("brief", "chief output loaded from fixture")
+            return
+        self.run_agent("chief", "away-monday-s01", "brief")
+
+    def notify(self, text: str) -> bool:
+        """The one message the factory may send while the PM is away: to the PM's own channel, within the daily limit."""
+        from factory import config as install
+        from factory import policy
+        cfg = install.load()
+        limit = policy.load(cfg.decision_rights)["away"]["urgent"]["max_per_day"] if cfg.decision_rights else 3
+        outbox = self.dir / "outbox.jsonl"
+        sent = len(outbox.read_text(encoding="utf-8").splitlines()) if outbox.exists() else 0
+        if sent >= limit:
+            self.log("notify", "held for the digest: the daily limit is reached", text=text)
+            return False
+        with outbox.open("a", encoding="utf-8") as f:
+            f.write(json.dumps({"ts": self.sim_now(), "to": "self", "text": text}) + "\n")
+        return True
+
+    def away(self, chief_fixture: Path | None = None) -> None:
+        """Chief's away brief, Signal's check, Quality's review. A decision is queued for the PM and nothing is applied."""
+        self.setup()
+        self.chief_away(chief_fixture)
+        self.sense_and_frame()
+        packet = self.latest("decision_packet")
+        if packet:
+            verdict_ = self.quality_review(packet["id"], "review")
+            review_entry = next((e for e in reversed(ledger.read(self.ledger)) if e["type"] == "review" and packet["id"] in e["refs"]), None)
+            prepared = [e["id"] for e in ledger.read(self.ledger) if e["type"] in ("signal_card", "decision_packet")]
+            self.write("queue", AUTOPILOT, {"status": "waiting_for_pm", "packet": packet["id"], "prepared": prepared,
+                                            "review": review_entry["id"] if review_entry else None,
+                                            "reason": "Decision rights are prepare_only: the action waits for the PM"}, [packet["id"]])
+            self.log("queue", "decision waiting for the PM", packet=packet["id"])
+            if verdict_ and verdict_["verdict"] == "STOP":
+                self.notify(f"Quality stopped {packet['id']}. Nothing was applied. Details in the digest.")
+            else:
+                d = packet["payload"]["diagnosis"]
+                self.notify(f"{d['metric']} moved for {segment_text(d.get('segment'))}. A decision is waiting for you; nothing was applied.")
+        (self.dir / "trace.jsonl").write_text("".join(json.dumps(t) + "\n" for t in self.trace), encoding="utf-8")
+
+    def resume(self) -> dict:
+        """Back at the keyboard: continue from the queued decision."""
+        trace = self.dir / "trace.jsonl"
+        self.trace = [json.loads(l) for l in trace.read_text(encoding="utf-8").splitlines()] if trace.exists() else []
+        queued = self.latest("queue")
+        self.log("resume", "the PM is back", queued=queued["id"] if queued else None)
+        result = None
+        if self.decide():
+            self.build()
+            if self.approve():
+                self.apply()
+                result = self.prove()
+                if result:
+                    self.call(result)
+                    self.tell()
+        if queued:
+            self.write("queue", AUTOPILOT, {**queued["payload"], "status": "decided", "reason": "The PM decided at the gate"}, [queued["id"]])
+        summary = self.learn(result)
+        (self.dir / "trace.jsonl").write_text("".join(json.dumps(t) + "\n" for t in self.trace), encoding="utf-8")
+        (self.dir / "summary.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
+        return summary
+
     def run(self) -> dict:
         self.setup()
         self.sense_and_frame()
@@ -309,10 +383,17 @@ def main() -> None:
     parser.add_argument("--gates", type=Path, help="YAML answers for the gates. Omit to answer at the keyboard")
     parser.add_argument("--fixture", type=Path, help="Load agent outputs from a ledger file instead of running the agents")
     parser.add_argument("--out", type=Path)
+    parser.add_argument("--resume", type=Path, help="Continue an autopilot run from its queued decision")
     args = parser.parse_args()
     sys.stdout.reconfigure(encoding="utf-8")  # Windows consoles default to cp1252
     script = yaml.safe_load(args.gates.read_text(encoding="utf-8")) if args.gates else None
     run_id = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    if args.resume:
+        out = args.resume
+        summary = Loop(args.scenario, args.seed, out, Gates(script), args.fixture).resume()
+        print("\n" + json.dumps(summary, indent=2))
+        print(f"\nLedger, trace, and summary: {out}")
+        return
     out = args.out or ROOT / "runs" / "loop" / f"{args.scenario}-seed{args.seed}-{run_id}"
     summary = Loop(args.scenario, args.seed, out, Gates(script), args.fixture).run()
     print("\n" + json.dumps(summary, indent=2))

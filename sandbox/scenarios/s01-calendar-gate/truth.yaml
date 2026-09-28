@@ -138,6 +138,12 @@ grading:
     voice: {signoff: "Thanks, S.", max_words: 60, banned_openings: [hi, hello, hope, dear]}
     # Chief reads chatter, not metrics. Blaming one of these for the drop repeats a trap from traps_in_data.
     trap_causes: [immature, "not mature", seasonal, weekend, "teams bot", "microsoft teams"]
+    # Away mode: what must reach the PM, and what must never interrupt them.
+    away:
+      urgent_any: ["mail:m_001", "chat:c_001", "mail:m_002", "mail:m_003", "cal:e_005"]
+      urgent_min: 2
+      never_urgent: ["mail:m_005", "mail:m_006", "mail:m_007", "mail:m_008", "mail:m_012"]
+      max_words: 50
     weekly:
       as_of: "2026-02-27T17:00:00Z"
       starved_goals: [g2]
