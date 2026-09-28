@@ -16,8 +16,15 @@ from pathlib import Path
 
 import yaml
 
+from collections import Counter
+
 from factory import code, ledger
+from factory import config as install
+from factory.chief.html import Links
+from factory.evals.runner import Trial, parse_transcript
+from factory.evals.suite import Task
 from factory.metrics import World
+from factory.workplace import Workplace
 from sandbox.generator.run import generate
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -46,6 +53,48 @@ def live_runs_table() -> list[dict]:
     rows = [l for l in section.splitlines() if l.startswith("| 20")]
     keys = ["date", "run", "result", "found"]
     return [dict(zip(keys, [c.strip() for c in r.strip("|").split("|")])) for r in rows]
+
+
+SUBAGENT = "Handed one focused question to a sub-agent: quant for numbers, qual for customer voice"
+
+
+def usage(transcript: Path) -> dict:
+    """What an agent actually did in a run, from its transcript: turns, time, and each tool with what it is for."""
+    if not transcript.is_file():
+        return {}
+    trial = Trial(Task("replay", "capability", "", 1, "", []), 0, transcript.parent)
+    text = transcript.read_text(encoding="utf-8")
+    parse_transcript(trial, text)
+    results = [json.loads(l) for l in text.splitlines() if l.startswith("{") and '"type":"result"' in l.replace(" ", "")]
+    capability_of = {tool: cap for cap, tool in install.load(ROOT / "config" / "sandbox.yaml").capabilities.items()}
+    vocab = install.vocabulary()
+    tools = []
+    for name, n in Counter(c["name"] for c in trial.tool_calls).most_common():
+        cap = capability_of.get(name)
+        tools.append({"tool": name.split("__")[-1], "capability": cap or ("sub-agent" if name == "Agent" else name),
+                      "what": vocab[cap]["description"] if cap else SUBAGENT if name == "Agent" else "", "calls": n})
+    rejected = sum(1 for c in trial.tool_calls if c["name"].endswith("write_entry") and '"rejection"' in c["result"])
+    return {"turns": trial.turns, "seconds": round((results[-1].get("duration_ms") or 0) / 1000, 1) if results else None,
+            "cost_usd": round(trial.cost_usd, 4), "tools": tools, "calls": len(trial.tool_calls), "rejected_writes": rejected}
+
+
+def chief_facts(chief_dir: Path) -> dict:
+    """What Chief had to get through, and what it made of it."""
+    entries = ledger.read(chief_dir / "ledger.jsonl")
+    brief = [e for e in entries if e["type"] == "brief"][-1]["payload"]
+    with Workplace(chief_dir / "world" / "world.db", goals_path=ROOT / "company" / "tallybird" / "goals.yaml") as wp:
+        inputs = {"emails": len(wp.mail_list()), "chats": len(wp.chat_list()), "meetings_today": len(wp.calendar_list(brief["date"], "2026-03-03")["events"]),
+                  "transcripts": len(wp.transcripts_list()), "tracker_issues": len(wp.tracker_search())}
+        names = {pid: p["name"] for pid, p in wp.people.items()}
+        links = Links(wp)
+        labels = {ref: links.label(ref) for ref in sorted(set(re.findall(r"\b(?:mail|chat|cal|tr|trk):[a-z0-9_]+", json.dumps(brief))))}
+    drafts = {x.get("ref") or x.get("person") for sec in ("top", "needs_you", "triage", "followups", "stale") for x in brief.get(sec, []) if x.get("draft_reply")}
+    drafts |= {x["ref"] for side in brief.get("open_loops", {}).values() for x in side if x.get("draft_reply")}
+    commitments = [e["payload"] for e in entries if e["type"] == "commitment"]
+    return {"inputs": inputs, "brief": brief, "names": names, "labels": labels,
+            "triage": dict(Counter(t["label"] for t in brief["triage"])), "suspicious": sum(1 for t in brief["triage"] if t.get("suspicious")),
+            "drafts": len(drafts), "commitments": commitments,
+            "overdue_promises": [c for c in commitments if c["owner"] == "p_me" and c["status"] == "open" and c["due"] < brief["date"]]}
 
 
 def copy(src: Path, dst: Path) -> str:
@@ -113,7 +162,8 @@ def build(loop_dir: Path, chief_dir: Path | None, out: Path) -> dict:
         copy(chief_dir / "workplace.html", data / "chief" / "workplace.html")
         outbox = chief_dir / "outbox.jsonl"
         note = [json.loads(l)["text"] for l in outbox.read_text(encoding="utf-8").splitlines() if l.strip()] if outbox.exists() else []
-        chief = {"brief": "data/chief/brief.html", "note": note[0] if note else None}
+        chief = {"brief_page": "data/chief/brief.html", "note": note[0] if note else None,
+                 "usage": usage(chief_dir / "transcript.jsonl"), **chief_facts(chief_dir)}
 
     run = {
         "scenario": summary["scenario"], "seed": summary["seed"],
@@ -129,6 +179,8 @@ def build(loop_dir: Path, chief_dir: Path | None, out: Path) -> dict:
         "bet": first("bet"), "actions": by_type("action"), "builds": builds,
         "verdict": first("verdict"), "call": first("call"),
         "summary": summary, "agents": agents, "trace": trace,
+        "usage": {"signal": usage(loop_dir / "transcript-signal-sense.jsonl"), "quality_packet": usage(loop_dir / "transcript-quality-review.jsonl"),
+                  "builder": usage(loop_dir / "transcript-builder-build.jsonl"), "quality_build": usage(loop_dir / "transcript-quality-build.jsonl")},
         "truth": {"cause": truth["cause"], "findings": truth["expected_findings"], "decision": truth["decision"],
                   "traps": truth.get("traps_in_data", [])},
         "chief": chief,
