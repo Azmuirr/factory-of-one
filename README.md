@@ -1,6 +1,6 @@
 # Factory of One
 
-The PMs who last will be operators with strong judgment who run several agents at once. This repo is a working version of that job: four agents do the work, code owns every fact, and the PM makes the calls.
+The PMs who last will be operators with strong judgment who run several agents at once. This repo is a working version of that job: five agents do the work, code owns every fact, and the PM makes the calls.
 
 **See it first:** [a PM's Monday](site/index.html), replayed from a real run. Chief triages the morning, Signal diagnoses an activation drop, Quality tries to break the diagnosis, Builder ships a fix behind a flag, and you make two calls and get scored on them. Open `site/index.html` in a browser; nothing to install.
 
@@ -10,7 +10,8 @@ The PMs who last will be operators with strong judgment who run several agents a
 |---|---|---|
 | **Chief**, chief of staff | Morning brief: triage, open loops, commitments, meeting prep, goal check, replies drafted in your voice. Sends nothing except one note to you | Sender weight, suspicious senders, who replied, calendar conflicts, free slots, hours per goal, stakeholder staleness |
 | **Signal**, analyst | What changed and why, with numbers and customer voice. Writes a decision packet | Every number: each one cites a query that code replays |
-| **Quality**, reviewer | Reviews Signal's and Builder's work before you see it, with [Elon Mode](skills/elon-mode/SKILL.md). Chief's brief is checked by code when it is written | Numbers, quotes, fields, privacy. It cannot return SHIP when a check fails |
+| **Bet**, investment analyst | Frames the work coming in: strategy docs, customer requests, stakeholder asks, and Signal's numbers, ranked into at most 5 bets tied to your goals, with set-asides that cite the strategy | Every size: a cited query or request search that code replays. Each account counted once |
+| **Quality**, reviewer | Reviews Signal's, Bet's, and Builder's work before you see it, with [Elon Mode](skills/elon-mode/SKILL.md). Chief's brief is checked by code when it is written | Numbers, quotes, fields, privacy. It cannot return SHIP when a check fails |
 | **Builder**, engineer and designer | A code change behind a flag, a design in the company's design system, a one-screen demo | Tests rerun by code, change scope, hidden acceptance tests, design system rules, dead clicks |
 
 You own two gates: **decide** (approve the action and place a bet with a prediction) and **call** (ship, iterate, or kill once the data is in). Your predictions are scored.
@@ -79,7 +80,7 @@ Every agent was tuned on scenario 1, and every result above is on scenario 1. Tr
 
 | Built | Not built yet |
 |---|---|
-| Chief, Signal, Quality, Builder | Bet (drafting the bet), Comms (one decision for each audience), Coach and Retro (learning across loops) |
+| Chief, Signal, Bet, Quality, Builder, and the autopilot for days you're away | Comms (one decision for each audience), Retro (learning across loops), Coach |
 | Scenario 1 (a release that locked out Microsoft calendar users) and a quiet control scenario | Scenarios 2 to 10, harder tiers, held-out scenarios |
 | The eval harness: tasks, code graders, answer keys, trials, regrading | A model judge calibrated against human graders |
 | A capability map, so any install can swap in its own tools | Tested setups for specific vendors, a warehouse adapter for Signal, repo rules for Builder beyond the sandbox app |

@@ -105,6 +105,7 @@ def test_a_tag_only_search_misses_the_mislabeled_account(tmp_path, now_run):
     tagged = field_requests.search(now_run / "world" / "world.db", tag="calendar-consent")
     def plant(p):
         p["items"][0]["evidence"] = [{"source": "requests", "ref": tagged["query_id"], "value": tagged["arr_at_stake"]}]
+        p["items"][0]["sources"] = [s for s in p["items"][0]["sources"] if s != "req:r_008"]  # the mislabeled request is missed
     t = bet_trial(tmp_path, now_run, plant)
     with (tmp_path / "queries.jsonl").open("a", encoding="utf-8") as f:
         f.write(json.dumps({"query_id": tagged["query_id"], "tool": "search_requests",
@@ -117,3 +118,43 @@ def test_a_size_that_does_not_replay_fails(tmp_path, now_run):
     def plant(p):
         p["items"][1]["size"]["value"] = 64800 * 2  # counting Northwind-style duplicates, or adding searches by hand
     assert "candidates passes Quality's code checks" in bet_failures(bet_trial(tmp_path, now_run, plant))
+
+
+def test_quoting_signals_packet_is_a_real_quote(tmp_path, now_run):
+    rows = [json.loads(l) for l in REFERENCE.read_text(encoding="utf-8").splitlines()]
+    claim = next(r for r in rows if r["type"] == "decision_packet")["payload"]["cause"][0]["text"]
+    def plant(p):
+        p["items"][0]["evidence"].append({"source": "ledger", "ref": "pkt_0001", "quote": claim})
+    assert bet_failures(bet_trial(tmp_path, now_run, plant)) == []
+
+
+@pytest.mark.parametrize("field, bad", [("size_ref", "pkt_0001"), ("source", "req:q_1dca312dcfaa")])
+def test_the_ledger_rejects_a_citation_in_the_wrong_form(field, bad):
+    from factory import ledger
+    rows = [json.loads(l) for l in REFERENCE.read_text(encoding="utf-8").splitlines()]
+    entry = copy.deepcopy(rows[-1])
+    if field == "size_ref":
+        entry["payload"]["items"][0]["size"]["ref"] = bad
+    else:
+        entry["payload"]["items"][1]["sources"].append(bad)
+    assert ledger.errors(entry)
+
+
+def test_a_number_bet_computed_itself_fails(tmp_path, now_run):
+    def plant(p):
+        p["items"][1]["problem"] += " Lumen Robotics and Meridian Freight both need Entra ID ($40,320 combined)."
+    assert "candidates passes Quality's code checks" in bet_failures(bet_trial(tmp_path, now_run, plant))
+
+
+def test_numbers_from_cited_requests_and_docs_are_fine(tmp_path, now_run):
+    def plant(p):
+        p["items"][1]["problem"] += " Lumen Robotics alone is $23,040 a year."
+        p["set_aside"][0]["why"] += " It is one account at $172,800 a year, and the strategy targets 30 Business customers."
+    assert bet_failures(bet_trial(tmp_path, now_run, plant)) == []
+
+
+def test_citing_the_mislabeled_request_directly_counts(tmp_path, now_run):
+    def plant(p):
+        p["items"][0]["evidence"] = []
+        p["items"][0]["sources"] = ["pkt_0001", "req:r_001", "req:r_004", "req:r_008"]
+    assert bet_failures(bet_trial(tmp_path, now_run, plant)) == []

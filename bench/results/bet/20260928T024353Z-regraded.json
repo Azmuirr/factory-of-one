@@ -1,0 +1,55 @@
+{
+  "agent": "bet",
+  "agent_version": "0.1.3",
+  "suite_version": "0.1.0",
+  "run_id": "20260928T024353Z-regraded",
+  "mode": "regraded",
+  "trials_per_task": 2,
+  "cost_usd": 0.9349,
+  "summary": {
+    "capability": {
+      "pass_at_k": "0/1",
+      "pass_pow_k": "0/1"
+    }
+  },
+  "tasks": [
+    {
+      "task": "frame-s01",
+      "kind": "capability",
+      "trials": [
+        {
+          "trial": 1,
+          "passed": false,
+          "partial": 0.875,
+          "failed": [
+            "requests are found by their words, not only their tags: the consent bet cites request searches finding 0 accounts, and misses req:r_008"
+          ],
+          "advisory": [],
+          "error": null,
+          "cost_usd": 0.3651,
+          "turns": 20,
+          "duration_s": 0.0,
+          "transcript": "runs\\evals\\bet\\20260928T024353Z\\frame-s01\\trial-1\\transcript.jsonl"
+        },
+        {
+          "trial": 2,
+          "passed": false,
+          "partial": 0.875,
+          "failed": [
+            "requests are found by their words, not only their tags: the consent bet cites request searches finding 0 accounts, and misses req:r_008"
+          ],
+          "advisory": [],
+          "error": null,
+          "cost_usd": 0.5698,
+          "turns": 28,
+          "duration_s": 0.0,
+          "transcript": "runs\\evals\\bet\\20260928T024353Z\\frame-s01\\trial-2\\transcript.jsonl"
+        }
+      ],
+      "cross_trial": [],
+      "pass_at_k": false,
+      "pass_pow_k": false,
+      "mean_partial": 0.875
+    }
+  ]
+}

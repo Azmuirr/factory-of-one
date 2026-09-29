@@ -149,3 +149,14 @@ def test_a_voice_count_that_merges_searches_fails(world, run_dir):
 def test_only_dates_and_time_spans_skip_the_numbers_check(text, checked):
     from factory import numbers as nums
     assert [v for v, _ in nums.text_numbers(text)] == checked
+
+
+@pytest.mark.parametrize("text", ["until a Microsoft-365-admin-consent check", "microsoft 365 tenants", "Office365 admins"])
+def test_product_names_with_numbers_in_any_spelling_are_not_data(text):
+    from factory import numbers as nums
+    assert nums.text_numbers(text) == []
+
+
+def test_a_tracker_id_is_not_a_data_number():
+    from factory import numbers as nums
+    assert nums.text_numbers("greenlight ONB-140 and PLAT-88 this week") == []

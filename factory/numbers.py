@@ -7,7 +7,8 @@ import re
 TEXT_NUMBER = re.compile(r"(?<![A-Za-z_\d.])\$?(\d[\d,]*(?:\.\d+)?)(%|[kK]\b)?")
 NOT_NUMBERS = re.compile(
     r"<script.*?</script>|<style.*?</style>|<[^>]+>|\b[a-z]+_[a-z0-9]+\b|\d{4}-\d{2}-\d{2}|\d+(?:\.\d+)?e-?\d+"
-    r"|\b(?:Microsoft|Office|Dynamics) 365\b|\bWindows 1[01]\b", re.S)  # product names, not data
+    r"|(?i:\b(?:Microsoft|Office|Dynamics|M)[\s-]?365\b|\bWindows[\s-]?1[01]\b)"  # product names, not data
+    r"|\b[A-Z]{2,}-\d+\b", re.S)  # tracker ids such as ONB-140
 NARRATIVE_MAX = 14  # a small bare integer is narrative only as a date, a time span, or a label ("Feb 10", "7 days", "week 6")
 TIME_AFTER = re.compile(r"^\s*-?\s*(?:days?|weeks?|months?|years?|hours?|minutes?|mins?|am|pm|of)\b", re.I)
 LABEL_BEFORE = re.compile(

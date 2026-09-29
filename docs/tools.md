@@ -17,7 +17,7 @@ Each tool is an MCP (Model Context Protocol) server shaped like the real product
 | Tool | Mimics | Data | First needed |
 |---|---|---|---|
 | `crm` | Salesforce, HubSpot | Accounts, opportunities, pipeline, PQL handoffs, lost reasons | Scenario 3 |
-| `field_requests` | Seller-logged customer asks, triaged into Jira or Azure DevOps | Request text, account, ARR at stake, deal stage, linked tracker item | Scenario 5 |
+| `requests` | Seller-logged customer asks (Salesforce, Productboard) | Request text, account, annual revenue at stake, tag. Search counts each account once and is logged for replay | v1 |
 
 ## Product data
 
@@ -39,7 +39,7 @@ Each tool is an MCP (Model Context Protocol) server shaped like the real product
 | `slack` | Slack, Teams | v1 |
 | `mail` | Gmail, Outlook | v1 |
 | `calendar` | Google Calendar | v1 |
-| `docs` | Google Docs, Notion, Confluence | v1 |
+| `docs` | Google Docs, Notion, Confluence: strategy and product docs | v1 |
 | `tracker` | Jira, Azure DevOps, Linear | v1 |
 | `directory` | Org chart and OKRs | v1 |
 | `code` | GitHub and CI: read the app, propose a change on a copy, run the tests. Never merges. The app is `sandbox/app` | v1 |

@@ -38,7 +38,9 @@ def digest(run: Path) -> str:
         r = by_id.get(q["payload"].get("review") or "", {}).get("payload", {})
         lines += [f"- **Decision: {p['recommended_action']['name']} {p['recommended_action']['params'].get('release_id', '')} for {segment_text(d.get('segment'))}.**",
                   f"  {d['metric']} moved for {segment_text(d.get('segment'))}; the step that broke is {d.get('mechanism_metric')}.",
-                  f"  Quality: {r.get('verdict', 'no review')}. {' '.join(f['claim'] for f in r.get('findings', [])[:1])}",
+                  f"  Quality: {r.get('verdict', 'no review')}."
+                  + (f" Failed checks: {', '.join(k for k, v in r.get('correctness', {}).items() if v == 'fail')}." if any(v == 'fail' for v in r.get('correctness', {}).values()) else "")
+                  + (f" Smallest fix: {r['findings'][0]['smallest_action']}" if r.get("findings") else ""),
                   f"  To decide: `python -m factory.loop --resume {run}`"]
     ranked = next((e for e in reversed(entries) if e["type"] == "candidates"), None)
     if ranked:

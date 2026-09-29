@@ -147,10 +147,41 @@ def unsourced_causes(payload) -> list[str]:
     return [s.strip()[:140] for s in sentences if METRIC_MOVE.search(s) and EXPLAINS.search(s) and "pkt_" not in s]
 
 
-def candidate_problems(world_path: Path, payload: dict, log: dict) -> list[str]:
-    """Every size in a ranked list is replayed from the query or search it cites."""
+def cited_numbers(world_path: Path, payload: dict, log: dict, earlier: list[dict]) -> set[float]:
+    """Every number Bet may use in prose: replayed from its cited queries, or found in the items it cites, or in the ledger."""
+    pool = set(nums.pool_of(e["payload"] for e in earlier))
+    world = World(world_path)
+    refs = {r for item in payload.get("items", []) + payload.get("set_aside", [])
+            for r in [item.get("size", {}).get("ref", ""), *item.get("sources", []), *[e.get("ref", "") for e in item.get("evidence", [])]]}
+    conn = sqlite3.connect(f"file:{Path(world_path).as_posix()}?mode=ro", uri=True)
+    for ref in refs:
+        if ref in log:
+            got = queries.run(world, log[ref]["tool"], log[ref]["args"])
+            pool |= {float(v) for v in nums.field_numbers(got)}
+        kind, _, rid = ref.partition(":")
+        table = {"req": ("requests", "request_id", "arr_at_stake || ' ' || text"), "doc": ("docs", "doc_id", "body"),
+                 "mail": ("mail", "message_id", "body"), "chat": ("chat", "message_id", "text")}.get(kind)
+        if table:
+            row = conn.execute(f"SELECT {table[2]} FROM {table[0]} WHERE {table[1]} = ?", (rid,)).fetchone()
+            if row:
+                pool |= {float(t.replace(",", "")) for t, _ in nums.TEXT_NUMBER.findall(str(row[0]))}
+    conn.close()
+    return pool
+
+
+def candidate_problems(world_path: Path, payload: dict, log: dict, earlier: list[dict] | None = None) -> list[str]:
+    """Every size in a ranked list is replayed from the query or search it cites, and every number in its prose comes from
+    something it cites. A sum Bet worked out itself fails."""
     problems = []
     world = None
+    pool = cited_numbers(world_path, payload, log, earlier or [])
+    for item in payload.get("items", []) + payload.get("set_aside", []):
+        texts = [item.get(k, "") for k in ("title", "problem", "why", "needs_from_pm", "cheapest_test", "kill_trigger")]
+        texts += [a["text"] for a in item.get("assumptions", [])]
+        for text in texts:
+            bad = [v for v, tol in nums.text_numbers(text) if not nums.text_grounded(v, tol, pool)]
+            if bad:
+                problems.append(f"{item.get('title', '')[:40]}: {bad} in the text do not come from anything it cites")
     for item in payload.get("items", []):
         size = item["size"]
         q = log.get(size["ref"])
@@ -210,11 +241,13 @@ def correctness(entry: dict, entries: list[dict], world_path: Path, root: Path) 
 
     evidence = {}
     if kind == "candidates":
-        details["numbers"] += candidate_problems(world_path, payload, queries.load(queries.log_path(root / "ledger.jsonl")))
+        details["numbers"] += candidate_problems(world_path, payload, queries.load(queries.log_path(root / "ledger.jsonl")), earlier)
         result["numbers"] = "pass"
         quotes = [ev["quote"] for item in payload.get("items", []) for ev in item.get("evidence", []) if ev.get("quote")]
         if quotes:
-            corpus = source_text(world_path)
+            # Bet may quote the ledger, such as a claim in Signal's packet, as well as docs, requests, and messages.
+            ledger_text = " ".join(" ".join(s.split()) for e in earlier for s in nums.texts(e["payload"]))
+            corpus = source_text(world_path) + " " + ledger_text
             details["quotes"] += [q for q in quotes if " ".join(q.split()) not in corpus]
             result["quotes"] = "pass"
 

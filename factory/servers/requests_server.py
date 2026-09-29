@@ -14,7 +14,7 @@ server = MCPServer("requests", instructions="Customer requests logged by Sales a
 def search_requests(query: str = "", any_of: list[str] | None = None, tag: str | None = None,
                     since: str | None = None, until: str | None = None) -> dict:
     """Find requests containing every word in query. any_of: several phrasings; a request matches if it contains every word of
-    at least one. Tags are set by whoever logged the request and can be wrong, so search by words too. Returns the requests,
+    at least one, so keep each phrasing to one to three words. Tags are set by whoever logged the request and can be wrong, so search by words too. Returns the requests,
     distinct accounts, and annual revenue at stake, counted once per account. Cite the returned query_id for any number you use."""
     args = {"query": query, "any_of": any_of, "tag": tag, "since": since, "until": until}
     result = field_requests.search(Path(os.environ["FACTORY_WORLD"]), **args)

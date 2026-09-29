@@ -1,0 +1,57 @@
+{
+  "agent": "bet",
+  "agent_version": "0.1.2",
+  "suite_version": "0.1.0",
+  "run_id": "20260928T024353Z",
+  "mode": "real",
+  "trials_per_task": 2,
+  "cost_usd": 0.9349,
+  "summary": {
+    "capability": {
+      "pass_at_k": "0/1",
+      "pass_pow_k": "0/1"
+    }
+  },
+  "tasks": [
+    {
+      "task": "frame-s01",
+      "kind": "capability",
+      "trials": [
+        {
+          "trial": 1,
+          "passed": false,
+          "partial": 0.75,
+          "failed": [
+            "requests are found by their words, not only their tags: the consent bet cites request searches finding 0 accounts",
+            "candidates passes Quality's code checks: Fix Microsoft-calendar activation drop: : [140.0] in the text do not come from anything it cites; Fix Microsoft-calendar activation drop: : [140.0] in the text do not come from anything it cites"
+          ],
+          "advisory": [],
+          "error": null,
+          "cost_usd": 0.3651,
+          "turns": 20,
+          "duration_s": 184.6,
+          "transcript": "runs\\evals\\bet\\20260928T024353Z\\frame-s01\\trial-1\\transcript.jsonl"
+        },
+        {
+          "trial": 2,
+          "passed": false,
+          "partial": 0.75,
+          "failed": [
+            "requests are found by their words, not only their tags: the consent bet cites request searches finding 0 accounts",
+            "candidates passes Quality's code checks: Fix admin-consent block on the calendar : [140.0] in the text do not come from anything it cites; Fix admin-consent block on the calendar : [140.0] in the text do not come from anything it cites"
+          ],
+          "advisory": [],
+          "error": null,
+          "cost_usd": 0.5698,
+          "turns": 28,
+          "duration_s": 293.4,
+          "transcript": "runs\\evals\\bet\\20260928T024353Z\\frame-s01\\trial-2\\transcript.jsonl"
+        }
+      ],
+      "cross_trial": [],
+      "pass_at_k": false,
+      "pass_pow_k": false,
+      "mean_partial": 0.75
+    }
+  ]
+}

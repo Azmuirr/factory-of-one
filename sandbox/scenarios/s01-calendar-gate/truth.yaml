@@ -160,4 +160,5 @@ grading:
     non_goal: {theme: webinar, doc: "doc:d_strategy"}
     # The consent theme has 3 accounts, and one is tagged "other". A tag-only search finds 2.
     consent_accounts_min: 3
+    mislabeled: "req:r_008"
 

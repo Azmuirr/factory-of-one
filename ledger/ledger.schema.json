@@ -1537,7 +1537,7 @@
           "minItems": 1,
           "items": {
             "type": "string",
-            "pattern": "^((sig|pkt|rev)_[a-z0-9]{4,}|(mail|chat|cal|trk|tr|doc|req):[A-Za-z0-9_-]+)$"
+            "pattern": "^((sig|pkt|rev)_[a-z0-9]{4,}|req:r_[0-9]+|(mail|chat|cal|trk|tr|doc):[A-Za-z0-9_-]+)$"
           }
         },
         "evidence": {
@@ -1584,7 +1584,9 @@
               ]
             },
             "ref": {
-              "type": "string"
+              "type": "string",
+              "pattern": "^q_[a-f0-9]{12}$",
+              "description": "The query_id of the metrics query or request search that produced the size"
             },
             "accounts": {
               "type": "integer"
@@ -1647,7 +1649,7 @@
                 "type": "array",
                 "items": {
                   "type": "string",
-                  "pattern": "^((sig|pkt|rev)_[a-z0-9]{4,}|(mail|chat|cal|trk|tr|doc|req):[A-Za-z0-9_-]+)$"
+                  "pattern": "^((sig|pkt|rev)_[a-z0-9]{4,}|req:r_[0-9]+|(mail|chat|cal|trk|tr|doc):[A-Za-z0-9_-]+)$"
                 }
               }
             }

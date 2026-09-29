@@ -1,0 +1,42 @@
+{
+  "agent": "bet",
+  "agent_version": "0.1.0",
+  "suite_version": "0.1.0",
+  "run_id": "20260928T023214Z",
+  "mode": "real",
+  "trials_per_task": 1,
+  "cost_usd": 0.4941,
+  "summary": {
+    "capability": {
+      "pass_at_k": "0/1",
+      "pass_pow_k": "0/1"
+    }
+  },
+  "tasks": [
+    {
+      "task": "frame-s01",
+      "kind": "capability",
+      "trials": [
+        {
+          "trial": 1,
+          "passed": false,
+          "partial": 0.75,
+          "failed": [
+            "requests are found by their words, not only their tags: the consent bet cites request searches finding 1 accounts",
+            "candidates passes Quality's code checks: The drop is concentrated in Microsoft calendar workspaces: 39.4% before, 29.8% after.; The onset matches rel_0412, Onboarding v2: connect calendar first, released Feb 10.; Tickets about needing admin approval on the calendar step started in week 6, from 3 or more workspaces a week."
+          ],
+          "advisory": [],
+          "error": null,
+          "cost_usd": 0.4941,
+          "turns": 26,
+          "duration_s": 247.2,
+          "transcript": "runs\\evals\\bet\\20260928T023214Z\\frame-s01\\trial-1\\transcript.jsonl"
+        }
+      ],
+      "cross_trial": [],
+      "pass_at_k": false,
+      "pass_pow_k": false,
+      "mean_partial": 0.75
+    }
+  ]
+}
