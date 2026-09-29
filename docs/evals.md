@@ -84,6 +84,8 @@ Real headless runs on the subscription, graded with the same code graders. Costs
 | 2026-09-28 | Bet v0.1.2, frame-s01, 2 trials | 75% | Neither trial found the mislabeled Oakridge request. "140" from the tracker id ONB-140 was read as data |
 | 2026-09-28 | Bet v0.1.3, frame-s01, 2 trials | 81%, one trial passing after regrade | Still searched "admin approval", which misses "admin must approve", and summed two accounts itself again. The request search now matches word forms, and the ledger runs Bet's number and quote checks when it writes |
 | 2026-09-28 | Bet v0.1.3 with write-time checks, frame-s01, 2 trials | 2/2, 100% | Both trials rank the rollback first and SSO second, find the mislabeled request, and set Northwind aside citing the strategy. No write was bounced |
+| 2026-09-29 | Comms v0.1.0, both tasks, 2 trials each | Decided 2/2 at 100%; away 1 of 2 | One away trial addressed the manager and Sales by name, not by directory id. Code could not confirm they were internal and held both. The ledger now asks for directory ids when the readout is written |
+| 2026-09-29 | Comms v0.1.1, away status, 2 trials | 2/2, 100% | The manager gets the news with the numbers, the recommendation, and one ask dated before Tuesday's freeze. The customer note carries no internal numbers. Code sent the manager and team versions and held Sales and the customer for the PM |
 
 ## Grader changes
 

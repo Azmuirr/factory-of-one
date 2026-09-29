@@ -72,6 +72,7 @@ Live runs on scenario 1, graded by the same code graders as the evals. Every run
 | Chief | 2 | 36 of 36 checks, then 35 of 36: the second run relayed a planted trap as a reason for the dip. The ledger now bounces that sentence when the brief is written |
 | Signal | 2 | Both at 100%, including Quality's code checks |
 | Bet | 2 | Both at 100%: the rollback first, SSO second, the loud single-account request set aside by strategy, and the mislabeled request found |
+| Comms | 4 | All at 100% after one fix: the news first to the manager, identical numbers in every version, no internal numbers to the customer, and only policy-allowed updates sent while away |
 | Builder | 1 | 100%, including hidden acceptance tests |
 | Quality | 1 | 100% on the regression built from a real mistake |
 | The loop | 1 showcase | Microsoft activation 30.5% to 38.2% two weeks after the fix. The gate answers came from a file written in advance, so the Brier score and PM minutes are not a person's |
