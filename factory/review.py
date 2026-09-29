@@ -112,19 +112,6 @@ def source_text(world_path: Path) -> str:
     return " ".join(" ".join(p.split()) for p in parts)
 
 
-def voice_bound(world_path: Path, segment: dict, start: str, end: str) -> int:
-    """Upper bound for a voice count: distinct accounts in the segment with any ticket in the period."""
-    sql = "SELECT COUNT(DISTINCT t.workspace_id) FROM tickets t JOIN workspaces w USING (workspace_id) WHERE date(t.created_at) BETWEEN ? AND ?"
-    params: list = [start, end]
-    for dim, values in (segment or {}).items():
-        sql += f" AND w.{dim} IN ({','.join('?' * len(values))})"
-        params += values
-    conn = sqlite3.connect(f"file:{Path(world_path).as_posix()}?mode=ro", uri=True)
-    n = conn.execute(sql, params).fetchone()[0]
-    conn.close()
-    return n
-
-
 def voice_problems(world_path: Path, diagnosis: dict, log: dict) -> list[str]:
     """The voice count must be one search's distinct_workspaces, replayed. Adding up separate searches double counts."""
     voice, ref = diagnosis.get("voice_workspaces"), diagnosis.get("voice_ref")

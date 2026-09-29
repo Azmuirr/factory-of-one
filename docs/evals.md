@@ -82,6 +82,8 @@ Real headless runs on the subscription, graded with the same code graders. Costs
 | 2026-09-28 | Bet v0.1.1, frame-s01 | 62% | Cited ledger ids and query ids in the wrong fields. The ledger now rejects a malformed citation when it is written |
 | 2026-09-28 | Autopilot, away day, s01 (live-2) | Full day | Chief, Signal, Quality, Bet, and Quality again, with nobody at the keyboard. Decision queued, nothing applied. Quality returned FIX on Signal's packet (a hyphenated "Microsoft-365" read as data) and on Bet's list (paraphrases labeled as quotes, and a sum Bet worked out itself inside one) |
 | 2026-09-28 | Bet v0.1.2, frame-s01, 2 trials | 75% | Neither trial found the mislabeled Oakridge request. "140" from the tracker id ONB-140 was read as data |
+| 2026-09-28 | Bet v0.1.3, frame-s01, 2 trials | 81%, one trial passing after regrade | Still searched "admin approval", which misses "admin must approve", and summed two accounts itself again. The request search now matches word forms, and the ledger runs Bet's number and quote checks when it writes |
+| 2026-09-28 | Bet v0.1.3 with write-time checks, frame-s01, 2 trials | 2/2, 100% | Both trials rank the rollback first and SSO second, find the mislabeled request, and set Northwind aside citing the strategy. No write was bounced |
 
 ## Grader changes
 
