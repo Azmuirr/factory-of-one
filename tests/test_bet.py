@@ -158,3 +158,28 @@ def test_citing_the_mislabeled_request_directly_counts(tmp_path, now_run):
         p["items"][0]["evidence"] = []
         p["items"][0]["sources"] = ["pkt_0001", "req:r_001", "req:r_004", "req:r_008"]
     assert bet_failures(bet_trial(tmp_path, now_run, plant)) == []
+
+
+def test_a_word_finds_its_other_forms(world):
+    r = field_requests.search(world, any_of=["admin approval"])
+    assert {x["account"] for x in r["requests"]} == {"Quarry Analytics", "Oakridge Schools"}  # "approval" also finds "approve"
+    assert field_requests.search(world, tag="calendar-consent")["distinct_accounts"] == 2  # a tag still misses the mislabeled one
+
+
+def test_the_ledger_bounces_a_sum_bet_worked_out_and_a_paraphrased_quote(tmp_path, monkeypatch, now_run):
+    (tmp_path / "world").mkdir()
+    shutil.copy(now_run / "world" / "world.db", tmp_path / "world" / "world.db")
+    shutil.copy(ROOT / "ledger" / "examples" / "queries.jsonl", tmp_path / "queries.jsonl")
+    rows = [json.loads(l) for l in REFERENCE.read_text(encoding="utf-8").splitlines()]
+    (tmp_path / "ledger.jsonl").write_text("".join(json.dumps(r) + "\n" for r in rows[:-1]), encoding="utf-8")
+    monkeypatch.setenv("FACTORY_WORLD", str(tmp_path / "world" / "world.db"))
+    monkeypatch.setenv("FACTORY_LEDGER", str(tmp_path / "ledger.jsonl"))
+    monkeypatch.setenv("FACTORY_AGENT", "bet")
+    from factory.servers import ledger_server
+    good = rows[-1]["payload"]
+    bad = copy.deepcopy(good)
+    bad["items"][1]["problem"] += " Two of them need Entra ID ($40,320 combined)."
+    bad["items"][0]["evidence"].append({"source": "mail", "ref": "mail:m_002", "quote": "Cobalt Ridge is totally blocked and angry."})
+    result = ledger_server.write_entry("candidates", bad)
+    assert result["status"] == "rejection" and "40320" in result["message"] and "totally blocked" in result["message"]
+    assert ledger_server.write_entry("candidates", good)["status"] == "value"

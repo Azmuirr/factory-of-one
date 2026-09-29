@@ -12,8 +12,19 @@ from factory.support import contains_all as _contains_all
 KEYS = ["request_id", "ts", "logged_by", "account", "arr_at_stake", "plan", "tag", "text"]
 
 
+SUFFIXES = ("ations", "ation", "ings", "ing", "ed", "es", "al", "e", "s")
+
+
+def stem(word: str) -> str:
+    """Match a word's other forms, as a search tool would: approval, approve, and approved all match "approv"."""
+    for suffix in SUFFIXES:
+        if word.endswith(suffix) and len(word) - len(suffix) >= 4:
+            return word[: -len(suffix)]
+    return word
+
+
 def contains_all(words: list[str]) -> tuple[str, list]:
-    clause, values = _contains_all(words)
+    clause, values = _contains_all([stem(w) for w in words])
     clause = clause.replace("t.subject", "r.text").replace("t.body", "r.account")
     return clause, values
 

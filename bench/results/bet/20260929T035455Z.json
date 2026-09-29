@@ -1,0 +1,56 @@
+{
+  "agent": "bet",
+  "agent_version": "0.1.3",
+  "suite_version": "0.1.0",
+  "run_id": "20260929T035455Z",
+  "mode": "real",
+  "trials_per_task": 2,
+  "cost_usd": 0.6976,
+  "summary": {
+    "capability": {
+      "pass_at_k": "0/1",
+      "pass_pow_k": "0/1"
+    }
+  },
+  "tasks": [
+    {
+      "task": "frame-s01",
+      "kind": "capability",
+      "trials": [
+        {
+          "trial": 1,
+          "passed": false,
+          "partial": 0.875,
+          "failed": [
+            "requests are found by their words, not only their tags: the consent bet cites request searches finding 2 accounts, and misses req:r_008"
+          ],
+          "advisory": [],
+          "error": null,
+          "cost_usd": 0.3173,
+          "turns": 22,
+          "duration_s": 115.5,
+          "transcript": "runs\\evals\\bet\\20260929T035455Z\\frame-s01\\trial-1\\transcript.jsonl"
+        },
+        {
+          "trial": 2,
+          "passed": false,
+          "partial": 0.75,
+          "failed": [
+            "requests are found by their words, not only their tags: the consent bet cites request searches finding 0 accounts, and misses req:r_008",
+            "candidates passes Quality's code checks: Send Growth's SSO requirements to Platfo: [40320.0] in the text do not come from anything it cites; Cobalt Ridge Logistics has a 120-seat trial running. Their IT director says new users can't get past the calendar step without admin approval."
+          ],
+          "advisory": [],
+          "error": null,
+          "cost_usd": 0.3803,
+          "turns": 21,
+          "duration_s": 179.4,
+          "transcript": "runs\\evals\\bet\\20260929T035455Z\\frame-s01\\trial-2\\transcript.jsonl"
+        }
+      ],
+      "cross_trial": [],
+      "pass_at_k": false,
+      "pass_pow_k": false,
+      "mean_partial": 0.812
+    }
+  ]
+}

@@ -44,6 +44,14 @@ def world_problems(type: str, payload: dict) -> list[str]:
                 problems.append(f"segment dimension {dim} does not exist")
             elif set(values) - set(dims[dim]["values"]):
                 problems.append(f"segment values {sorted(set(values) - set(dims[dim]['values']))} are not values of {dim}")
+    if type == "candidates" and os.environ.get("FACTORY_WORLD"):
+        # The checks Quality would run, run now, so Bet fixes its list in the same session.
+        from factory import queries, review
+        world, path = Path(os.environ["FACTORY_WORLD"]), Path(os.environ["FACTORY_LEDGER"])
+        earlier = ledger.read(path)
+        problems += review.candidate_problems(world, payload, queries.load(queries.log_path(path)), earlier)
+        problems += [f'"{q[:80]}" is not word for word in any source: quote exactly or drop the quote'
+                     for q in review.candidate_quote_problems(world, payload, earlier)]
     if type == "brief":
         from factory.review import unsourced_causes
         problems += [f'This says why a metric moved, and you have no metrics: "{s}". Attribute it to the person who said it, '

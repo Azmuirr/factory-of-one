@@ -169,6 +169,16 @@ def cited_numbers(world_path: Path, payload: dict, log: dict, earlier: list[dict
     return pool
 
 
+def candidate_quote_problems(world_path: Path, payload: dict, earlier: list[dict]) -> list[str]:
+    """Quotes in a ranked list must appear word for word in the world's sources or in the ledger, such as Signal's packet."""
+    quotes = [ev["quote"] for item in payload.get("items", []) for ev in item.get("evidence", []) if ev.get("quote")]
+    if not quotes:
+        return []
+    ledger_text = " ".join(" ".join(s.split()) for e in earlier for s in nums.texts(e["payload"]))
+    corpus = source_text(world_path) + " " + ledger_text
+    return [q for q in quotes if " ".join(q.split()) not in corpus]
+
+
 def candidate_problems(world_path: Path, payload: dict, log: dict, earlier: list[dict] | None = None) -> list[str]:
     """Every size in a ranked list is replayed from the query or search it cites, and every number in its prose comes from
     something it cites. A sum Bet worked out itself fails."""
@@ -243,12 +253,8 @@ def correctness(entry: dict, entries: list[dict], world_path: Path, root: Path) 
     if kind == "candidates":
         details["numbers"] += candidate_problems(world_path, payload, queries.load(queries.log_path(root / "ledger.jsonl")), earlier)
         result["numbers"] = "pass"
-        quotes = [ev["quote"] for item in payload.get("items", []) for ev in item.get("evidence", []) if ev.get("quote")]
-        if quotes:
-            # Bet may quote the ledger, such as a claim in Signal's packet, as well as docs, requests, and messages.
-            ledger_text = " ".join(" ".join(s.split()) for e in earlier for s in nums.texts(e["payload"]))
-            corpus = source_text(world_path) + " " + ledger_text
-            details["quotes"] += [q for q in quotes if " ".join(q.split()) not in corpus]
+        if any(ev.get("quote") for item in payload.get("items", []) for ev in item.get("evidence", [])):
+            details["quotes"] += candidate_quote_problems(world_path, payload, earlier)
             result["quotes"] = "pass"
 
     if kind == "build" and payload.get("kind") == "mvp":
