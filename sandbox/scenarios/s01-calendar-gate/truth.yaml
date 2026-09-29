@@ -162,3 +162,9 @@ grading:
     consent_accounts_min: 3
     mislabeled: "req:r_008"
 
+  # Comms' readout. Code sends only what the decision rights allow (while away) or the PM approves.
+  comms:
+    required: [manager, team, peers]
+    max_words: 120
+    signoff: "Thanks, S."
+

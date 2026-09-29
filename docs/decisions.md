@@ -140,3 +140,14 @@ Each entry records the options, the choice, and what would reverse it. The reaso
 
 **Would change if:** the PM names a stand-in, or trusts a class of action enough to delegate it. Both are one line in the policy file.
 
+## D11. Comms drafts; code sends
+
+| Option | Verdict |
+|---|---|
+| Comms calls a send tool itself, within the decision rights | Rejected. The agent would hold the send button, and a prompt slip becomes a message to a customer |
+| **Comms writes one readout with a version per audience. Code checks every number against the ledger and sends only what the PM approves at the Tell gate, or, while the PM is away, what the decision rights allow** | **Chosen** |
+
+**Also:** the ledger rejects a readout whose numbers the ledger doesn't hold, so every version tells the same facts. An internal update addressed to someone outside the company is held. A customer note carries no internal numbers.
+
+**Would change if:** a live install needs sends the PM can't pre-approve. Then the rule belongs in the decision rights file, not in Comms.
+

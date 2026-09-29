@@ -6,6 +6,8 @@ decide:
   confidence: 0.8
   kill_trigger: Microsoft first_meeting_rate_7d not back to its week 1 to 5 level for cohorts after the rollback
   review_date: "2026-03-16"
+tell:
+  send: "yes"
 call:
   decision: iterate
   rationale: The rollback recovered Microsoft activation. Next, retest v2 behind a flag with a consent fallback.

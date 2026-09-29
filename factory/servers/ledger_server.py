@@ -52,6 +52,10 @@ def world_problems(type: str, payload: dict) -> list[str]:
         problems += review.candidate_problems(world, payload, queries.load(queries.log_path(path)), earlier)
         problems += [f'"{q[:80]}" is not word for word in any source: quote exactly or drop the quote'
                      for q in review.candidate_quote_problems(world, payload, earlier)]
+    if type == "readout":
+        # Every number Comms writes must be one the ledger already holds, so every version tells the same facts.
+        from factory import comms
+        problems += comms.number_problems(payload, ledger.read(Path(os.environ["FACTORY_LEDGER"])))
     if type == "brief":
         from factory.review import unsourced_causes
         problems += [f'This says why a metric moved, and you have no metrics: "{s}". Attribute it to the person who said it, '

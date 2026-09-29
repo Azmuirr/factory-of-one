@@ -23,7 +23,11 @@ from factory.loop.gates import Gates
 def digest(run: Path) -> str:
     entries = ledger.read(run / "ledger.jsonl")
     outbox = run / "outbox.jsonl"
-    posts = [json.loads(l) for l in outbox.read_text(encoding="utf-8").splitlines() if l.strip()] if outbox.exists() else []
+    sent = [json.loads(l) for l in outbox.read_text(encoding="utf-8").splitlines() if l.strip()] if outbox.exists() else []
+    posts = [p for p in sent if p.get("to") == "self"]
+    on_behalf = [p for p in sent if p.get("to") != "self"]
+    held_file = run / "held.jsonl"
+    held_msgs = [json.loads(l) for l in held_file.read_text(encoding="utf-8").splitlines() if l.strip()] if held_file.exists() else []
     trace = [json.loads(l) for l in (run / "trace.jsonl").read_text(encoding="utf-8").splitlines()] if (run / "trace.jsonl").exists() else []
     held = [t["text"] for t in trace if t.get("event", "").startswith("held for the digest")]
     brief = next((e["payload"] for e in reversed(entries) if e["type"] == "brief"), None)
@@ -31,6 +35,8 @@ def digest(run: Path) -> str:
     by_id = {e["id"]: e for e in entries}
     lines = [f"# While you were away: {ledger.sim_now(run / 'world' / 'world.db')[:10]}", "",
              f"## Sent to you ({len(posts)})", *[f"- {p['text']}" for p in posts], *[f"- Held, over the daily limit: {t}" for t in held], "",
+             f"## Sent on your behalf ({len(on_behalf)})", *[f"- To your {p['audience']} ({', '.join(p['to'])}): {p['text']}" for p in on_behalf], "",
+             f"## Held for you ({len(held_msgs)})", *[f"- To {p['audience']} ({', '.join(p['to'])}): {p['reason']}. Draft: {p['text']}" for p in held_msgs], "",
              f"## Waiting for you ({len(waiting)})"]
     for q in waiting:
         p = by_id[q["payload"]["packet"]]["payload"]
@@ -54,12 +60,13 @@ def digest(run: Path) -> str:
         lines += ["", "## Chief handled", f"- Triaged {sum(tri.values())} emails: {', '.join(f"{n} {k.replace('_', ' ')}" for k, n in tri.items())}. Drafted replies; none were sent.",
                   f"- {len(brief.get('needs_you', []))} chats need you, {len(brief.get('open_loops', {}).get('waiting_on_me', []))} requests are waiting on you.",
                   f"- {sum(1 for e in entries if e['type'] == 'commitment')} commitments tracked."]
-    lines += ["", "## Not done while you were away", "- Nothing was applied, merged, or sent to anyone but you. Your decision rights are prepare_only."]
+    lines += ["", "## Not done while you were away", "- Nothing was applied or merged. Only the updates your decision rights allow were sent; everything else is held above."]
     return "\n".join(lines) + "\n"
 
 
-def run_day(scenario: str, seed: int, out: Path, fixture: Path | None = None, chief_fixture: Path | None = None) -> str:
-    Loop(scenario, seed, out, Gates({}), fixture).away(chief_fixture)
+def run_day(scenario: str, seed: int, out: Path, fixture: Path | None = None, chief_fixture: Path | None = None,
+            comms_fixture: Path | None = None) -> str:
+    Loop(scenario, seed, out, Gates({}), fixture).away(chief_fixture, comms_fixture)
     text = digest(out)
     (out / "digest.md").write_text(text, encoding="utf-8")
     return text
@@ -72,11 +79,12 @@ def main() -> None:
     parser.add_argument("--out", type=Path)
     parser.add_argument("--fixture", type=Path, help="Signal and Builder output from a ledger file, instead of the agents")
     parser.add_argument("--chief-fixture", type=Path, help="Chief's away brief from a ledger file, instead of the agent")
+    parser.add_argument("--comms-fixture", type=Path, help="Comms' status readout from a ledger file, instead of the agent")
     args = parser.parse_args()
     sys.stdout.reconfigure(encoding="utf-8")
     run_id = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     out = (args.out or ROOT / "runs" / "autopilot" / f"{args.scenario}-seed{args.seed}-{run_id}").resolve()
-    print(run_day(args.scenario, args.seed, out, args.fixture, args.chief_fixture))
+    print(run_day(args.scenario, args.seed, out, args.fixture, args.chief_fixture, args.comms_fixture))
     print(f"Run folder: {out}")
 
 

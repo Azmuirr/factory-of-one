@@ -1,0 +1,34 @@
+agent: comms
+version: 0.1.0
+defaults:
+  trials: 3
+  seed: 1
+
+tasks:
+  - id: tell-away-s01
+    kind: capability
+    scenario: s01-calendar-gate
+    reference: agents/comms/evals/fixtures/reference-status.jsonl
+    setup:
+      - seed_ledger: {file: agents/comms/evals/fixtures/away-ledger.jsonl}
+    prompt: The PM is away today and a decision is waiting for them. Write the readout for the PM's manager, the team, the Sales lead about Cobalt Ridge, and a note to Cobalt Ridge's IT director.
+    graders:
+      - comms_versions
+      - comms_numbers_match
+      - {type: code, name: comms_delivery, params: {away: true}}
+      - comms_in_voice
+      - {type: code, name: tools_within_allowlist, params: {servers: [ledger, workplace]}}
+
+  - id: tell-decided-s01
+    kind: capability
+    scenario: s01-calendar-gate
+    reference: agents/comms/evals/fixtures/reference-decided.jsonl
+    setup:
+      - seed_ledger: {file: ledger/examples/s01-happy-path.jsonl, ids: [sig_0001, pkt_0001, rev_0001, cnd_0001, bet_0001, act_0001, bld_0001, act_0002, ver_0001, call_0001]}
+    prompt: The PM made the call. Write the readout of the decision for the PM's manager, the team, and the Sales lead.
+    graders:
+      - comms_versions
+      - comms_numbers_match
+      - {type: code, name: comms_delivery, params: {away: false}}
+      - comms_in_voice
+      - {type: code, name: tools_within_allowlist, params: {servers: [ledger, workplace]}}

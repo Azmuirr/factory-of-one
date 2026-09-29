@@ -23,7 +23,7 @@ def loop_run(tmp_path_factory):
 def test_the_loop_writes_every_artifact_in_order(loop_run):
     out, _ = loop_run
     types = [e["type"] for e in ledger.read(out / "ledger.jsonl")]
-    assert types == ["signal_card", "decision_packet", "review", "candidates", "review", "bet", "action", "build", "review", "action", "action", "verdict", "call"]
+    assert types == ["signal_card", "decision_packet", "review", "candidates", "review", "bet", "action", "build", "review", "action", "action", "verdict", "call", "readout"]
     assert ledger.validate_file(out / "ledger.jsonl") == []
 
 
@@ -48,8 +48,14 @@ def test_the_trace_records_every_station_and_the_pm_cost(loop_run):
     stations = [t["station"] for t in map(json.loads, (out / "trace.jsonl").read_text(encoding="utf-8").splitlines())]
     for station in ("sense", "decide", "build", "apply", "prove", "call", "tell", "learn"):
         assert station in stations
-    assert [g["gate"] for g in summary["gates"]] == ["decide", "call"]
+    assert [g["gate"] for g in summary["gates"]] == ["decide", "call", "tell"]
     assert summary["pm_minutes"] > 0
+
+
+def test_approved_versions_are_sent_after_the_tell_gate(loop_run):
+    out, _ = loop_run
+    sent = [json.loads(l) for l in (out / "outbox.jsonl").read_text(encoding="utf-8").splitlines()]
+    assert {p["audience"] for p in sent} == {"manager", "team", "peers"} and all(p["reason"] == "approved by the PM" for p in sent)
 
 
 def test_code_signs_what_code_wrote(loop_run):

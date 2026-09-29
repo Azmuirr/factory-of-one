@@ -288,8 +288,40 @@ class Loop:
         call_id = self.write("call", HUMAN, {"decision": a["decision"], "rationale": a["rationale"]}, [self.latest("verdict")["id"]])
         self.log("call", "call made", call=call_id, decision=a["decision"])
 
+    def rights(self) -> dict:
+        from factory import config as install
+        from factory import policy
+        cfg = install.load()
+        return policy.load(cfg.decision_rights) if cfg.decision_rights else {"away": {"actions": "prepare_only", "send": {}}}
+
+    def comms_readout(self, task_id: str, moment: str, fixture: Path | None) -> dict | None:
+        source = fixture or self.fixture
+        if source:
+            rows = [json.loads(l) for l in source.read_text(encoding="utf-8").splitlines() if l.strip()]
+            for row in rows:
+                if row["type"] == "readout" and row["payload"]["moment"] == moment:
+                    ledger.append(self.ledger, {**row, "id": ledger.next_id(self.ledger, "readout")})
+            self.log("tell", "comms output loaded from fixture")
+        else:
+            self.run_agent("comms", task_id, "tell")
+        return self.latest("readout")
+
     def tell(self) -> None:
-        self.log("tell", "Comms is not built yet. Nothing is sent.")
+        """Comms drafts the decision for each audience. The PM approves at the Tell gate; code checks numbers and sends."""
+        from factory import comms
+        readout = self.comms_readout("tell-decided-s01", "decision", None)
+        if not readout:
+            self.log("tell", "no readout written")
+            return
+        lines = [f"{v['audience'].upper()} to {', '.join(v['to'])} ({v['channel']}):\n{v['text']}" for v in readout["payload"]["versions"]]
+        problems = comms.number_problems(readout["payload"], ledger.read(self.ledger))
+        a = self.gates.ask("tell", "\n\n".join(lines + ([f"Numbers that do not match the ledger: {problems}"] if problems else [])),
+                           [("send", "Send these versions? (yes/no)", "no")])
+        if a["send"].lower() not in ("y", "yes"):
+            self.log("tell", "the PM chose not to send")
+            return
+        results = comms.deliver(readout, ledger.read(self.ledger), self.world, self.rights(), approved_by_pm=True, out=self.dir)
+        self.log("tell", "readout delivered", sent=[r["audience"] for r in results if r["sent"]], held=[r["audience"] for r in results if not r["sent"]])
 
     def learn(self, result: dict | None) -> dict:
         summary = {
@@ -328,7 +360,7 @@ class Loop:
         cfg = install.load()
         limit = policy.load(cfg.decision_rights)["away"]["urgent"]["max_per_day"] if cfg.decision_rights else 3
         outbox = self.dir / "outbox.jsonl"
-        sent = len(outbox.read_text(encoding="utf-8").splitlines()) if outbox.exists() else 0
+        sent = sum(1 for l in outbox.read_text(encoding="utf-8").splitlines() if json.loads(l).get("to") == "self") if outbox.exists() else 0
         if sent >= limit:
             self.log("notify", "held for the digest: the daily limit is reached", text=text)
             return False
@@ -336,7 +368,7 @@ class Loop:
             f.write(json.dumps({"ts": self.sim_now(), "to": "self", "text": text}) + "\n")
         return True
 
-    def away(self, chief_fixture: Path | None = None) -> None:
+    def away(self, chief_fixture: Path | None = None, comms_fixture: Path | None = None) -> None:
         """Chief's away brief, Signal's check, Quality's review. A decision is queued for the PM and nothing is applied."""
         self.setup()
         self.chief_away(chief_fixture)
@@ -356,6 +388,12 @@ class Loop:
             else:
                 d = packet["payload"]["diagnosis"]
                 self.notify(f"{d['metric']} moved for {segment_text(d.get('segment'))}. A decision is waiting for you; nothing was applied.")
+            from factory import comms
+            readout = self.comms_readout("tell-away-s01", "status", comms_fixture)
+            if readout:
+                results = comms.deliver(readout, ledger.read(self.ledger), self.world, self.rights(), approved_by_pm=False, out=self.dir)
+                self.log("tell", "status delivered by the decision rights", sent=[r["audience"] for r in results if r["sent"]],
+                         held=[r["audience"] for r in results if not r["sent"]])
         (self.dir / "trace.jsonl").write_text("".join(json.dumps(t) + "\n" for t in self.trace), encoding="utf-8")
 
     def resume(self) -> dict:

@@ -51,7 +51,8 @@ def test_agents_cannot_queue_decisions_only_the_autopilot_can(tmp_path, monkeypa
 def away_day(tmp_path_factory):
     from factory.autopilot.__main__ import run_day
     out = tmp_path_factory.mktemp("away") / "day"
-    digest = run_day("s01-calendar-gate", 1, out, fixture=FIXTURE, chief_fixture=AWAY)
+    digest = run_day("s01-calendar-gate", 1, out, fixture=FIXTURE, chief_fixture=AWAY,
+                     comms_fixture=ROOT / "agents" / "comms" / "evals" / "fixtures" / "reference-status.jsonl")
     return out, digest
 
 
@@ -64,16 +65,19 @@ def test_nothing_is_applied_while_the_pm_is_away(away_day):
     assert ledger.validate_file(out / "ledger.jsonl") == []
 
 
-def test_urgent_items_reach_the_pm_and_nothing_else_is_sent(away_day):
+def test_urgent_items_reach_the_pm_and_only_what_the_rights_allow_goes_to_others(away_day):
     out, _ = away_day
     posts = [json.loads(l) for l in (out / "outbox.jsonl").read_text(encoding="utf-8").splitlines()]
-    assert posts and all(p["to"] == "self" for p in posts)
-    assert len(posts) <= policy.load(RIGHTS)["away"]["urgent"]["max_per_day"]
+    to_pm = [p for p in posts if p["to"] == "self"]
+    assert to_pm and len(to_pm) <= policy.load(RIGHTS)["away"]["urgent"]["max_per_day"]
+    assert {p["audience"] for p in posts if p["to"] != "self"} == {"manager", "team"}
+    held = [json.loads(l)["audience"] for l in (out / "held.jsonl").read_text(encoding="utf-8").splitlines()]
+    assert sorted(held) == ["customer", "peers"]
 
 
 def test_the_digest_says_what_happened_and_what_waits(away_day):
     _, digest = away_day
-    assert "Waiting for you" in digest and "Sent to you" in digest and "--resume" in digest
+    assert all(s in digest for s in ("Waiting for you", "Sent to you", "Sent on your behalf", "Held for you", "--resume"))
 
 
 def test_back_at_the_keyboard_the_loop_resumes_at_the_decision(away_day, tmp_path):

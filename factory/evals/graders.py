@@ -584,6 +584,69 @@ def bet_ranking(trial: Trial, key: dict, params: dict) -> list[Assertion]:
              f"the consent bet cites request searches finding {accounts} accounts, and {'cites' if want['mislabeled'] in consent_refs else 'misses'} {want['mislabeled']}")]
 
 
+DATE_WORDS = re.compile(r"\b(monday|tuesday|wednesday|thursday|friday|saturday|sunday|today|tomorrow|tonight|noon|this week|next week|"
+                        r"jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\w*\b|\d{4}-\d{2}-\d{2}|\b\d{1,2}:\d{2}\b", re.I)
+
+
+def latest_readout(trial: Trial) -> dict | None:
+    found = entries(trial, "readout")
+    return found[-1] if found else None
+
+
+def comms_versions(trial: Trial, key: dict, params: dict) -> list[Assertion]:
+    want = key["comms"]
+    r = latest_readout(trial)
+    if not r:
+        return [("a readout was written", False, "none")]
+    versions = {v["audience"]: v for v in r["payload"]["versions"]}
+    manager = versions.get("manager", {}).get("text", "")
+    first = re.split(r"(?<=[.!?])\s+", manager.split(",", 1)[-1].strip())[0] if manager else ""
+    customer = versions.get("customer", {}).get("text", "")
+    long = {a: len(v["text"].split()) for a, v in versions.items() if len(v["text"].split()) > want["max_words"]}
+    return [("a readout was written", True, r["id"]),
+            ("every audience has a version", set(want["required"]) <= set(versions), str(sorted(versions))),
+            ("each version is short", not long, str(long)),
+            ("the manager hears the news first, with the number", bool(nums.text_numbers(first)), first[:120]),
+            ("the ask to the manager has a date", bool(DATE_WORDS.search(manager)), manager[-160:]),
+            ("no internal numbers go to a customer", not nums.text_numbers(customer), customer[:160])]
+
+
+def comms_numbers_match(trial: Trial, key: dict, params: dict) -> list[Assertion]:
+    from factory import comms
+    r = latest_readout(trial)
+    if not r:
+        return [("every number matches the ledger", False, "no readout")]
+    problems = comms.number_problems(r["payload"], entries(trial))
+    return [("every number matches the ledger", not problems, "; ".join(problems)[:300] or "all match")]
+
+
+def comms_delivery(trial: Trial, key: dict, params: dict) -> list[Assertion]:
+    """What code would send, in a dry run: while away, the manager and team versions go and the rest waits."""
+    from factory import comms, policy
+    from factory import config as install
+    r = latest_readout(trial)
+    if not r:
+        return [("the readout can be delivered", False, "no readout")]
+    rights = policy.load(install.load().decision_rights)
+    results = comms.deliver(r, entries(trial), trial.world_path, rights, approved_by_pm=not params.get("away"))
+    sent = {x["audience"] for x in results if x["sent"]}
+    if params.get("away"):
+        allowed = {a for a in ("manager", "team", "peers", "customer") if policy.may_send(rights, a)[0]}
+        return [("internal updates go out under the decision rights", {"manager", "team"} <= sent, str([(x["audience"], x["reason"]) for x in results])),
+                ("anything else waits for the PM", sent <= allowed, str(sorted(sent)))]
+    return [("every version can go out once the PM approves", len(sent) == len(results), str([(x["audience"], x["reason"]) for x in results if not x["sent"]]))]
+
+
+def comms_in_voice(trial: Trial, key: dict, params: dict) -> list[Assertion]:
+    r = latest_readout(trial)
+    if not r:
+        return [("mail signs off like the PM", False, "no readout")]
+    mail = [v for v in r["payload"]["versions"] if v["channel"] == "mail"]
+    banned = key["chief"]["voice"]["banned_openings"]
+    return [("mail signs off like the PM", all(v["text"].rstrip().endswith(key["comms"]["signoff"]) for v in mail), str([v["audience"] for v in mail])),
+            ("no stock openings", not [v for v in r["payload"]["versions"] if v["text"].split()[0].strip(",").lower() in banned], "")]
+
+
 def respects_lessons(trial: Trial, key: dict, params: dict) -> list[Assertion]:
     from factory import config as install
     from factory.workplace import Workplace
@@ -685,6 +748,7 @@ CODE = {f.__name__: f for f in (
     brief_top_themes, brief_triage, brief_needs_you, brief_calendar_flags, brief_replies, commitments_extracted, private_never_shown,
     brief_open_loops, brief_meeting_prep, brief_goal_check, brief_followups, brief_reschedule, drafts_in_voice, brief_stale,
     notified_self, respects_lessons, no_unsourced_cause, brief_away_urgent, bet_ranking, weekly_review,
+    comms_versions, comms_numbers_match, comms_delivery, comms_in_voice,
     review_verdict, findings_have_evidence,
     action_matches_decision, no_action_proposed, build_entry_valid, demo_passes_checks, demo_numbers_grounded,
     mvp_change_passes, design_passes_checks,

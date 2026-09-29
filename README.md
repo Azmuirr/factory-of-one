@@ -1,6 +1,6 @@
 # Factory of One
 
-The PMs who last will be operators with strong judgment who run several agents at once. This repo is a working version of that job: five agents do the work, code owns every fact, and the PM makes the calls.
+The PMs who last will be operators with strong judgment who run several agents at once. This repo is a working version of that job: six agents do the work, code owns every fact, and the PM makes the calls.
 
 **See it first:** [a PM's Monday](site/index.html), replayed from a real run. Chief triages the morning, Signal diagnoses an activation drop, Quality tries to break the diagnosis, Builder ships a fix behind a flag, and you make two calls and get scored on them. Open `site/index.html` in a browser; nothing to install.
 
@@ -12,9 +12,10 @@ The PMs who last will be operators with strong judgment who run several agents a
 | **Signal**, analyst | What changed and why, with numbers and customer voice. Writes a decision packet | Every number: each one cites a query that code replays |
 | **Bet**, investment analyst | Frames the work coming in: strategy docs, customer requests, stakeholder asks, and Signal's numbers, ranked into at most 5 bets tied to your goals, with set-asides that cite the strategy | Every size: a cited query or request search that code replays. Each account counted once |
 | **Quality**, reviewer | Reviews Signal's, Bet's, and Builder's work before you see it, with [Elon Mode](skills/elon-mode/SKILL.md). Chief's brief is checked by code when it is written | Numbers, quotes, fields, privacy. It cannot return SHIP when a check fails |
+| **Comms**, communicator | One decision told up to your manager, down to your team, across to peers, and to a customer when needed, with identical facts. Drafts only | Every number must already be in the ledger. Code sends only what you approve at the Tell gate, or, while you're away, what your decision rights allow |
 | **Builder**, engineer and designer | A code change behind a flag, a design in the company's design system, a one-screen demo | Tests rerun by code, change scope, hidden acceptance tests, design system rules, dead clicks |
 
-You own two gates: **decide** (approve the action and place a bet with a prediction) and **call** (ship, iterate, or kill once the data is in). Your predictions are scored.
+You own three gates: **decide** (approve the action and place a bet with a prediction), **call** (ship, iterate, or kill once the data is in), and **tell** (which versions go out). Your predictions are scored.
 
 **When you're away,** the autopilot runs the loop to your decision and stops there: Chief sends up to three urgent items to your own channel, Signal and Quality prepare the decision, and a digest waits for you. Nothing is applied without you. The rules are one file you edit: [decision rights](company/tallybird/decision_rights.yaml).
 
@@ -57,7 +58,7 @@ python -m factory.loop                            # about 10 minutes: every agen
 python -m factory.autopilot                       # a day with you away: urgent items to you, the decision queued, a digest
 python -m factory.loop --resume runs/autopilot/<run>   # back at the keyboard: decide, and the loop continues
 python -m factory.evals run signal --trials 3    # score an agent against the answer key
-python -m pytest                                  # 162 tests, about 5 minutes, no Claude
+python -m pytest                                  # 199 tests, about 7 minutes, no Claude
 ```
 
 On macOS or Linux, use `.venv/bin/python` in place of `python` if the venv isn't activated. Rebuild the replay page from any run with `python -m factory.replay --loop runs/loop/<run> --chief runs/chief/<run>`.
@@ -81,7 +82,7 @@ Every agent was tuned on scenario 1, and every result above is on scenario 1. Tr
 
 | Built | Not built yet |
 |---|---|
-| Chief, Signal, Bet, Quality, Builder, and the autopilot for days you're away | Comms (one decision for each audience), Retro (learning across loops), Coach |
+| Chief, Signal, Bet, Quality, Builder, Comms, and the autopilot for days you're away | Retro (learning across loops), Coach |
 | Scenario 1 (a release that locked out Microsoft calendar users) and a quiet control scenario | Scenarios 2 to 10, harder tiers, held-out scenarios |
 | The eval harness: tasks, code graders, answer keys, trials, regrading | A model judge calibrated against human graders |
 | A capability map, so any install can swap in its own tools | Tested setups for specific vendors, a warehouse adapter for Signal, repo rules for Builder beyond the sandbox app |

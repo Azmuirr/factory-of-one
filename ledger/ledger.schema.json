@@ -965,28 +965,61 @@
     },
     "readout": {
       "type": "object",
+      "additionalProperties": false,
       "required": [
+        "moment",
+        "about",
         "versions",
         "numbers"
       ],
-      "additionalProperties": false,
       "properties": {
+        "moment": {
+          "enum": [
+            "status",
+            "decision"
+          ],
+          "description": "status: where things stand while a decision waits. decision: the call, after it is made"
+        },
+        "about": {
+          "$ref": "#/$defs/id_ref"
+        },
         "versions": {
           "type": "array",
           "minItems": 1,
           "items": {
             "type": "object",
+            "additionalProperties": false,
             "required": [
               "audience",
+              "to",
+              "channel",
               "text"
             ],
             "properties": {
               "audience": {
                 "enum": [
-                  "up",
-                  "down",
-                  "across"
+                  "manager",
+                  "team",
+                  "peers",
+                  "customer"
                 ]
+              },
+              "to": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "string",
+                  "description": "A person id from the directory, or a channel such as #growth"
+                }
+              },
+              "channel": {
+                "enum": [
+                  "mail",
+                  "chat"
+                ]
+              },
+              "subject": {
+                "type": "string"
               },
               "text": {
                 "type": "string"
@@ -998,9 +1031,11 @@
           "type": "array",
           "items": {
             "type": "object",
+            "additionalProperties": false,
             "required": [
               "label",
-              "value"
+              "value",
+              "ref"
             ],
             "properties": {
               "label": {
@@ -1008,6 +1043,9 @@
               },
               "value": {
                 "type": "number"
+              },
+              "ref": {
+                "$ref": "#/$defs/id_ref"
               }
             }
           }
