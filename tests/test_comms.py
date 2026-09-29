@@ -126,3 +126,16 @@ def test_a_customer_note_with_internal_numbers_fails(tmp_path, now_run):
         v = next(v for v in p["versions"] if v["audience"] == "customer")
         v["text"] = v["text"].replace("Thanks, S.", "We're losing $25,562 a week on this. Thanks, S.")
     assert "no internal numbers go to a customer" in failed(comms_trial(tmp_path, now_run, STATUS, plant), True)
+
+
+def test_the_ledger_asks_for_directory_ids_not_names(tmp_path, monkeypatch, world):
+    entries = rows(STATUS)
+    (tmp_path / "ledger.jsonl").write_text("".join(json.dumps(e) + "\n" for e in entries if e["type"] != "readout"), encoding="utf-8")
+    monkeypatch.setenv("FACTORY_WORLD", str(world))
+    monkeypatch.setenv("FACTORY_LEDGER", str(tmp_path / "ledger.jsonl"))
+    monkeypatch.setenv("FACTORY_AGENT", "comms")
+    from factory.servers import ledger_server
+    bad = copy.deepcopy(readout(entries)["payload"])
+    bad["versions"][0]["to"] = ["Dana Okafor"]
+    result = ledger_server.write_entry("readout", bad)
+    assert result["status"] == "rejection" and "directory" in result["message"]

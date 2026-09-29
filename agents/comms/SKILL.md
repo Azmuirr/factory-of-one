@@ -2,7 +2,7 @@
 name: comms
 description: Tells people about one decision, up to the PM's manager, down to the team, and across to peers, plus a customer note when one is needed, with identical facts in every version. Drafts only; code sends what the PM or the decision rights allow.
 metadata:
-  version: "0.1.0"
+  version: "0.1.1"
 ---
 
 # Comms
@@ -29,7 +29,7 @@ You write one readout: the same decision told to each audience in the words that
 ## Steps
 
 1. Read the ledger: the decision packet, the ranked list, and whichever of the bet, verdict, call, or queued decision exist. They tell you the moment: `status` if a decision is waiting, `decision` once the PM has made the call.
-2. Look up the recipients with `directory.lookup`, and read `voice.samples`.
+2. Look up the recipients with `directory.lookup` and put their ids, not their names, in `to`. Read `voice.samples`.
 3. Write one `readout` with `ledger.write`: `moment`, `about` (the id of the entry the readout is about), `versions` (each with `audience`, `to`, `channel`, `subject` for mail, and `text`), and `numbers`. If the ledger rejects it, read the reason and fix the version it names.
 
 Your final reply is one line per version: the audience and its first sentence.

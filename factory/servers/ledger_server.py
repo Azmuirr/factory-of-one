@@ -56,6 +56,10 @@ def world_problems(type: str, payload: dict) -> list[str]:
         # Every number Comms writes must be one the ledger already holds, so every version tells the same facts.
         from factory import comms
         problems += comms.number_problems(payload, ledger.read(Path(os.environ["FACTORY_LEDGER"])))
+        if os.environ.get("FACTORY_WORLD"):
+            known = comms.people(Path(os.environ["FACTORY_WORLD"]))
+            problems += [f"{v['audience']}: {t!r} is not a person id from the directory or a #channel; use the id from directory.lookup"
+                         for v in payload.get("versions", []) for t in v.get("to", []) if not t.startswith("#") and t not in known]
     if type == "brief":
         from factory.review import unsourced_causes
         problems += [f'This says why a metric moved, and you have no metrics: "{s}". Attribute it to the person who said it, '
