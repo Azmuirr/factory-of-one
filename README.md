@@ -61,7 +61,7 @@ python -m factory.loop --resume runs/autopilot/<run>   # back at the keyboard: d
 python -m factory.retro run runs/loop/<run> runs/autopilot/<run>   # Friday: Retro reads the week and proposes patches
 python -m factory.retro apply runs/retro/<run> pch_0001   # you approve a patch; code applies it and adds its eval case
 python -m factory.evals run signal --trials 3    # score an agent against the answer key
-python -m pytest                                  # 212 tests, about 7 minutes, no Claude
+python -m pytest                                  # 216 tests, about 7 minutes, no Claude
 ```
 
 On macOS or Linux, use `.venv/bin/python` in place of `python` if the venv isn't activated. Rebuild the replay page from any run with `python -m factory.replay --loop runs/loop/<run> --chief runs/chief/<run>`.

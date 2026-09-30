@@ -655,7 +655,7 @@ def retro_note(trial: Trial, key: dict, params: dict) -> list[Assertion]:
         return [("a retro note was written", False, "none")]
     lines = notes[-1]["payload"]["lines"]
     stats = retro.week_stats(trial.dir / "week")
-    pool = {float(v) for v in nums.field_numbers(stats)}
+    pool = retro.stats_numbers(stats)
     made_up = [v for line in lines for v, tol in nums.text_numbers(line) if not nums.text_grounded(v, tol, pool)]
     agent = want["recurring"]["agent"]
     return [("a retro note was written", True, f"{len(lines)} lines"),

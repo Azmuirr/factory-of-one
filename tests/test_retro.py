@@ -106,3 +106,39 @@ def test_a_note_with_a_made_up_number_fails(tmp_path):
     def plant(rows):
         next(r for r in rows if r["type"] == "retro")["payload"]["lines"][0] = "Calibration: Brier 0.11 on 2 bets."
     assert "every number in the note comes from the week's stats" in retro_failures(retro_trial(tmp_path, plant))
+
+
+def test_numbers_retro_may_cite_include_confidences_and_the_findings():
+    pool = retro.stats_numbers(retro.week_stats(WEEK))
+    assert {0.8, 7.0, 11.0, 0.04, 3.0, 4.0} <= pool
+
+
+@pytest.fixture
+def retro_ledger(tmp_path, monkeypatch, now_run):
+    shutil.copytree(WEEK, tmp_path / "week")
+    monkeypatch.setenv("FACTORY_WORLD", str(now_run / "world" / "world.db"))
+    monkeypatch.setenv("FACTORY_LEDGER", str(tmp_path / "ledger.jsonl"))
+    monkeypatch.setenv("FACTORY_WEEK", str(tmp_path / "week"))
+    monkeypatch.setenv("FACTORY_AGENT", "retro")
+    from factory.servers import ledger_server
+    return ledger_server
+
+
+def test_the_ledger_bounces_a_ratio_retro_worked_out(retro_ledger):
+    note = next(r for r in map(json.loads, REFERENCE.read_text(encoding="utf-8").splitlines()) if r["type"] == "retro")["payload"]
+    bad = {**note, "patches": [], "lines": note["lines"][:-1] + ["Sense took 1.5x as long as build."]}
+    result = retro_ledger.write_entry("retro", bad)
+    assert result["status"] == "rejection" and "1.5" in result["message"]
+
+
+def test_the_ledger_names_the_real_graders_when_a_patch_invents_one(retro_ledger):
+    bad = patch()
+    bad["eval_case"]["graders"] = ["numbers"]
+    result = retro_ledger.write_entry("patch", bad)
+    assert result["status"] == "rejection" and "passes_quality_checks" in result["message"]
+
+
+def test_retro_can_see_each_agents_grader_names():
+    from factory.servers import retro_server
+    agents = retro_server.list_skills()["agents"]
+    assert "passes_quality_checks" in agents["signal"]["graders"] and "SKILL.md" in agents["signal"]["files"]

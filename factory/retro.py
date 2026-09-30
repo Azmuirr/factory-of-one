@@ -55,6 +55,38 @@ def week_stats(week: Path) -> dict:
             "seconds_by_station": dict(seconds.most_common()), "slowest_station": seconds.most_common(1)[0][0] if seconds else None}
 
 
+def stats_numbers(stats: dict) -> set[float]:
+    """Every number Retro may cite: each field in the week's stats, and each number written in the findings it carries."""
+    from factory import numbers as nums
+    pool: set[float] = set()
+
+    def walk(v):
+        if isinstance(v, bool):
+            return
+        if isinstance(v, (int, float)):
+            pool.add(float(v))
+        elif isinstance(v, str):
+            pool.update(float(d.replace(",", "")) for d, _ in nums.TEXT_NUMBER.findall(v))
+        elif isinstance(v, dict):
+            for x in v.values():
+                walk(x)
+        elif isinstance(v, list):
+            for x in v:
+                walk(x)
+
+    walk(stats)
+    return pool
+
+
+def suite_graders(agent: str, agents_root: Path = AGENTS) -> list[str]:
+    """The names of the graders in an agent's own suite. Names only: never the tasks' answer keys."""
+    path = agents_root / agent / "evals" / "suite.yaml"
+    if not path.exists():
+        return []
+    suite = yaml.safe_load(path.read_text(encoding="utf-8"))
+    return sorted({g if isinstance(g, str) else g["name"] for t in suite["tasks"] for g in t["graders"]})
+
+
 def instructions_path(agent: str, name: str, agents_root: Path = AGENTS) -> Path:
     """Only an agent's own instruction files: never its evals, fixtures, or anything outside agents/."""
     folder = (agents_root / agent).resolve()

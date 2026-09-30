@@ -54,6 +54,19 @@ def world_problems(type: str, payload: dict) -> list[str]:
                      for q in review.candidate_quote_problems(world, payload, earlier)]
     if type == "patch" and payload.get("status") != "proposed":
         problems.append("agents propose patches; only the PM approves or rejects one")
+    if type == "patch":
+        from factory import retro
+        from factory.evals.graders import CODE
+        unknown = [g for g in payload.get("eval_case", {}).get("graders", []) if g not in CODE]
+        if unknown:
+            problems.append(f"eval_case names graders that do not exist: {unknown}. {payload.get('agent')}'s suite uses: {retro.suite_graders(payload.get('agent', ''))}")
+    if type == "retro" and os.environ.get("FACTORY_WEEK"):
+        from factory import numbers as nums
+        from factory import retro
+        pool = retro.stats_numbers(retro.week_stats(Path(os.environ["FACTORY_WEEK"])))
+        made_up = [v for line in payload.get("lines", []) for v, tol in nums.text_numbers(line) if not nums.text_grounded(v, tol, pool)]
+        if made_up:
+            problems.append(f"these numbers are not in retro.week: {made_up}. Copy numbers from it; never compute ratios or totals")
     if type == "readout":
         # Every number Comms writes must be one the ledger already holds, so every version tells the same facts.
         from factory import comms

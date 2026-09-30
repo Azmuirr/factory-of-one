@@ -19,8 +19,9 @@ def week_stats() -> dict:
 
 @server.tool()
 def list_skills() -> dict:
-    """Every agent and its instruction files."""
-    return {"status": "value", "agents": {p.name: sorted(f.name for f in p.glob("*.md")) for p in sorted(retro.AGENTS.iterdir()) if p.is_dir()}}
+    """Every agent, its instruction files, and the names of the graders in its eval suite, for a patch's eval case."""
+    return {"status": "value", "agents": {p.name: {"files": sorted(f.name for f in p.glob("*.md")), "graders": retro.suite_graders(p.name)}
+                                          for p in sorted(retro.AGENTS.iterdir()) if p.is_dir()}}
 
 
 @server.tool()

@@ -1,0 +1,57 @@
+{
+  "agent": "retro",
+  "agent_version": "0.1.1",
+  "suite_version": "0.1.0",
+  "run_id": "20260930T011013Z-regraded",
+  "mode": "regraded",
+  "trials_per_task": 2,
+  "cost_usd": 0.3442,
+  "summary": {
+    "capability": {
+      "pass_at_k": "0/1",
+      "pass_pow_k": "0/1"
+    }
+  },
+  "tasks": [
+    {
+      "task": "week-1",
+      "kind": "capability",
+      "trials": [
+        {
+          "trial": 1,
+          "passed": false,
+          "partial": 0.8,
+          "failed": [
+            "every number in the note comes from the week's stats: [1.5]",
+            "the patch brings an eval case that runs: ['numbers']"
+          ],
+          "advisory": [],
+          "error": null,
+          "cost_usd": 0.1893,
+          "turns": 10,
+          "duration_s": 0.0,
+          "transcript": "runs\\evals\\retro\\20260930T011013Z\\week-1\\trial-1\\transcript.jsonl"
+        },
+        {
+          "trial": 2,
+          "passed": false,
+          "partial": 0.8,
+          "failed": [
+            "every number in the note comes from the week's stats: [3.7]",
+            "the patch brings an eval case that runs: ['review.check_entry:numbers']"
+          ],
+          "advisory": [],
+          "error": null,
+          "cost_usd": 0.1549,
+          "turns": 9,
+          "duration_s": 0.0,
+          "transcript": "runs\\evals\\retro\\20260930T011013Z\\week-1\\trial-2\\transcript.jsonl"
+        }
+      ],
+      "cross_trial": [],
+      "pass_at_k": false,
+      "pass_pow_k": false,
+      "mean_partial": 0.8
+    }
+  ]
+}
