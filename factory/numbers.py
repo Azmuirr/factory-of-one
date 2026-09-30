@@ -9,6 +9,7 @@ NOT_NUMBERS = re.compile(
     r"<script.*?</script>|<style.*?</style>|<[^>]+>|\b[a-z]+_[a-z0-9]+\b|\d{4}-\d{2}-\d{2}|\d+(?:\.\d+)?e-?\d+"
     r"|(?i:\b(?:Microsoft|Office|Dynamics|M)[\s-]?365\b|\bWindows[\s-]?1[01]\b)"  # product names, not data
     r"|\b[A-Z]{2,}-\d+\b"  # tracker ids such as ONB-140
+    r"|(?i:\b2[\s-](?:to[\s-])?10\b|\b11[\s-](?:to[\s-])?50\b|\b51\s?\+|\b51\s?plus\b)"  # company_size labels, not data
     r"|\b\d{1,2}:\d{2}\b", re.S)  # times of day
 NARRATIVE_MAX = 14  # a small bare integer is narrative only as a date, a time span, or a label ("Feb 10", "7 days", "week 6")
 TIME_AFTER = re.compile(r"^\s*-?\s*(?:days?|weeks?|months?|years?|hours?|minutes?|mins?|am|pm|of)\b", re.I)

@@ -1,0 +1,41 @@
+{
+  "agent": "signal",
+  "agent_version": "0.3.8",
+  "suite_version": "0.1.0",
+  "run_id": "20260930T224455Z",
+  "mode": "real",
+  "trials_per_task": 1,
+  "cost_usd": 0.4148,
+  "summary": {
+    "capability": {
+      "pass_at_k": "0/1",
+      "pass_pow_k": "0/1"
+    }
+  },
+  "tasks": [
+    {
+      "task": "diagnose-s02",
+      "kind": "capability",
+      "trials": [
+        {
+          "trial": 1,
+          "passed": false,
+          "partial": 0.933,
+          "failed": [
+            "decision_packet passes Quality's code checks: '15' in \"rel_0501 shipped on 2026-02-10, the day after the recent per\" is not in its evidence; '0.1347' in \"s51_plus also fell (0.1347 to 0.0915, p_value 0.047616), whi\" is not in the data; '0.0915' in \"s51_plus also fell (0.1347 to 0.0915, p_value 0.047616), whi\" is not in the data; '0.047616' in \"s51_plus also fell (0.1347 to 0.0915, p_value 0.047616), whi\" is not in the data"
+          ],
+          "advisory": [],
+          "error": null,
+          "cost_usd": 0.4148,
+          "turns": 7,
+          "duration_s": 108.7,
+          "transcript": "runs\\evals\\signal\\20260930T224455Z\\diagnose-s02\\trial-1\\transcript.jsonl"
+        }
+      ],
+      "cross_trial": [],
+      "pass_at_k": false,
+      "pass_pow_k": false,
+      "mean_partial": 0.933
+    }
+  ]
+}

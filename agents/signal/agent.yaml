@@ -1,5 +1,5 @@
 name: signal
-version: 0.3.0
+version: 0.3.8
 model: sonnet
 max_turns: 40
 skill: SKILL.md

@@ -1,0 +1,42 @@
+# Generator input for scenario 2. Hidden from agents: they see only the generated world.
+# Held out: no agent's instructions were written or tuned with this scenario in view. It exists to test whether
+# what generalized from scenario 1 (find where a metric moved, tie it to a release, size it, cite evidence) still
+# holds on a different metric, a different segment dimension, and a different mechanism.
+id: s02-checkout-default
+title: Trial-to-paid drops for larger teams after the checkout redesign
+version: 0.1.0
+tier: easy
+tiers_built: [easy]
+
+clock:
+  weeks: 10
+  now: {week: 8, day: 7}
+  post_action_weeks: [9, 10]
+
+baseline: default  # sandbox/SPEC.md section 4
+
+releases:
+  - id: rel_0501
+    at: {week: 6, day: 2}
+    title: "Checkout: simplified billing step"
+    notes: "The trial-end billing screen now shows one price per seat per month by default. The annual-billing toggle moved below the fold and no longer shows the savings amount."
+    flag: null
+    effects:
+      - kind: paid_friction
+        # Larger teams feel a per-seat monthly number the most; annual was carrying a meaningful share of their
+        # decision to convert. Solo and small teams are far less price-sensitive to a missing annual prompt at
+        # this scale, so the segment is company size, not calendar provider or channel this time.
+        segment: {company_size: [s11_50, s51_plus]}
+        paid_mult: 0.65
+
+text:
+  tickets:
+    - theme: checkout_price_shock
+      eligible: "trial ended, outcome free, affected by rel_0501's segment"
+      file_rate: 0.05
+      support_tag_mix: {billing: 0.6, account: 0.2, other: 0.2}
+      template: templates/tickets/checkout_price_shock.txt
+
+messages: []
+
+actions_available: [rollback, set_flag, start_experiment, no_action]

@@ -46,9 +46,10 @@ def diagnosis_matches_truth(trial: Trial, key: dict, params: dict) -> list[Asser
     if not packet:
         return [("diagnosis present", False, "no decision packet")]
     got, want = packet["diagnosis"], key["diagnosis"]
+    accepted = want.get("segments_accepted", [want["segment"]])
     return [
         ("metric", got.get("metric") == want["metric"], f"{got.get('metric')}"),
-        ("segment", got.get("segment") == want["segment"], f"{got.get('segment')}"),
+        ("segment", got.get("segment") in accepted, f"{got.get('segment')}"),
         ("release", got.get("release_id") == want["release_id"], f"{got.get('release_id')}"),
         ("mechanism", got.get("mechanism_metric") == want["mechanism_metric"], f"{got.get('mechanism_metric')}"),
         ("customer voice", got.get("voice_workspaces", 0) >= want["voice_min_workspaces"], f"{got.get('voice_workspaces')} workspaces"),
@@ -70,8 +71,9 @@ def recommends_truth_action(trial: Trial, key: dict, params: dict) -> list[Asser
         return [("action", False, "no decision packet")]
     got, want = packet["recommended_action"], key["recommended_action"]
     segment = got.get("params", {}).get("segment") or {}
+    names_accepted = want.get("names_accepted", [want["name"]])
     return [
-        ("action type", got.get("name") == want["name"], got.get("name", "")),
+        ("action type", got.get("name") in names_accepted, got.get("name", "")),
         ("action release", got.get("params", {}).get("release_id") == want["release_id"], str(got.get("params", {}).get("release_id"))),
         ("action segment", segment in want["segments_accepted"], str(segment)),
     ]

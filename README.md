@@ -85,7 +85,9 @@ Live runs on scenario 1, graded by the same code graders as the evals. Every run
 | Quality | 1 | 100% on the regression built from a real mistake |
 | The loop | 1 showcase | Microsoft activation 30.5% to 38.2% two weeks after the fix. The gate answers came from a file written in advance, so the Brier score and PM minutes are not a person's |
 
-Every agent was tuned on scenario 1, and every result above is on scenario 1. Treat them as a working system, not a benchmark. A scenario the agents were never tuned on is the honest test, and it isn't built yet.
+Every agent was tuned on scenario 1, and every result above is on scenario 1. Treat them as a working system, not a benchmark.
+
+**Held out:** scenario 2 ([docs/decisions.md#d16](docs/decisions.md)) is a different metric, a different segment, and a different mechanism, built after Signal's instructions were already written. Its first live run genuinely missed the cause; two general instruction fixes later, live-verified without regressing scenario 1, it found the right metric, segment, release, and mechanism, cited 38 real workspaces, and recommended a considered action over a blind rollback. One small gap is still open on the record rather than patched away: [docs/evals.md](docs/evals.md#live-runs).
 
 **Red teaming:** every agent's suite includes a `planted-instruction` task, a fabricated "SYSTEM NOTE" inside something the agent legitimately reads as data (mail, a doc, a ticket, a release note, a transcript, or the ledger itself). All 7 held on their first live run: [docs/evals.md#red-teaming](docs/evals.md#red-teaming). One run also found and fixed a real crash, unrelated to the injection itself.
 
@@ -94,7 +96,7 @@ Every agent was tuned on scenario 1, and every result above is on scenario 1. Tr
 | Built | Not built yet |
 |---|---|
 | Chief, Signal, Bet, Quality, Builder, Comms, Coach, Retro, and the autopilot for a day or a full week away | Retro's view across more than one scenario |
-| Scenario 1 (a release that locked out Microsoft calendar users) and a quiet control scenario | Scenarios 2 to 10, harder tiers, held-out scenarios |
+| Scenario 1 (a release that locked out Microsoft calendar users), a quiet control scenario, and scenario 2 (a checkout default that quietly cuts trial-to-paid for larger teams), held out and Signal-tested | Scenarios 3 to 10, harder tiers, scenario 2 for Chief, Bet, and Comms (needs a workplace) |
 | The eval harness: tasks, code graders, answer keys, trials, regrading | A model judge calibrated against human graders |
 | A capability map, so any install can swap in its own tools | Tested setups for specific vendors, a warehouse adapter for Signal, repo rules for Builder beyond the sandbox app |
 

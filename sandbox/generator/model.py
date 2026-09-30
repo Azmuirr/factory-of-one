@@ -73,11 +73,19 @@ class Simulator:
         for release in self.scenario.releases:
             if not release.effects or t < release.ts or self.rolled_back(release.id, segment, t):
                 continue
-            ws.releases_applied.append(release.id)
+            applied = False
             for effect in release.effects:
-                merged.update({k: v for k, v in effect.items() if k != "kind"})
+                wanted = effect.get("segment") or {}
+                if not all(segment.get(k) in v for k, v in wanted.items()):
+                    continue
+                applied = True
+                merged.update({k: v for k, v in effect.items() if k not in ("kind", "segment")})
                 if effect["kind"] == "connect_block":
                     merged["block_release"] = release.id
+                elif effect["kind"] == "paid_friction":
+                    merged["friction_release"] = release.id
+            if applied:
+                ws.releases_applied.append(release.id)
         return merged
 
     def rolled_back(self, release_id: str, segment: dict, t: float) -> bool:
@@ -228,7 +236,7 @@ class Simulator:
                 late_share = meet_t > t0 + 7 * DAY and rng.random() < 0.3
                 self.meeting(ws, rng, meet_t, events, share_prob=1.0 if late_share else 0.0)
 
-        self.trial_end(ws, rng, u_paid, activated, events)
+        self.trial_end(ws, rng, u_paid, activated, events, effects)
         for k, (ts, name, props) in enumerate(sorted(events, key=lambda e: e[0])):
             self.world.events.append((ts, f"{ws.workspace_id}-{k:03d}", ws.workspace_id, ws.user_id, "notes", name, props))
 
@@ -256,14 +264,17 @@ class Simulator:
         }))
         return share_t
 
-    def trial_end(self, ws, rng, u_paid, activated, events) -> None:
+    def trial_end(self, ws, rng, u_paid, activated, events, effects=None) -> None:
         subs = self.world.subscriptions
         subs.append((ws.created_at, ws.workspace_id, "trial", 1, None, 0.0))
         end_t = ws.created_at + B.TRIAL_DAYS * DAY
-        paid = u_paid < (B.PAID_IF_ACTIVATED if activated else B.PAID_IF_NOT)
+        paid_mult = (effects or {}).get("paid_mult", 1.0)
+        paid = u_paid < (B.PAID_IF_ACTIVATED if activated else B.PAID_IF_NOT) * paid_mult
         events.append((end_t, "trial_ended", {"outcome": "paid" if paid else "free"}))
         if not paid:
             subs.append((end_t, ws.workspace_id, "free", 1, None, 0.0))
+            if paid_mult < 1.0 and self.ticket_theme and rng.random() < self.ticket_theme["file_rate"]:
+                self.planted_ticket(ws, rng, end_t + rng.uniform(0.1, 2.0) * DAY)
             return
         if ws.company_size == "solo":
             plan, seats = "pro", 1

@@ -1,0 +1,98 @@
+# Grading key for scenario 2. Only the bench reads this file.
+# Held out: built after every agent's instructions were already written. Nothing here was used to tune a skill.
+scenario: s02-checkout-default
+version: 0.1.0
+
+cause:
+  release: rel_0501
+  mechanism: "The checkout redesign defaults the trial-end billing screen to a monthly per-seat price and moves the annual toggle (and its savings amount) below the fold. Larger teams are the most price-sensitive to a number that reads higher than expected, so fewer of them convert."
+  affected:
+    segment: {company_size: [s11_50, s51_plus]}
+    funnel_step: "activation is unaffected; the drop is at trial_ended, paid vs free. Activated and non-activated workspaces in the segment convert to paid less often than before, at the same rate relative to each other"
+  onset: {week: 6, day: 2}
+  size:
+    s11_50_trial_to_paid: {before: 0.1179, after: 0.0767}
+    s51_plus_trial_to_paid: {before: 0.1318, after: 0.0915}
+    overall_trial_to_paid: {before: 0.1105, after: 0.1025, relative_change: -0.07}
+    new_arr_lost_per_year_usd: 76900  # expected from the model; seed 1 measures s11_50 + s51_plus new_mrr delta, annualized
+  secondary_effect: "None planted. Activation, calendar connect, and recap-share behavior are all unchanged; only the paid/free split at trial end moves, and only in the two larger segments."
+
+expected_findings:
+  - id: F1
+    finding: "Localizes the drop to larger teams (company_size s11_50, and s51_plus if its smaller sample clears the significance bar used), not to the overall trial_to_paid_rate, which barely moves."
+  - id: F2
+    finding: "Ties the onset to rel_0501."
+  - id: F3
+    finding: "Names the checkout's missing annual-pricing prompt as the mechanism, not a change in activation or product usage."
+  - id: F4
+    finding: "Cites tickets from 3 or more workspaces about price or billing confusion at checkout."
+  - id: F5
+    finding: "Computes trial_to_paid_rate on mature cohorts only (14 full days between signup and now)."
+  - id: F6
+    finding: "Bonus: sizes the cost in revenue, or notes that overall (unsegmented) trial_to_paid_rate looks almost unchanged and explains why segmenting is what reveals it."
+
+decision:
+  correct:
+    - "Restore the annual-pricing prompt at checkout for s11_50 (and s51_plus if named), or roll back rel_0501 for that segment, then retest behind a flag."
+    - "Roll back rel_0501 for everyone, then retest behind a flag."
+    - "Start an experiment that restores the annual prompt for the affected segment, to validate the fix before fully committing."
+  partial:
+    - "Roll back without a retest plan."
+  wrong:
+    - "No action by the end of week 8."
+    - "Blame activation, onboarding, or a calendar/meeting-platform change: none moved."
+    - "Ship another checkout change first."
+
+outcome_if_correct:
+  leading: "New workspaces in s11_50 and s51_plus see the annual-pricing prompt again within 1 day of the fix."
+  lagging: "s11_50 and s51_plus trial_to_paid_rate within 2 points of their pre-onset levels (0.1179 and 0.1318) for cohorts that start after the fix."
+  observation_lag_days: 14  # trial_to_paid_rate's own window; slower to read than an activation metric
+
+traps_in_data:
+  - "Cohorts from the last 14 days are immature for this metric; a naive read near 'now' looks worse than it is."
+  - "The overall (unsegmented) trial_to_paid_rate barely moves (-0.07 relative): a query that doesn't segment by company_size looks like nothing happened."
+  - "activation_rate_7d and first_meeting_rate_7d are both unchanged. A search for 'what changed' that starts with activation, the scenario 1 muscle memory, finds nothing here."
+  - "Weekend signups and channel mix are unchanged and are not the story this time."
+  - "Solo and s2_10 trial_to_paid_rate are flat to slightly up (noise): a segment-by-segment read must not stop at the first segment checked."
+
+bench_score:
+  - found_cause: "F1, F2, and F3 present"
+  - decided: "correct, partial, or wrong, per the lists above"
+  - detection_latency_days: "from onset to the first decision packet naming the cause"
+  - pm_minutes: "proxy from words read and decisions made at gates"
+  - agent_cost_usd: "from traces"
+  - false_alarms: "claims about causes not in this file, especially activation or onboarding"
+
+# Machine-readable key for code graders.
+grading:
+  alarm_expected: true
+  diagnosis:
+    # s11_50 is the segment large enough to clear p < 0.01 reliably on one week of mature data. s51_plus carries
+    # the same true effect (paid_mult 0.65 in the model) but a much smaller n, so it is graded as a bonus finding
+    # (F1), not a requirement: a diagnosis that names only s11_50, with s51_plus flagged as a likely unknown, is a
+    # correct, well-calibrated answer, not a miss.
+    metric: trial_to_paid_rate
+    segment: {company_size: [s11_50]}
+    segments_accepted:
+      - {company_size: [s11_50]}
+      - {company_size: [s11_50, s51_plus]}
+    release_id: rel_0501
+    mechanism_metric: trial_to_paid_rate
+    voice_min_workspaces: 3
+  false_causes:
+    - {dimension: calendar_provider}
+    - {dimension: channel}
+  recommended_action:
+    # start_experiment is accepted alongside rollback: validating the fix on the affected segment before fully
+    # committing is at least as good a call as a blind rollback for a pricing change, and matches "then retest
+    # behind a flag" in decision.correct above.
+    name: rollback
+    names_accepted: [rollback, start_experiment]
+    release_id: rel_0501
+    segments_accepted:
+      - {company_size: [s11_50]}
+      - {company_size: [s11_50, s51_plus]}
+      - {}
+
+# Not yet built for this scenario: workplace.yaml (mail, chat, calendar, tracker, docs, requests), so Chief, Bet,
+# and Comms have no grading keys here yet. This scenario currently tests Signal, Quality, and Builder only.
