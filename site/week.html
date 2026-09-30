@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A PM's week away</title>
+<meta name="description" content="A queued decision plays out Tuesday through Friday with nobody at the keyboard, then the PM comes back and decides.">
+<style>
+:root {
+  --paper: #F7F6F2; --card: #FFFFFF; --ink: #1B1D21; --muted: #5F6570; --rule: #E3E1DA; --soft: #EFEDE6;
+  --accent: #2B4EDB; --accent-soft: #E6EBFD; --ok: #1F7A4D; --ok-soft: #E1F2E8;
+  --warn: #9A5B00; --warn-soft: #FDF1DC; --bad: #B42318; --bad-soft: #FBE4E1; --ghost: #9AA0A8;
+  --mono: ui-monospace, "SF Mono", Consolas, monospace;
+  --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #121316; --card: #1B1D22; --ink: #ECEDEF; --muted: #A1A6AF; --rule: #2C2F36; --soft: #22252B;
+    --accent: #8FA6FF; --accent-soft: #232B47; --ok: #6BC49A; --ok-soft: #173024;
+    --warn: #F2B35B; --warn-soft: #362914; --bad: #F2877D; --bad-soft: #3A1C1A; --ghost: #6B717A;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #121316; --card: #1B1D22; --ink: #ECEDEF; --muted: #A1A6AF; --rule: #2C2F36; --soft: #22252B;
+  --accent: #8FA6FF; --accent-soft: #232B47; --ok: #6BC49A; --ok-soft: #173024;
+  --warn: #F2B35B; --warn-soft: #362914; --bad: #F2877D; --bad-soft: #3A1C1A; --ghost: #6B717A;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.55 var(--sans); }
+a { color: var(--accent); }
+header.top { position: sticky; top: 0; z-index: 5; background: var(--paper); border-bottom: 1px solid var(--rule); }
+.bar { max-width: 900px; margin: 0 auto; padding: 12px 24px; display: flex; gap: 16px; align-items: center; }
+.brand { font-weight: 700; } .brand span { color: var(--muted); font-weight: 500; }
+.bar a.back { margin-left: auto; font-size: 14px; color: var(--muted); text-decoration: none; }
+.bar a.back:hover { color: var(--ink); }
+main { max-width: 900px; margin: 0 auto; padding: 32px 24px 120px; }
+.eyebrow { font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin: 0 0 6px; }
+h1 { font-size: 36px; line-height: 1.15; letter-spacing: -0.02em; margin: 0 0 12px; }
+h2 { font-size: 20px; margin: 0 0 8px; }
+p { margin: 0 0 12px; }
+.lede { font-size: 18px; color: var(--muted); max-width: 680px; }
+.muted { color: var(--muted); } .small { font-size: 14px; }
+.card { background: var(--card); border: 1px solid var(--rule); border-radius: 14px; padding: 18px 20px; margin: 0 0 14px; }
+.chip { display: inline-block; font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: var(--soft); color: var(--muted); }
+.chip.ok { background: var(--ok-soft); color: var(--ok); } .chip.warn { background: var(--warn-soft); color: var(--warn); }
+.week { position: relative; margin: 24px 0; }
+.day { display: grid; grid-template-columns: 96px 1fr; gap: 20px; position: relative; padding-bottom: 28px; }
+.day::before { content: ""; position: absolute; left: 95px; top: 30px; bottom: 0; width: 2px; background: var(--rule); }
+.day:last-child::before { display: none; }
+.day .when { text-align: right; padding-top: 2px; font-weight: 700; }
+.day .when span { display: block; font-weight: 500; font-size: 12px; color: var(--muted); }
+.dot { position: absolute; left: 88px; top: 6px; width: 16px; height: 16px; border-radius: 50%; background: var(--paper); border: 3px solid var(--accent); }
+.body { padding-left: 12px; }
+.urgent { border-left: 3px solid var(--warn); padding: 2px 0 2px 12px; margin: 6px 0; font-size: 14px; }
+.status { font-size: 14px; color: var(--muted); margin-top: 8px; padding: 10px 12px; background: var(--soft); border-radius: 10px; }
+.outcome { background: var(--ok-soft); border-radius: 14px; padding: 18px 20px; margin: 24px 0; }
+.outcome.bad { background: var(--bad-soft); }
+</style>
+</head>
+<body>
+<header class="top"><div class="bar"><div class="brand">Factory of One <span>a week away</span></div><a class="back" href="index.html">&larr; A PM's Monday</a></div></header>
+<main id="app"></main>
+<script src="data/week.js"></script>
+<script>
+const W = window.WEEK;
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]));
+const fmt = (v, unit) => "$" + Math.round(v).toLocaleString("en-US") + " " + unit;
+
+function dayCard(d, isMonday) {
+  const urgent = (d.urgent || []).map(u => `<div class="urgent">${esc(u.why)} <span class="muted">${esc(u.do)}</span></div>`).join("");
+  const bet = d.top_bet ? `<p class="small"><span class="chip">Bet's top priority</span> ${esc(d.top_bet.title)} (${esc(fmt(d.top_bet.size, d.top_bet.unit))}). Needs from you: ${esc(d.top_bet.needs_from_pm)}</p>` : "";
+  const status = d.status ? `<div class="status">${esc(d.status)}</div>` : "";
+  return `<article class="day"><div class="when">${esc(d.weekday)}<span>${esc(d.date)}</span></div><i class="dot"></i>
+    <div class="body"><h2>${isMonday ? "The decision is queued" : "Nobody at the keyboard"}</h2>
+      ${urgent || `<p class="small muted">Nothing urgent enough to interrupt you.</p>`}${bet}${status}</div></article>`;
+}
+
+function render() {
+  const days = W.days.map((d, i) => dayCard(d, i === 0)).join("");
+  const outcome = W.call && W.verdict ? `<div class="outcome"><h2>Friday: back at the keyboard</h2>
+      <p>${esc(W.decided_note || "")}</p>
+      <p><strong>Verdict:</strong> ${esc(W.verdict.metric)} went from ${(W.verdict.before * 100).toFixed(1)}% to ${(W.verdict.after * 100).toFixed(1)}% (${esc(W.verdict.outcome)}).</p>
+      <p><strong>Call:</strong> ${esc(W.call.decision)}. ${esc(W.call.rationale)}</p></div>`
+    : `<div class="outcome bad"><h2>Friday: back at the keyboard</h2><p>The decision is still open, or was declined.</p></div>`;
+  document.getElementById("app").innerHTML = `
+    <p class="eyebrow">Monday to Friday</p>
+    <h1>The queued decision plays out while you're away</h1>
+    <p class="lede">Monday's rollback waits for you. Nobody applies it, nobody sends anything but the manager and team
+      updates your decision rights allow. Chief, Bet, and Comms keep working every day; Signal runs once, on its
+      weekly cadence. Friday, you're back.</p>
+    <div class="week">${days}</div>
+    ${outcome}
+    <p class="small muted">Sent to your own channel this week: ${W.urgent_to_pm.length} note${W.urgent_to_pm.length === 1 ? "" : "s"}.
+      <a href="index.html">Play a single Monday in detail &rarr;</a></p>`;
+}
+render();
+</script>
+</body>
+</html>

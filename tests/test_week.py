@@ -104,3 +104,24 @@ def test_the_week_cli_produces_a_digest_with_fridays_outcome(tmp_path):
                     chief_fixtures={d: AWAY for d in days}, comms_fixtures={d: STATUS for d in days})
     assert (out / "digest.md").read_text(encoding="utf-8") == text
     assert "Friday: back at the keyboard" in text and "Decided:" in text
+
+
+# The week page's data builder ------------------------------------------------------------------------
+
+def test_the_week_page_data_has_one_card_per_day_and_how_it_ended(tmp_path, week_run):
+    from factory.replay.week import build
+    out, _ = week_run
+    week = build(out, tmp_path / "site" / "data")
+    assert len(week["days"]) == 5 and [d["weekday"] for d in week["days"]] == ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
+    assert all(d["top_bet"] and d["status"] for d in week["days"])
+    assert week["call"]["decision"] and week["verdict"]["outcome"]
+    assert (tmp_path / "site" / "data" / "week.js").read_text(encoding="utf-8").startswith("window.WEEK = ")
+
+
+def test_ledger_entries_are_dated_the_day_theyre_written_not_a_day_later(week_run):
+    """A latent off-by-one: sim_now() during a multi-day run reports the cutoff, one day past the label on the
+    prompt and on the workplace content just revealed. Chief's, Bet's, and Comms' entries must carry the label."""
+    out, _ = week_run
+    entries = ledger.read(out / "ledger.jsonl")
+    dates = sorted({e["ts"][:10] for e in entries if e["type"] in ("brief", "candidates") and e["author"]["kind"] == "agent"})
+    assert dates == ["2026-03-02", "2026-03-03", "2026-03-04", "2026-03-05", "2026-03-06"]

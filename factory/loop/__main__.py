@@ -38,6 +38,11 @@ class Loop:
         self.trace: list[dict] = []
         self.agent_cost = 0.0
         self.action_date: str | None = None
+        # An explicit "today" for a multi-day run, overriding the data cutoff's own date. The cutoff is always one
+        # tick past the last visible instant, so during a normal single-day run it already equals "today"; across a
+        # week, advance_day's cutoff is deliberately the END of the target day (so that day's own mail is visible),
+        # one day past the label we want on prompts and on entries written during that day.
+        self.label: str | None = None
 
     # Bookkeeping -------------------------------------------------------------
 
@@ -112,7 +117,8 @@ class Loop:
         for row in rows:
             new_id = ledger.next_id(self.ledger, row["type"])
             remap[row["id"]] = new_id
-            new_row = {**row, "id": new_id, "ts": self.sim_now(), "refs": [remap.get(r, r) for r in row.get("refs", [])]}
+            new_row = {**row, "id": new_id, "ts": self.today() + "T12:00:00Z" if self.label else self.sim_now(),
+                       "refs": [remap.get(r, r) for r in row.get("refs", [])]}
             ledger.append(self.ledger, new_row)
             out.append(new_row)
         return out
@@ -313,9 +319,10 @@ class Loop:
         source = fixture or self.fixture
         if source:
             rows = [json.loads(l) for l in source.read_text(encoding="utf-8").splitlines() if l.strip()]
+            ts = self.today() + "T12:00:00Z" if self.label else self.sim_now()
             for row in rows:
                 if row["type"] == "readout" and row["payload"]["moment"] == moment:
-                    ledger.append(self.ledger, {**row, "id": ledger.next_id(self.ledger, "readout")})
+                    ledger.append(self.ledger, {**row, "id": ledger.next_id(self.ledger, "readout"), "ts": ts})
             self.log("tell", "comms output loaded from fixture")
         else:
             self.run_agent("comms", task_id, "tell", prompt=prompt)
@@ -355,9 +362,14 @@ class Loop:
 
     # The PM is away: prepare everything, apply nothing (decision D10) -------------
 
+    def today(self) -> str:
+        """The date to put in prompts and to stamp on new entries: an explicit label during a multi-day run
+        (see advance_day), else the data cutoff's own date."""
+        return self.label or self.sim_now()[:10]
+
     def when(self, at_time: str = "07:30") -> str:
-        """The current simulated date in words, for a prompt: 'Tuesday 2026-03-03, 07:30'."""
-        return f"{datetime.strptime(self.sim_now()[:10], '%Y-%m-%d').strftime('%A %Y-%m-%d')}, {at_time}"
+        """Today, in words, for a prompt: 'Tuesday 2026-03-03, 07:30'."""
+        return f"{datetime.strptime(self.today(), '%Y-%m-%d').strftime('%A %Y-%m-%d')}, {at_time}"
 
     def chief_away(self, fixture: Path | None = None, day_name: str | None = None) -> None:
         if fixture:
@@ -425,12 +437,15 @@ class Loop:
         (self.dir / "trace.jsonl").write_text("".join(json.dumps(t) + "\n" for t in self.trace), encoding="utf-8")
 
     def advance_day(self, now_day: int) -> None:
-        """A fresh snapshot of the workplace at a later day in the same week. No action has been simulated: only new
-        mail, chat, tracker, docs, and requests come into view. The ledger (everything said and decided) carries over."""
+        """A fresh snapshot of the workplace at a later day in the same week: `now_day`'s own mail, chat, tracker,
+        docs, and requests come into view, since the cutoff is the start of the day after. No action has been
+        simulated. The ledger (everything said and decided) carries over. Sets today's label to `now_day` itself,
+        since the cutoff (one day later) is not what should appear in prompts or on entries written today."""
         generated = generate(self.scenario, seed=self.seed, through="now", now_day=now_day, out=self.dir / "world-tmp")
         shutil.copy(generated / "world" / "world.db", self.world)
         shutil.rmtree(self.dir / "world-tmp", ignore_errors=True)
-        self.log("advance", "the workplace moved forward a day", data_through=self.sim_now())
+        self.label = (date(2026, 1, 5) + timedelta(days=now_day)).isoformat()
+        self.log("advance", "the workplace moved forward a day", label=self.label, data_through=self.sim_now())
 
     def away_week(self, days: tuple[tuple[str, int], ...] = (("tuesday", 57), ("wednesday", 58), ("thursday", 59), ("friday", 60)),
                   chief_fixtures: dict[str, Path] | None = None, comms_fixtures: dict[str, Path] | None = None,
@@ -446,6 +461,7 @@ class Loop:
             frame_prompt = None if day_name is None else f"It is {self.when()}. Frame the work coming in and rank the bets."
             self.frame(fixture=bet_fixture, prompt=frame_prompt)
             self.tell_status(day_name, comms_fixtures.get(day_name))
+        self.label = None  # back to the keyboard: entries from here stamp with the data cutoff itself, as usual
         (self.dir / "trace.jsonl").write_text("".join(json.dumps(t) + "\n" for t in self.trace), encoding="utf-8")
         return self.resume()
 
