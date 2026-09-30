@@ -76,6 +76,7 @@ Live runs on scenario 1, graded by the same code graders as the evals. Every run
 | Signal | 2 | Both at 100%, including Quality's code checks |
 | Bet | 2 | Both at 100%: the rollback first, SSO second, the loud single-account request set aside by strategy, and the mislabeled request found |
 | Comms | 4 | All at 100% after one fix: the news first to the manager, identical numbers in every version, no internal numbers to the customer, and only policy-allowed updates sent while away |
+| Retro | 2 | Both at 100%: found the week's recurring failure in 3 of 4 real runs and proposed a patch that applies cleanly, with a runnable eval case |
 | Builder | 1 | 100%, including hidden acceptance tests |
 | Quality | 1 | 100% on the regression built from a real mistake |
 | The loop | 1 showcase | Microsoft activation 30.5% to 38.2% two weeks after the fix. The gate answers came from a file written in advance, so the Brier score and PM minutes are not a person's |
