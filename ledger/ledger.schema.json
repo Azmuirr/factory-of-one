@@ -16,7 +16,7 @@
   "properties": {
     "id": {
       "type": "string",
-      "pattern": "^(sig|pkt|bet|act|bld|ver|rev|call|rdo|cmt|pch|brf|que|cnd|rto)_[a-z0-9]{4,}$"
+      "pattern": "^(sig|pkt|bet|act|bld|ver|rev|call|rdo|cmt|pch|brf|que|cnd|rto|prp)_[a-z0-9]{4,}$"
     },
     "type": {
       "enum": [
@@ -34,7 +34,8 @@
         "brief",
         "queue",
         "candidates",
-        "retro"
+        "retro",
+        "prep"
       ]
     },
     "ts": {
@@ -367,12 +368,36 @@
           }
         }
       }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "prep"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "id": {
+            "pattern": "^prp_"
+          },
+          "payload": {
+            "$ref": "#/$defs/prep"
+          }
+        }
+      }
     }
   ],
   "$defs": {
     "id_ref": {
       "type": "string",
-      "pattern": "^(sig|pkt|bet|act|bld|ver|rev|call|rdo|cmt|pch|brf|que|cnd|rto)_[a-z0-9]{4,}$"
+      "pattern": "^(sig|pkt|bet|act|bld|ver|rev|call|rdo|cmt|pch|brf|que|cnd|rto|prp)_[a-z0-9]{4,}$"
+    },
+    "source_ref": {
+      "type": "string",
+      "pattern": "^(cal|mail|chat|doc|trk|transcript):[A-Za-z0-9_-]+$|^(sig|pkt|bet|act|bld|ver|rev|call|rdo|cmt|pch|brf|que|cnd|rto|prp)_[a-z0-9]{4,}$",
+      "description": "A calendar, mail, chat, doc, tracker, or transcript id with its prefix, or a ledger entry id"
     },
     "human": {
       "type": "object",
@@ -1795,6 +1820,74 @@
           "type": "array",
           "items": {
             "type": "string"
+          }
+        }
+      }
+    },
+    "prep": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "moment",
+        "about",
+        "talking_points",
+        "open_items"
+      ],
+      "properties": {
+        "moment": {
+          "enum": [
+            "one_on_one",
+            "feedback",
+            "hiring"
+          ],
+          "description": "There is no field here for a rating, ranking, or score: Coach never produces one"
+        },
+        "about": {
+          "type": "string",
+          "description": "A person id from the directory, or a role or req name for a hiring prep"
+        },
+        "for_meeting": {
+          "$ref": "#/$defs/source_ref"
+        },
+        "talking_points": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "text",
+              "source"
+            ],
+            "properties": {
+              "text": {
+                "type": "string"
+              },
+              "source": {
+                "$ref": "#/$defs/source_ref"
+              }
+            }
+          }
+        },
+        "open_items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "text",
+              "source"
+            ],
+            "properties": {
+              "text": {
+                "type": "string"
+              },
+              "source": {
+                "$ref": "#/$defs/source_ref"
+              },
+              "owner": {
+                "type": "string"
+              }
+            }
           }
         }
       }

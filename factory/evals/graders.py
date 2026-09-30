@@ -647,6 +647,31 @@ def comms_in_voice(trial: Trial, key: dict, params: dict) -> list[Assertion]:
             ("no stock openings", not [v for v in r["payload"]["versions"] if v["text"].split()[0].strip(",").lower() in banned], "")]
 
 
+def latest_prep(trial: Trial) -> dict | None:
+    found = entries(trial, "prep")
+    return found[-1] if found else None
+
+
+def coach_sources_real(trial: Trial, key: dict, params: dict) -> list[Assertion]:
+    from factory import coach
+    p = latest_prep(trial)
+    if not p:
+        return [("a prep entry was written", False, "none")]
+    problems = coach.ref_problems(trial.world_path, p["payload"], entries(trial))
+    problems += coach.about_problems(trial.world_path, p["payload"])
+    return [("a prep entry was written", True, p["id"]),
+            ("every source is real", not problems, "; ".join(problems)[:300] or "all real")]
+
+
+def coach_has_content(trial: Trial, key: dict, params: dict) -> list[Assertion]:
+    p = latest_prep(trial)
+    if not p:
+        return [("the prep has talking points and open items", False, "no prep")]
+    payload = p["payload"]
+    return [("at least one talking point", bool(payload.get("talking_points")), str(len(payload.get("talking_points", [])))),
+            ("open items checked, even if none are open", "open_items" in payload, str(payload.get("open_items")))]
+
+
 def retro_note(trial: Trial, key: dict, params: dict) -> list[Assertion]:
     from factory import retro
     want = params["key"]
@@ -791,7 +816,7 @@ CODE = {f.__name__: f for f in (
     brief_top_themes, brief_triage, brief_needs_you, brief_calendar_flags, brief_replies, commitments_extracted, private_never_shown,
     brief_open_loops, brief_meeting_prep, brief_goal_check, brief_followups, brief_reschedule, drafts_in_voice, brief_stale,
     notified_self, respects_lessons, no_unsourced_cause, brief_away_urgent, bet_ranking, weekly_review,
-    comms_versions, comms_numbers_match, comms_delivery, comms_in_voice, retro_note, retro_patch,
+    comms_versions, comms_numbers_match, comms_delivery, comms_in_voice, coach_sources_real, coach_has_content, retro_note, retro_patch,
     review_verdict, findings_have_evidence,
     action_matches_decision, no_action_proposed, build_entry_valid, demo_passes_checks, demo_numbers_grounded,
     mvp_change_passes, design_passes_checks,

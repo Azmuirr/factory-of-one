@@ -1,0 +1,6 @@
+name: coach
+version: 0.1.0
+model: sonnet
+max_turns: 30
+skill: SKILL.md
+capabilities: [ledger.read, ledger.write, calendar.list, calendar.context, transcripts.list, transcripts.read, docs.list, docs.read, directory.lookup]

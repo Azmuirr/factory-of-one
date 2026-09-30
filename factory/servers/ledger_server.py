@@ -83,6 +83,12 @@ def world_problems(type: str, payload: dict) -> list[str]:
         from factory.review import unsourced_causes
         problems += [f'This says why a metric moved, and you have no metrics: "{s}". Attribute it to the person who said it, '
                      "or leave the cause to the readout." for s in unsourced_causes(payload)]
+    if type == "prep" and os.environ.get("FACTORY_WORLD"):
+        from factory import coach
+        world = Path(os.environ["FACTORY_WORLD"])
+        earlier = ledger.read(Path(os.environ["FACTORY_LEDGER"]))
+        problems += coach.ref_problems(world, payload, earlier)
+        problems += coach.about_problems(world, payload)
     if type == "build" and os.environ.get("FACTORY_DEMOS"):
         location = Path(os.environ["FACTORY_DEMOS"]).parent / payload.get("location", "")
         if payload.get("kind") == "mvp":

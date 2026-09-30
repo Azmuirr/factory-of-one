@@ -1,0 +1,16 @@
+agent: coach
+version: 0.1.0
+defaults:
+  trials: 2
+  seed: 1
+
+tasks:
+  - id: one-on-one-s01
+    kind: capability
+    scenario: s01-calendar-gate
+    reference: agents/coach/evals/fixtures/reference-prep.jsonl
+    prompt: Prepare me for my next 1:1 with Nina Alvarez.
+    graders:
+      - coach_sources_real
+      - coach_has_content
+      - {type: code, name: tools_within_allowlist, params: {servers: [ledger, workplace]}}
