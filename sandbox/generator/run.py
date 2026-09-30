@@ -13,12 +13,16 @@ GENERATOR_VERSION = "0.1.0"
 
 
 def generate(scenario_id: str, seed: int = 1, actions_path: Path | None = None,
-             through: str | None = None, out: Path | None = None) -> Path:
-    """Build one world. `through` is "now" (what agents see first) or "end" (after actions)."""
+             through: str | None = None, out: Path | None = None, now_day: int | None = None) -> Path:
+    """Build one world. `through` is "now" (what agents see first) or "end" (after actions). `now_day` overrides
+    the scenario's own "now" day (0-indexed from its epoch), for a snapshot of a later day in the same week."""
     scenario = load_scenario(scenario_id)
     actions = load_actions(actions_path)
     through = through or ("end" if actions else "now")
-    cutoff = scenario.now_cutoff if through == "now" else scenario.end_cutoff
+    if through == "now":
+        cutoff = (now_day + 1) * DAY if now_day is not None else scenario.now_cutoff
+    else:
+        cutoff = scenario.end_cutoff
     out = Path(out) if out else REPO_ROOT / "runs" / scenario_id / f"seed-{seed}"
 
     world = Simulator(scenario, seed, actions).run(n_days=int(cutoff // DAY))

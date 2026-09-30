@@ -18,7 +18,7 @@ The PMs who last will be operators with strong judgment who run several agents a
 
 You own three gates: **decide** (approve the action and place a bet with a prediction), **call** (ship, iterate, or kill once the data is in), and **tell** (which versions go out). Your predictions are scored.
 
-**When you're away,** the autopilot runs the loop to your decision and stops there: Chief sends up to three urgent items to your own channel, Signal and Quality prepare the decision, and a digest waits for you. Nothing is applied without you. The rules are one file you edit: [decision rights](company/tallybird/decision_rights.yaml).
+**When you're away,** the autopilot runs the loop to your decision and stops there: Chief sends up to three urgent items to your own channel, Signal and Quality prepare the decision, and a digest waits for you. Nothing is applied without you. `--week` runs this Monday through Friday: the queued decision carries forward untouched while Chief, Bet, and Comms keep working every day, and you resume at the gate on Friday. The rules are one file you edit: [decision rights](company/tallybird/decision_rights.yaml).
 
 ## What's real and what's simulated
 
@@ -58,10 +58,11 @@ python -m factory.chief --mode morning --open    # about 6 minutes: Chief live o
 python -m factory.loop                            # about 10 minutes: every agent live, you at the gates
 python -m factory.autopilot                       # a day with you away: urgent items to you, the decision queued, a digest
 python -m factory.loop --resume runs/autopilot/<run>   # back at the keyboard: decide, and the loop continues
+python -m factory.autopilot --week                # your whole week away: Monday's decision plays out to Friday, then you decide
 python -m factory.retro run runs/loop/<run> runs/autopilot/<run>   # Friday: Retro reads the week and proposes patches
 python -m factory.retro apply runs/retro/<run> pch_0001   # you approve a patch; code applies it and adds its eval case
 python -m factory.evals run signal --trials 3    # score an agent against the answer key
-python -m pytest                                  # 216 tests, about 7 minutes, no Claude
+python -m pytest                                  # 224 tests, about 8 minutes, no Claude
 ```
 
 On macOS or Linux, use `.venv/bin/python` in place of `python` if the venv isn't activated. Rebuild the replay page from any run with `python -m factory.replay --loop runs/loop/<run> --chief runs/chief/<run>`.
@@ -87,7 +88,7 @@ Every agent was tuned on scenario 1, and every result above is on scenario 1. Tr
 
 | Built | Not built yet |
 |---|---|
-| Chief, Signal, Bet, Quality, Builder, Comms, Retro, and the autopilot for days you're away | Coach, and Retro's view across more than one scenario |
+| Chief, Signal, Bet, Quality, Builder, Comms, Retro, and the autopilot for a day or a full week away | Coach, and Retro's view across more than one scenario |
 | Scenario 1 (a release that locked out Microsoft calendar users) and a quiet control scenario | Scenarios 2 to 10, harder tiers, held-out scenarios |
 | The eval harness: tasks, code graders, answer keys, trials, regrading | A model judge calibrated against human graders |
 | A capability map, so any install can swap in its own tools | Tested setups for specific vendors, a warehouse adapter for Signal, repo rules for Builder beyond the sandbox app |

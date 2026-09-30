@@ -51,6 +51,8 @@ The rules land in `lessons/chief.yaml` for your install and load on every run.
 
 When you're back, read `digest.md` in the run folder and continue with `python -m factory.loop --resume <run folder>`.
 
+For a whole week away, `python -m factory.autopilot --week` runs Monday through Friday in one continuous ledger: Chief, Bet, and Comms run every day; Signal runs once, on its weekly cadence, rather than re-diagnosing the same unresolved issue daily; and on Friday the loop reaches the decide, call, and tell gates and asks at the keyboard, same as `--resume` would. Give it `--gates` to answer those non-interactively, for a scheduled or unattended run.
+
 ## Friday: let Retro read the week
 
 ```bash

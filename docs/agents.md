@@ -70,6 +70,7 @@ One front door. You ask one question and get one answer.
 
 Code owns: every number, cohort maturity, triangulation, confidence grades, the verdict script. Model owns: which slice to check next, grouping text into themes, the written diagnosis. Gate: none.
 Scored on: planted findings found, false causes claimed, 0 invented numbers or quotes, the same answer across 10 runs.
+Cadence: weekly, not daily (decision D12). While the PM is away for several days, Signal runs once and the queued decision carries forward; Chief, Bet, and Comms are what keep working every day.
 
 ## 3. Bet: investment analyst
 

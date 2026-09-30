@@ -151,3 +151,16 @@ Each entry records the options, the choice, and what would reverse it. The reaso
 
 **Would change if:** a live install needs sends the PM can't pre-approve. Then the rule belongs in the decision rights file, not in Comms.
 
+
+## D12. Signal runs weekly, not daily, while the PM is away
+
+| Option | Verdict |
+|---|---|
+| Re-run Signal every day the PM is away | Rejected. Signal's own prompt is a weekly check; running it daily would re-diagnose the same unresolved issue every day and cost agent time for no new information |
+| **Signal runs once, on the weekly cadence. Chief, Bet, and Comms run every day, reading whatever is new in the workplace and the ledger** | **Chosen** |
+
+**Consequence:** a multi-day away run (`factory.autopilot --week`) produces one `signal_card`/`decision_packet` for the week, but a fresh `brief`, `candidates`, and status `readout` each day. The queued decision from day one carries forward untouched until the PM resumes; Bet's daily re-ranking and Chief's daily brief are what surface new urgency (a deadline arriving, a customer escalating) without anyone re-running the weekly diagnosis.
+
+**Would change if:** a scenario plants a second, distinct problem mid-week. Then Signal would need a way to run again on demand, not only on the weekly cadence.
+
+**Also:** the generator's `generate()` takes an optional `now_day`, so the same scenario can be snapshotted at any day in its week, not only the day scenario.yaml calls "now". `Loop.advance_day()` uses this to move the workplace forward one day at a time without touching the ledger. Fixture-based agent output (`load_fixture`) is reassigned fresh ids and the current simulated time on each load, so the same canned fixture can stand in for a live agent on any day of the week, which is what keeps a full week's tests free to run.

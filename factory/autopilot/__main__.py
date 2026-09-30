@@ -3,6 +3,10 @@ the numbers, Quality reviews, and any decision is queued for the PM. Nothing is 
 
 python -m factory.autopilot [--out runs/autopilot/<id>] [--fixture ledger.jsonl --chief-fixture away.jsonl]
 python -m factory.loop --resume runs/autopilot/<id>      # back at the keyboard: decide, and the loop continues
+
+A full week away, Monday through Friday, ending with the PM back at the keyboard on Friday:
+
+python -m factory.autopilot --week [--out runs/autopilot/<id>] [--gates s01-gates.yaml]
 """
 
 from __future__ import annotations
@@ -72,6 +76,29 @@ def run_day(scenario: str, seed: int, out: Path, fixture: Path | None = None, ch
     return text
 
 
+def week_digest(run: Path) -> str:
+    """The daily-away digest, plus what happened once the PM was back at the keyboard on Friday."""
+    entries = ledger.read(run / "ledger.jsonl")
+    text = digest(run)
+    call, verdict = (next((e for e in reversed(entries) if e["type"] == t), None) for t in ("call", "verdict"))
+    if call and verdict:
+        v = verdict["payload"]
+        text += (f"\n## Friday: back at the keyboard\n- Decided: {call['payload']['decision']}. {call['payload']['rationale']}\n"
+                 f"- Verdict: {v['metric']} in {segment_text(v['segment'])} went from {v['before']} to {v['after']} ({v['outcome']}).\n")
+    else:
+        text += "\n## Friday: back at the keyboard\n- The decision was declined or is still open; see the ledger.\n"
+    return text
+
+
+def run_week(scenario: str, seed: int, out: Path, gates: dict | None = None, fixture: Path | None = None,
+             chief_fixtures: dict | None = None, comms_fixtures: dict | None = None, bet_fixture: Path | None = None) -> str:
+    loop = Loop(scenario, seed, out, Gates(gates), fixture)
+    loop.away_week(chief_fixtures=chief_fixtures, comms_fixtures=comms_fixtures, bet_fixture=bet_fixture)
+    text = week_digest(out)
+    (out / "digest.md").write_text(text, encoding="utf-8")
+    return text
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(prog="python -m factory.autopilot")
     parser.add_argument("--scenario", default="s01-calendar-gate")
@@ -80,11 +107,19 @@ def main() -> None:
     parser.add_argument("--fixture", type=Path, help="Signal and Builder output from a ledger file, instead of the agents")
     parser.add_argument("--chief-fixture", type=Path, help="Chief's away brief from a ledger file, instead of the agent")
     parser.add_argument("--comms-fixture", type=Path, help="Comms' status readout from a ledger file, instead of the agent")
+    parser.add_argument("--week", action="store_true", help="Run Monday through Friday, ending with the PM back at the keyboard")
+    parser.add_argument("--gates", type=Path, help="With --week: YAML answers for Friday's gates. Omit to answer at the keyboard")
     args = parser.parse_args()
     sys.stdout.reconfigure(encoding="utf-8")
     run_id = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     out = (args.out or ROOT / "runs" / "autopilot" / f"{args.scenario}-seed{args.seed}-{run_id}").resolve()
-    print(run_day(args.scenario, args.seed, out, args.fixture, args.chief_fixture, args.comms_fixture))
+    if args.week:
+        import yaml
+        gates = yaml.safe_load(args.gates.read_text(encoding="utf-8")) if args.gates else None
+        print(run_week(args.scenario, args.seed, out, gates, args.fixture, chief_fixtures={"monday": args.chief_fixture} if args.chief_fixture else None,
+                       comms_fixtures={"monday": args.comms_fixture} if args.comms_fixture else None))
+    else:
+        print(run_day(args.scenario, args.seed, out, args.fixture, args.chief_fixture, args.comms_fixture))
     print(f"Run folder: {out}")
 
 

@@ -79,14 +79,15 @@ class Loop:
             return
         self.run_agent("signal", "diagnose-s01", "sense")
 
-    def frame(self) -> None:
+    def frame(self, fixture: Path | None = None, prompt: str | None = None) -> None:
         """Bet ranks the work coming in: requests, docs, and Signal's packet. Quality reviews the list."""
         self.log("frame", "start")
-        if self.fixture:
-            self.load_fixture(lambda row: row["type"] == "candidates")
+        source = fixture or self.fixture
+        if source:
+            self.load_fixture(lambda row: row["type"] == "candidates", fixture=source)
             self.log("frame", "bet output loaded from fixture")
         else:
-            self.run_agent("bet", "frame-s01", "frame")
+            self.run_agent("bet", "frame-s01", "frame", prompt=prompt)
         ranked = self.latest("candidates")
         if ranked:
             self.quality_review(ranked["id"], "frame")
@@ -102,10 +103,24 @@ class Loop:
                   for i in sorted(p["items"], key=lambda i: i["rank"])],
                 *[f"  Set aside: {a['title']}. {a['why']}" for a in p.get("set_aside", [])], ""]
 
-    def load_fixture(self, keep) -> None:
-        for line in self.fixture.read_text(encoding="utf-8").splitlines():
-            if line.strip() and keep(json.loads(line)):
-                ledger.append(self.ledger, json.loads(line))
+    def append_fixture_rows(self, rows: list[dict]) -> list[dict]:
+        """Append fixture rows with fresh ids and the current simulated time, as a live run would produce, remapping
+        refs between rows loaded together. Safe to call more than once with the same fixture: each call gets the
+        next id for its type, so a canned Monday fixture can stand in for a live agent on any day of the week."""
+        remap: dict[str, str] = {}
+        out = []
+        for row in rows:
+            new_id = ledger.next_id(self.ledger, row["type"])
+            remap[row["id"]] = new_id
+            new_row = {**row, "id": new_id, "ts": self.sim_now(), "refs": [remap.get(r, r) for r in row.get("refs", [])]}
+            ledger.append(self.ledger, new_row)
+            out.append(new_row)
+        return out
+
+    def load_fixture(self, keep, fixture: Path | None = None) -> None:
+        source = fixture or self.fixture
+        parsed = (json.loads(l) for l in source.read_text(encoding="utf-8").splitlines() if l.strip())
+        self.append_fixture_rows([row for row in parsed if keep(row)])
 
     def run_agent(self, name: str, task_id: str, station: str, prompt: str | None = None) -> None:
         if prompt is None:
@@ -294,7 +309,7 @@ class Loop:
         cfg = install.load()
         return policy.load(cfg.decision_rights) if cfg.decision_rights else {"away": {"actions": "prepare_only", "send": {}}}
 
-    def comms_readout(self, task_id: str, moment: str, fixture: Path | None) -> dict | None:
+    def comms_readout(self, task_id: str, moment: str, fixture: Path | None, prompt: str | None = None) -> dict | None:
         source = fixture or self.fixture
         if source:
             rows = [json.loads(l) for l in source.read_text(encoding="utf-8").splitlines() if l.strip()]
@@ -303,7 +318,7 @@ class Loop:
                     ledger.append(self.ledger, {**row, "id": ledger.next_id(self.ledger, "readout")})
             self.log("tell", "comms output loaded from fixture")
         else:
-            self.run_agent("comms", task_id, "tell")
+            self.run_agent("comms", task_id, "tell", prompt=prompt)
         return self.latest("readout")
 
     def tell(self) -> None:
@@ -340,33 +355,51 @@ class Loop:
 
     # The PM is away: prepare everything, apply nothing (decision D10) -------------
 
-    def chief_away(self, fixture: Path | None) -> None:
+    def when(self, at_time: str = "07:30") -> str:
+        """The current simulated date in words, for a prompt: 'Tuesday 2026-03-03, 07:30'."""
+        return f"{datetime.strptime(self.sim_now()[:10], '%Y-%m-%d').strftime('%A %Y-%m-%d')}, {at_time}"
+
+    def chief_away(self, fixture: Path | None = None, day_name: str | None = None) -> None:
         if fixture:
             rows = [json.loads(l) for l in fixture.read_text(encoding="utf-8").splitlines() if l.strip()]
-            for row in rows:
-                ledger.append(self.ledger, row)
+            loaded = self.append_fixture_rows(rows)
             # In a replay, the urgent notes Chief would have posted are posted from its brief.
-            away = next((r["payload"] for r in reversed(rows) if r["type"] == "brief" and r["payload"].get("mode") == "away"), {})
+            away = next((r["payload"] for r in reversed(loaded) if r["type"] == "brief" and r["payload"].get("mode") == "away"), {})
             for u in away.get("urgent", []):
                 self.notify(f"{u['why']} {u['do']}")
-            self.log("brief", "chief output loaded from fixture")
+            self.log("brief", "chief output loaded from fixture", day=day_name)
             return
-        self.run_agent("chief", "away-monday-s01", "brief")
+        prompt = None if day_name in (None, "monday") else f"It is {self.when()}. The PM is away today. Write the away brief."
+        self.run_agent("chief", "away-monday-s01", "brief", prompt=prompt)
 
     def notify(self, text: str) -> bool:
-        """The one message the factory may send while the PM is away: to the PM's own channel, within the daily limit."""
+        """The one message the factory may send while the PM is away: to the PM's own channel, within today's limit."""
         from factory import config as install
         from factory import policy
         cfg = install.load()
         limit = policy.load(cfg.decision_rights)["away"]["urgent"]["max_per_day"] if cfg.decision_rights else 3
         outbox = self.dir / "outbox.jsonl"
-        sent = sum(1 for l in outbox.read_text(encoding="utf-8").splitlines() if json.loads(l).get("to") == "self") if outbox.exists() else 0
+        today = self.sim_now()[:10]
+        sent = sum(1 for l in outbox.read_text(encoding="utf-8").splitlines()
+                   if (lambda p: p.get("to") == "self" and p.get("ts", "")[:10] == today)(json.loads(l))) if outbox.exists() else 0
         if sent >= limit:
-            self.log("notify", "held for the digest: the daily limit is reached", text=text)
+            self.log("notify", "held for the digest: today's limit is reached", text=text)
             return False
         with outbox.open("a", encoding="utf-8") as f:
             f.write(json.dumps({"ts": self.sim_now(), "to": "self", "text": text}) + "\n")
         return True
+
+    def tell_status(self, day_name: str = "monday", fixture: Path | None = None) -> None:
+        """Comms' daily status readout while the PM is away, sent under the decision rights (never approved by a person)."""
+        from factory import comms
+        prompt = None if day_name == "monday" else (
+            f"It is {self.when()}. The PM is still away. Write today's status readout: what's changed, what's still "
+            "waiting, and anything urgent, for whoever needs one.")
+        readout = self.comms_readout("tell-away-s01", "status", fixture, prompt=prompt)
+        if readout:
+            results = comms.deliver(readout, ledger.read(self.ledger), self.world, self.rights(), approved_by_pm=False, out=self.dir)
+            self.log("tell", "status delivered by the decision rights", day=day_name,
+                     sent=[r["audience"] for r in results if r["sent"]], held=[r["audience"] for r in results if not r["sent"]])
 
     def away(self, chief_fixture: Path | None = None, comms_fixture: Path | None = None) -> None:
         """Chief's away brief, Signal's check, Quality's review. A decision is queued for the PM and nothing is applied."""
@@ -388,13 +421,33 @@ class Loop:
             else:
                 d = packet["payload"]["diagnosis"]
                 self.notify(f"{d['metric']} moved for {segment_text(d.get('segment'))}. A decision is waiting for you; nothing was applied.")
-            from factory import comms
-            readout = self.comms_readout("tell-away-s01", "status", comms_fixture)
-            if readout:
-                results = comms.deliver(readout, ledger.read(self.ledger), self.world, self.rights(), approved_by_pm=False, out=self.dir)
-                self.log("tell", "status delivered by the decision rights", sent=[r["audience"] for r in results if r["sent"]],
-                         held=[r["audience"] for r in results if not r["sent"]])
+            self.tell_status("monday", comms_fixture)
         (self.dir / "trace.jsonl").write_text("".join(json.dumps(t) + "\n" for t in self.trace), encoding="utf-8")
+
+    def advance_day(self, now_day: int) -> None:
+        """A fresh snapshot of the workplace at a later day in the same week. No action has been simulated: only new
+        mail, chat, tracker, docs, and requests come into view. The ledger (everything said and decided) carries over."""
+        generated = generate(self.scenario, seed=self.seed, through="now", now_day=now_day, out=self.dir / "world-tmp")
+        shutil.copy(generated / "world" / "world.db", self.world)
+        shutil.rmtree(self.dir / "world-tmp", ignore_errors=True)
+        self.log("advance", "the workplace moved forward a day", data_through=self.sim_now())
+
+    def away_week(self, days: tuple[tuple[str, int], ...] = (("tuesday", 57), ("wednesday", 58), ("thursday", 59), ("friday", 60)),
+                  chief_fixtures: dict[str, Path] | None = None, comms_fixtures: dict[str, Path] | None = None,
+                  bet_fixture: Path | None = None) -> dict:
+        """Monday's decision is queued (the PM is away), then the week plays out with nobody at the keyboard: Chief's
+        away brief and Comms' status readout run every day, Bet re-ranks every day, and Signal runs only once, on the
+        weekly cadence. Friday, the PM returns and resumes at the queued decision."""
+        chief_fixtures, comms_fixtures = chief_fixtures or {}, comms_fixtures or {}
+        self.away(chief_fixtures.get("monday"), comms_fixtures.get("monday"))
+        for day_name, now_day in days:
+            self.advance_day(now_day)
+            self.chief_away(chief_fixtures.get(day_name), day_name=day_name)
+            frame_prompt = None if day_name is None else f"It is {self.when()}. Frame the work coming in and rank the bets."
+            self.frame(fixture=bet_fixture, prompt=frame_prompt)
+            self.tell_status(day_name, comms_fixtures.get(day_name))
+        (self.dir / "trace.jsonl").write_text("".join(json.dumps(t) + "\n" for t in self.trace), encoding="utf-8")
+        return self.resume()
 
     def resume(self) -> dict:
         """Back at the keyboard: continue from the queued decision."""
