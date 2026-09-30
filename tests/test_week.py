@@ -156,3 +156,26 @@ def test_run_agent_passes_todays_label_to_the_server_env(tmp_path, monkeypatch):
     monkeypatch.setattr("factory.loop.__main__.run_claude", fake_run_claude)
     loop.run_agent("chief", "away-monday-s01", "brief")
     assert calls == [{"FACTORY_LABEL": "2026-03-03"}]
+
+
+# Quality never re-reviews a stale candidates list against a later day's world --------------------------
+
+def test_frame_does_not_re_review_yesterdays_list_if_bet_writes_nothing_new(tmp_path, monkeypatch, now_run):
+    import shutil
+
+    from factory.loop.gates import Gates
+
+    out = tmp_path / "run"
+    (out / "world").mkdir(parents=True)
+    shutil.copy(now_run / "world" / "world.db", out / "world" / "world.db")
+    loop = Loop("s01-calendar-gate", 1, out, Gates({}), FIXTURE)
+    loop.ledger.touch()
+    loop.load_fixture(lambda row: row["type"] in ("signal_card", "decision_packet"))  # pkt_0001, so candidates' refs resolve
+    loop.frame()  # writes cnd_0001 and reviews it, from the fixture
+    reviews_after_first = len(ledger.read(loop.ledger))
+    monkeypatch.setattr(loop, "run_agent", lambda *a, **k: None)  # a live agent that writes nothing this time
+    loop.fixture = None  # force the "live agent" path, which our stub leaves empty
+    loop.frame()
+    entries = ledger.read(loop.ledger)
+    assert len(entries) == reviews_after_first  # no second review of the same stale entry
+    assert any(t["event"] == "bet wrote nothing new today" for t in loop.trace)

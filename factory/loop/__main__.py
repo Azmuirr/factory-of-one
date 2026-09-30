@@ -87,6 +87,7 @@ class Loop:
     def frame(self, fixture: Path | None = None, prompt: str | None = None) -> None:
         """Bet ranks the work coming in: requests, docs, and Signal's packet. Quality reviews the list."""
         self.log("frame", "start")
+        before = self.latest("candidates")
         source = fixture or self.fixture
         if source:
             self.load_fixture(lambda row: row["type"] == "candidates", fixture=source)
@@ -94,8 +95,13 @@ class Loop:
         else:
             self.run_agent("bet", "frame-s01", "frame", prompt=prompt)
         ranked = self.latest("candidates")
-        if ranked:
-            self.quality_review(ranked["id"], "frame")
+        if not ranked:
+            self.log("frame", "bet wrote nothing")
+            return
+        if before and ranked["id"] == before["id"]:
+            self.log("frame", "bet wrote nothing new today")
+            return
+        self.quality_review(ranked["id"], "frame")
 
     def ranked_lines(self) -> list[str]:
         ranked = self.latest("candidates")

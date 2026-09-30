@@ -1,0 +1,273 @@
+{
+ "days": [
+  {
+   "date": "2026-03-02",
+   "weekday": "Monday",
+   "urgent": [
+    {
+     "by": "2026-03-02T10:00",
+     "do": "Send Dana the readout before 10:00, or tell her at the 9:30 1:1 what you can and cannot say yet.",
+     "draft_reply": "Dana, I'll bring the readout to our 9:30. Aiko says cohorts from Feb 23 on are not mature yet, so I won't call the last week real. Thanks, S.",
+     "ref": "mail:m_001",
+     "url": "workplace.html#mail-m_001",
+     "why": "Dana needs a one-page readout by 10:00 for the 11:00 leadership sync, where Priya wants one number and one decision. No readout is in the ledger."
+    },
+    {
+     "by": "2026-03-02T12:00",
+     "do": "Decide pause or wait right after the readout and tell Marco before noon.",
+     "draft_reply": "Marco, let's wait for the readout before deciding. I'll send you the call before your noon cutoff. Thanks, S.",
+     "ref": "chat:c_001",
+     "url": "workplace.html#chat-c_001",
+     "why": "Marco needs a call by noon on pausing v2 for Microsoft calendars, to ship before the Tuesday freeze. In the retro you said no rollback decision until the readout is done."
+    },
+    {
+     "by": "2026-03-02T11:30",
+     "do": "Ask Grace to move the call to 12:00 and bring a workaround. Marco estimates 2 days for skip plus paste a meeting link.",
+     "draft_reply": "Grace, I'll join the Cobalt Ridge call, but 11:30 clashes with the leadership sync. Can we move it to 12:00? Thanks, S.",
+     "ref": "mail:m_002",
+     "url": "workplace.html#mail-m_002",
+     "why": "Cobalt Ridge has a 120-seat trial blocked at the calendar step and the trial ends Friday. The 11:30 call clashes with the leadership sync."
+    }
+   ],
+   "top_bet": {
+    "title": "Restore skip on the calendar step for Microsoft workspaces (rollback of rel_0412, Microsoft only)",
+    "size": 24783,
+    "unit": "a week",
+    "needs_from_pm": "Decide after the readout: pause v2 for Microsoft (rollback) or wait, and tell Marco before noon."
+   },
+   "status": "Dana, 7-day activation for Microsoft-calendar workspaces fell from 39.4% to 30.6% after Onboarding v2 removed skip. Google workspaces did not move (40.9% to 40.7%). The cause is tied by date, not proven. I'm away, so the decision waits for me: restore skip for Microsoft workspaces only (a rollback of rel_0412). Nothing has been applied. The size is $24783 a week in new ARR at risk. Ask: please hold any rollback call until I confirm on my return. Thanks, S."
+  },
+  {
+   "date": "2026-03-03",
+   "weekday": "Tuesday",
+   "urgent": [
+    {
+     "by": "2026-03-03 (Tuesday freeze)",
+     "do": "Reply to Marco to approve or decline the Microsoft-only skip restore before the freeze today.",
+     "draft_reply": "Marco, yes, please restore the skip option for Microsoft calendars only, before the freeze. Leave Google as is. Thanks, S.",
+     "ref": "chat:c_001",
+     "url": "workplace.html#chat-c_001",
+     "why": "Marco needed a call on pausing v2 for Microsoft calendars by Monday noon; the Tuesday freeze is today. Signal packet pkt_0001 recommends a Microsoft-only rollback of rel_0412 (restore skip). Prepare only; nothing applied."
+    },
+    {
+     "by": "2026-03-06 (trial end, per Grace)",
+     "do": "Send Luis the security overview and reply that you are working on a no-calendar path. Customer mail waits for you.",
+     "draft_reply": "Luis, sorry for the wait on the security overview. I'll send it so your team can start its review. I'm also looking at a way for your team to use Tallybird during the trial without connecting calendars. Thanks, S.",
+     "ref": "mail:m_002",
+     "url": "workplace.html#mail-m_002",
+     "why": "Cobalt Ridge, a 120-seat trial, is blocked at the calendar step by admin approval; Grace says the trial ends Friday. The security overview promised to Luis is still open."
+    },
+    {
+     "by": "2026-03-03",
+     "do": "Pick option A or B for Lena today.",
+     "draft_reply": "Lena, let's go with option A, the skip button that leads to paste a meeting link. Marco estimates 2 days. Please hand it to him. Thanks, S.",
+     "ref": "mail:m_011",
+     "url": "workplace.html#mail-m_011",
+     "why": "Lena asked for a pick between two consent fallback options by Tuesday so she can hand it to Marco. Marco estimated the skip plus paste-a-meeting-link option at 2 days."
+    }
+   ],
+   "top_bet": null,
+   "status": "Dana, Microsoft-calendar activation is still down, 39.4% to 30.6%, while Google held (40.9% to 40.7%). Nothing has changed since yesterday and no decision is made. I'm away, so the rollback (restore skip for Microsoft only) waits for me and is not applied. One correction: quality flagged the weekly ARR-at-risk figure in my earlier note as not matching its source, so please disregard it. The cause is tied by date, not proven; the Microsoft-only skip test is the proof. Ask: please hold any rollback call until I confirm on my return. Thanks, S."
+  },
+  {
+   "date": "2026-03-04",
+   "weekday": "Wednesday",
+   "urgent": [
+    {
+     "by": "2026-03-04",
+     "do": "Tell Nina to send the doc to Omar today and pick which identity provider leads.",
+     "draft_reply": "Nina, go ahead and send it to Omar today. On Okta or Entra ID, lead with the one Grace's Business plan deals ask for most, and check with her before it goes. Thanks, S.",
+     "ref": "mail:m_015",
+     "url": "workplace.html#mail-m_015",
+     "why": "Omar needs Growth's SSO requirements today or the Platform sprint (starts Mar 9) slips a quarter; Nina's draft is ready and waits on Okta vs Entra ID."
+    },
+    {
+     "by": "Friday (trial end)",
+     "do": "Pick consent fallback option A with Lena, send Luis the security overview, and answer Grace and Luis.",
+     "draft_reply": "Grace, thanks for setting up the call. Luis asks to use the trial without connecting calendars. I'm pushing a skip plus paste a meeting link fallback with Marco and will confirm what we can offer him. Thanks, S.",
+     "ref": "mail:m_002",
+     "url": "workplace.html#mail-m_002",
+     "why": "Cobalt Ridge (120-seat trial) is blocked at the calendar step and their trial ends Friday. Luis says their security review takes about three weeks and asks to use Tallybird without connecting calendars. Your security overview to Luis is overdue."
+    },
+    {
+     "do": "Decide whether to approve the prepared Microsoft-only rollback of rel_0412, then send Dana the overdue readout.",
+     "draft_reply": "Marco, please ready a Microsoft-only skip for v2 so it is set to go on my word. Also let's build the consent fallback, skip plus paste a meeting link. Thanks, S.",
+     "ref": "chat:c_001",
+     "url": "workplace.html#chat-c_001",
+     "why": "Signal packet pkt_0001: activation_rate_7d fell from 0.3937 to 0.3061 for Microsoft-calendar workspaces while Google did not move (0.4087 to 0.407); onboarding v2 (rel_0412) removed the skip. A Microsoft-only rollback is prepared, not applied. Marco asked for a call by Monday noon and it passed. Aiko says cohorts from Feb 23 on are not mature."
+    }
+   ],
+   "top_bet": {
+    "title": "Restore a skip path on the calendar step for Microsoft workspaces",
+    "size": 24326,
+    "unit": "a week",
+    "needs_from_pm": "Choose flag-only rollback or the ONB-140 fallback and tell Marco today."
+   },
+   "status": "Dana, Microsoft-calendar activation is still down, 39.4% to 30.6%, while Google held (40.9% to 40.7%). No decision is made and nothing is applied. I'm away, so the Microsoft-only skip rollback of rel_0412 waits for me. New today: Engineering's fallback estimate is done. Still open: my activation readout to you, Support's ticket tagging, and Luis's security overview. Cobalt Ridge's trial ends Friday. The ARR-at-risk figure failed quality's check, so disregard it. Cause is tied by date, not proven; the skip test is the proof. Ask: hold any rollback call until I confirm. Thanks, S."
+  },
+  {
+   "date": "2026-03-05",
+   "weekday": "Thursday",
+   "urgent": [
+    {
+     "by": "today",
+     "do": "Decide on the Microsoft-only skip fallback (Marco's estimate: 2 days) and answer Grace.",
+     "draft_reply": "Grace, Marco estimates 2 days for a skip plus paste-a-meeting-link fallback. It is not shipped and I can't promise a date. Please ask Luis for a trial extension while we sort it. Thanks, S.",
+     "ref": "mail:m_017",
+     "url": "workplace.html#mail-m_017",
+     "why": "Cobalt Ridge's 120-seat trial ends tomorrow and they are blocked on admin consent; Grace needs a decision today."
+    },
+    {
+     "by": "today",
+     "do": "Send Ben the tool spend estimate (last quarter's sheet is attached to mail m_004).",
+     "draft_reply": "Ben, I'll send the tool spend estimate today, ahead of Friday's review. Thanks, S.",
+     "ref": "mail:m_016",
+     "url": "workplace.html#mail-m_016",
+     "why": "Ben needs the Q2 tool spend estimate today for Friday's finance review; your promise of Thursday is due today."
+    },
+    {
+     "by": "today",
+     "do": "Tell Nina to settle Okta vs Entra ID and send the doc to Omar today.",
+     "draft_reply": "Nina, good to send to Omar today. You own the doc, so make the Okta or Entra ID call and give him your reasoning. Thanks, S.",
+     "ref": "mail:m_015",
+     "url": "workplace.html#mail-m_015",
+     "why": "Omar's SSO requirements deadline (Mar 4) has passed; Omar says the March 9 sprint work slips a quarter without them. Nina's draft is ready and waits on the Okta or Entra ID question."
+    }
+   ],
+   "top_bet": null,
+   "status": "Dana, Microsoft-calendar activation is still down, 39.4% to 30.6%, while Google held (40.9% to 40.7%). No decision is made and nothing is applied. I'm away, so the Microsoft-only skip rollback of rel_0412 waits for me. Quality again failed the ARR-at-risk figure, so disregard every dollar figure you've seen. Cause is tied by date, not proven; the skip test is the proof. Still overdue: my activation readout to you, Support's ticket tagging, Luis's security overview. Cobalt Ridge's trial ends Friday. Ask: hold any rollback call until I confirm. Thanks, S."
+  },
+  {
+   "date": "2026-03-06",
+   "weekday": "Friday",
+   "urgent": [
+    {
+     "by": "today, trial end",
+     "do": "Decide what Grace and Luis are told about a skip or no-calendar fallback. Luis's reply waits for you.",
+     "draft_reply": "Luis, thanks for the update. We know admin consent is blocking your team and we are weighing a fallback that skips calendar connect. I can't confirm a date yet. I'll come back to you once it is decided. Thanks, S.",
+     "ref": "mail:m_018",
+     "url": "workplace.html#mail-m_018",
+     "why": "Cobalt Ridge (120-seat trial) ends today. Luis Moreno says most of the team still can't get past the calendar step and asks if they should walk away. Grace Kim (m_017) asked for a decision yesterday."
+    },
+    {
+     "by": "today, before finance review",
+     "do": "Send Ben the tool spend estimate. I have no figures.",
+     "draft_reply": "Ben, sorry I missed Thursday. I'm pulling the tool spend figures and will send them as soon as I have them. Thanks, S.",
+     "ref": "mail:m_016",
+     "url": "workplace.html#mail-m_016",
+     "why": "Ben Carter needs the Q2 tool spend estimate before today's finance review. You told him Thursday."
+    },
+    {
+     "do": "Approve or decline the Microsoft-only rollback of rel_0412 (restore skip). Prepared only, not applied.",
+     "draft_reply": "Marco, let's prepare a Microsoft-only rollback of the mandatory calendar step and keep it off until I confirm. Thanks, S.",
+     "ref": "chat:c_001",
+     "url": "workplace.html#chat-c_001",
+     "why": "Signal (pkt_0001) reports activation_rate_7d fell from 0.3937 to 0.3061 for Microsoft-calendar workspaces while Google held (0.4087 to 0.407). Marco's Monday-noon call on pausing v2 for Microsoft is unanswered."
+    }
+   ],
+   "top_bet": {
+    "title": "Restore skip on the calendar step for Microsoft-calendar workspaces",
+    "size": 25209,
+    "unit": "a week",
+    "needs_from_pm": "Approve turning on the Microsoft-only skip flag after review; PM is away so this is prepare-only."
+   },
+   "status": "Dana, Microsoft-calendar activation is still down, 39.4% to 30.6%, while Google held (40.9% to 40.7%). No decision is made and nothing is applied. I'm away, so the Microsoft-only skip rollback of rel_0412 waits for me. New today: quality failed the dollar sizing a third time, so disregard every dollar figure you've seen. Cause is tied by date, not proven; the skip test is the proof. Urgent: Cobalt Ridge's trial ends today. Still overdue: my activation readout to you. Ask: hold any rollback call until I confirm on my return. Thanks, S."
+  }
+ ],
+ "urgent_to_pm": [
+  {
+   "ts": "2026-03-02T00:00:00Z",
+   "to": "self",
+   "text": "Readout due to Dana by 10:00 for the 11:00 leadership sync. Send it, or tell her at the 9:30 1:1 what you can't say yet. workplace.html#mail-m_001"
+  },
+  {
+   "ts": "2026-03-02T00:00:00Z",
+   "to": "self",
+   "text": "Marco needs your call by noon on pausing v2 for Microsoft calendars, before the Tuesday freeze. Decide after the readout and tell him. workplace.html#chat-c_001"
+  },
+  {
+   "ts": "2026-03-02T00:00:00Z",
+   "to": "self",
+   "text": "Cobalt Ridge's 120-seat trial is blocked and ends Friday. The 11:30 call clashes with the leadership sync, so ask Grace to move it to 12:00. workplace.html#mail-m_002"
+  },
+  {
+   "ts": "2026-03-04T00:00:00Z",
+   "to": "self",
+   "text": "Marco needs your call today, before the freeze: restore skip for Microsoft calendars only? Nothing applied. Reply in #eng-onboarding. workplace.html#chat-c_001"
+  },
+  {
+   "ts": "2026-03-04T00:00:00Z",
+   "to": "self",
+   "text": "Cobalt Ridge (120 seats) is blocked at the calendar step; trial ends Friday per Grace. Send Luis the overdue security overview and a no-calendar path. Draft ready. workplace.html#mail-m_002"
+  },
+  {
+   "ts": "2026-03-04T00:00:00Z",
+   "to": "self",
+   "text": "Lena needs your pick today, option A or B for the consent fallback, so she can hand it to Marco. Draft picks A. workplace.html#mail-m_011"
+  },
+  {
+   "ts": "2026-03-05T00:00:00Z",
+   "to": "self",
+   "text": "URGENT, due today: Omar needs the SSO requirements for Monday's sprint planning or the work slips a quarter. Tell Nina to send the doc and pick Okta or Entra ID first. https://workplace.html#mail-m_015"
+  },
+  {
+   "ts": "2026-03-05T00:00:00Z",
+   "to": "self",
+   "text": "URGENT, blocked customer: Cobalt Ridge (120-seat trial) is stuck at the calendar step and the trial ends Friday. Reply to Luis and Grace, and send the overdue security overview. https://workplace.html#mail-m_002"
+  },
+  {
+   "ts": "2026-03-05T00:00:00Z",
+   "to": "self",
+   "text": "URGENT, key metric: Signal's packet pkt_0001 prepared a Microsoft-only rollback of onboarding v2 (restore skip). Nothing is applied. Marco is waiting for your call, and Dana's readout is overdue. https://workplace.html#chat-c_001"
+  },
+  {
+   "ts": "2026-03-06T00:00:00Z",
+   "to": "self",
+   "text": "Cobalt Ridge's 120-seat trial ends tomorrow and they are blocked on admin consent. Decide today on the Microsoft-only skip fallback (Marco estimates 2 days), then answer Grace. workplace.html#mail-m_017"
+  },
+  {
+   "ts": "2026-03-06T00:00:00Z",
+   "to": "self",
+   "text": "Ben needs the Q2 tool spend estimate today for Friday's finance review. Send it to him today. workplace.html#mail-m_016"
+  },
+  {
+   "ts": "2026-03-06T00:00:00Z",
+   "to": "self",
+   "text": "Omar's SSO requirements are past due (Mar 4), and he says the Mar 9 sprint slips a quarter without them. Tell Nina to settle Okta vs Entra ID and send the doc today. workplace.html#mail-m_015"
+  },
+  {
+   "ts": "2026-03-07T00:00:00Z",
+   "to": "self",
+   "text": "Cobalt Ridge trial ends today and Luis's team is blocked at the calendar step. Decide what Grace and Luis hear about a fallback. Drafts are ready. workplace.html#mail-m_018"
+  },
+  {
+   "ts": "2026-03-07T00:00:00Z",
+   "to": "self",
+   "text": "Ben needs the Q2 tool spend estimate before today's finance review. Send him the figures. I have none. Draft is ready. workplace.html#mail-m_016"
+  },
+  {
+   "ts": "2026-03-07T00:00:00Z",
+   "to": "self",
+   "text": "Microsoft activation fell from 0.3937 to 0.3061 per Signal. Marco awaits your call on a Microsoft-only rollback of the skip removal. Prepared, not applied. Approve or decline. workplace.html#chat-c_001"
+  }
+ ],
+ "call": {
+  "decision": "iterate",
+  "rationale": "The rollback recovered Microsoft activation. Next, retest v2 behind a flag with a consent fallback."
+ },
+ "verdict": {
+  "after": 0.4219,
+  "before": 0.3024,
+  "does_not_prove": "That the effect will last, or that the action was the only change in the period.",
+  "method": "Mature cohorts 2026-03-07 to 2026-03-15 (301 workspaces) against 2026-02-09 to 2026-03-06. Two-proportion test, p = 1.3e-05.",
+  "metric": "activation_rate_7d",
+  "outcome": "improved",
+  "segment": {
+   "calendar_provider": [
+    "microsoft"
+   ]
+  }
+ },
+ "decided_note": "Dana, Microsoft-calendar activation recovered from 30.2% to 42.2% after we restored skip for Microsoft workspaces only (rollback of rel_0412). My call: iterate. We retest Onboarding v2 behind a flag, with a consent fallback for people who can't connect a calendar. The result holds for the cohorts measured so far; it doesn't prove the effect will last. Ask: please tell me by Friday if you want a different next step. Thanks, S.",
+ "digest": "# While you were away: 2026-03-16\n\n## Sent to you (15)\n- Readout due to Dana by 10:00 for the 11:00 leadership sync. Send it, or tell her at the 9:30 1:1 what you can't say yet. workplace.html#mail-m_001\n- Marco needs your call by noon on pausing v2 for Microsoft calendars, before the Tuesday freeze. Decide after the readout and tell him. workplace.html#chat-c_001\n- Cobalt Ridge's 120-seat trial is blocked and ends Friday. The 11:30 call clashes with the leadership sync, so ask Grace to move it to 12:00. workplace.html#mail-m_002\n- Marco needs your call today, before the freeze: restore skip for Microsoft calendars only? Nothing applied. Reply in #eng-onboarding. workplace.html#chat-c_001\n- Cobalt Ridge (120 seats) is blocked at the calendar step; trial ends Friday per Grace. Send Luis the overdue security overview and a no-calendar path. Draft ready. workplace.html#mail-m_002\n- Lena needs your pick today, option A or B for the consent fallback, so she can hand it to Marco. Draft picks A. workplace.html#mail-m_011\n- URGENT, due today: Omar needs the SSO requirements for Monday's sprint planning or the work slips a quarter. Tell Nina to send the doc and pick Okta or Entra ID first. https://workplace.html#mail-m_015\n- URGENT, blocked customer: Cobalt Ridge (120-seat trial) is stuck at the calendar step and the trial ends Friday. Reply to Luis and Grace, and send the overdue security overview. https://workplace.html#mail-m_002\n- URGENT, key metric: Signal's packet pkt_0001 prepared a Microsoft-only rollback of onboarding v2 (restore skip). Nothing is applied. Marco is waiting for your call, and Dana's readout is overdue. https://workplace.html#chat-c_001\n- Cobalt Ridge's 120-seat trial ends tomorrow and they are blocked on admin consent. Decide today on the Microsoft-only skip fallback (Marco estimates 2 days), then answer Grace. workplace.html#mail-m_017\n- Ben needs the Q2 tool spend estimate today for Friday's finance review. Send it to him today. workplace.html#mail-m_016\n- Omar's SSO requirements are past due (Mar 4), and he says the Mar 9 sprint slips a quarter without them. Tell Nina to settle Okta vs Entra ID and send the doc today. workplace.html#mail-m_015\n- Cobalt Ridge trial ends today and Luis's team is blocked at the calendar step. Decide what Grace and Luis hear about a fallback. Drafts are ready. workplace.html#mail-m_018\n- Ben needs the Q2 tool spend estimate before today's finance review. Send him the figures. I have none. Draft is ready. workplace.html#mail-m_016\n- Microsoft activation fell from 0.3937 to 0.3061 per Signal. Marco awaits your call on a Microsoft-only rollback of the skip removal. Prepared, not applied. Approve or decline. workplace.html#chat-c_001\n- Held, over the daily limit: activation_rate_7d moved for calendar_provider = microsoft. A decision is waiting for you; nothing was applied.\n\n## Sent on your behalf (13)\n- To your manager (p_vp): Dana, 7-day activation for Microsoft-calendar workspaces fell from 39.4% to 30.6% after Onboarding v2 removed skip. Google workspaces did not move (40.9% to 40.7%). The cause is tied by date, not proven. I'm away, so the decision waits for me: restore skip for Microsoft workspaces only (a rollback of rel_0412). Nothing has been applied. The size is $24783 a week in new ARR at risk. Ask: please hold any rollback call until I confirm on my return. Thanks, S.\n- To your team (p_ds, p_jpm): Team, nothing has changed yet. Activation for Microsoft workspaces fell from 39.4% to 30.6% after v2 removed skip, while Google held at 40.7%. The recommendation is a Microsoft-only rollback that restores skip. Why Microsoft only: Google did not move. The flag ships off and waits for my review. Aiko, keep the Microsoft cohort split ready, since it is our test. Nina, your SSO doc work is unchanged. Thanks, S.\n- To your manager (p_vp): Dana, Microsoft-calendar activation is still down, 39.4% to 30.6%, while Google held (40.9% to 40.7%). Nothing has changed since yesterday and no decision is made. I'm away, so the rollback (restore skip for Microsoft only) waits for me and is not applied. One correction: quality flagged the weekly ARR-at-risk figure in my earlier note as not matching its source, so please disregard it. The cause is tied by date, not proven; the Microsoft-only skip test is the proof. Ask: please hold any rollback call until I confirm on my return. Thanks, S.\n- To your team (p_ds, p_jpm): Team, nothing has been decided. Microsoft activation is 30.6%, down from 39.4%, while Google held at 40.7%. The Microsoft-only skip rollback is prepared but not applied, and it waits for my review. Why Microsoft only: Google did not move. Aiko, keep the Microsoft cohort split ready, since it is our test. Please don't quote the ARR-at-risk figure until it is re-checked. Thanks, S.\n- To your manager (p_vp): Dana, Microsoft-calendar activation is still down, 39.4% to 30.6%, while Google held (40.9% to 40.7%). No decision is made and nothing is applied. I'm away, so the Microsoft-only skip rollback of rel_0412 waits for me. New today: Engineering's fallback estimate is done. Still open: my activation readout to you, Support's ticket tagging, and Luis's security overview. Cobalt Ridge's trial ends Friday. The ARR-at-risk figure failed quality's check, so disregard it. Cause is tied by date, not proven; the skip test is the proof. Ask: hold any rollback call until I confirm. Thanks, S.\n- To your team (p_ds, p_jpm, p_des): Team, nothing is decided. Microsoft activation is 30.6%, down from 39.4%, while Google held at 40.7%. The skip rollback for Microsoft only is prepared, not applied, and waits for my review. Why Microsoft only: Google did not move. Engineering's fallback estimate is done, so no new work there. Aiko, keep the Microsoft cohort split ready, since it is our test. Please don't quote the ARR-at-risk figure until it is re-checked. Thanks, S.\n- To your manager (p_vp): Dana, Microsoft-calendar activation is still down, 39.4% to 30.6%, while Google held (40.9% to 40.7%). No decision is made and nothing is applied. I'm away, so the Microsoft-only skip rollback of rel_0412 waits for me. Quality again failed the ARR-at-risk figure, so disregard every dollar figure you've seen. Cause is tied by date, not proven; the skip test is the proof. Still overdue: my activation readout to you, Support's ticket tagging, Luis's security overview. Cobalt Ridge's trial ends Friday. Ask: hold any rollback call until I confirm. Thanks, S.\n- To your team (p_ds, p_jpm, p_des): Team, nothing is decided. Microsoft activation is 30.6%, down from 39.4%, while Google held at 40.7%. The skip rollback for Microsoft only is prepared, not applied, and waits for my review. Why Microsoft only: Google did not move. Quality failed the dollar sizing again, so please don't quote any ARR-at-risk figure. Aiko, keep the Microsoft cohort split ready, since it is our test. Nothing else changes in your work. Thanks, S.\n- To your manager (p_vp): Dana, Microsoft-calendar activation is still down, 39.4% to 30.6%, while Google held (40.9% to 40.7%). No decision is made and nothing is applied. I'm away, so the Microsoft-only skip rollback of rel_0412 waits for me. New today: quality failed the dollar sizing a third time, so disregard every dollar figure you've seen. Cause is tied by date, not proven; the skip test is the proof. Urgent: Cobalt Ridge's trial ends today. Still overdue: my activation readout to you. Ask: hold any rollback call until I confirm on my return. Thanks, S.\n- To your team (p_ds, p_jpm, p_des): Team, nothing is decided. Microsoft activation is 30.6%, down from 39.4%, while Google held at 40.7%. The skip rollback for Microsoft only is prepared, not applied, and waits for my review. Why Microsoft only: Google did not move. Quality failed the dollar sizing again, so please don't quote any ARR-at-risk figure. Design and Engineering fallback items are closed, so nothing new for you. Aiko, keep the Microsoft cohort split ready, since it is our test. Thanks, S.\n- To your manager (p_vp): Dana, Microsoft-calendar activation recovered from 30.2% to 42.2% after we restored skip for Microsoft workspaces only (rollback of rel_0412). My call: iterate. We retest Onboarding v2 behind a flag, with a consent fallback for people who can't connect a calendar. The result holds for the cohorts measured so far; it doesn't prove the effect will last. Ask: please tell me by Friday if you want a different next step. Thanks, S.\n- To your team (p_ds, p_jpm, p_des): Team, the Microsoft-only skip rollback worked: activation went from 30.2% to 42.2%. My call is to iterate. Skip stays restored for Microsoft. Next we retest v2 behind a flag with a consent fallback, because the Microsoft blocker was admin approval at the calendar step. Aiko, keep the Microsoft cohort split running so we can watch whether the gain holds. The new flag ships off until I review it. Thanks, S.\n- To your peers (p_sales): Grace, skip is restored for Microsoft-calendar workspaces, and their 7-day activation recovered from 30.2% to 42.2%. My call is to iterate: we retest Onboarding v2 behind a flag with a consent fallback. Ask: Grace, from today, tell Microsoft prospects only that skip is back, and promise no date for the retest. I'll give you one when it is scheduled. Thanks, S.\n\n## Held for you (10)\n- To peers (p_sales): messages to peers wait for the PM. Draft: Grace, Cobalt Ridge is blocked at the Outlook calendar step, the same pattern behind the Microsoft activation drop (39.4% to 30.6%). The decision on restoring skip waits for me, so please promise Cobalt Ridge nothing on timing until I confirm. Asks: Grace, hold timing promises until I confirm. Sam, send Luis the overdue security overview. Marco, build skip plus paste-a-link behind a flag by March 6. Thanks, S.\n- To customer (p_cust): messages to customer wait for the PM. Draft: Luis, thank you for explaining your review process. We know your team is blocked at the calendar step, and we're working on a way for people to use Tallybird without connecting calendars first. I can't confirm a date yet. I'll update you before your trial ends on Friday, and I'll send the security overview I owe you. I'm sorry it's late. Thanks, S.\n- To peers (p_sales, p_sup): messages to peers wait for the PM. Draft: Grace, Cobalt Ridge is blocked at the Outlook calendar step, the same pattern behind the Microsoft activation drop (39.4% to 30.6%). The decision on restoring skip waits for me, so please promise Cobalt Ridge nothing on timing until I confirm. Asks: Grace, hold timing promises until I confirm. Support, the admin-approval ticket tagging was due March 2; please reply with the date it will be done. I owe Luis the security overview and will send it myself. Thanks, S.\n- To customer (p_cust): messages to customer wait for the PM. Draft: Luis, thank you for explaining your review process. We know your team is blocked at the calendar step, and we're working on a way for people to use Tallybird without connecting calendars first. I can't confirm a date yet. I'll update you before your trial ends on Friday, and I'll send the security overview I owe you. I'm sorry it's late. Thanks, S.\n- To peers (p_sales, p_sup, p_eng): messages to peers wait for the PM. Draft: Grace, Cobalt Ridge is blocked at the Outlook calendar step, the same pattern behind the Microsoft activation drop (39.4% to 30.6%). Restoring skip waits for me. Asks: Grace, promise Cobalt Ridge nothing on timing until I confirm. Support, the admin-approval ticket tagging was due March 2; reply with the date it will be done. Marco, thank you for the fallback estimate; hold the build until I confirm. I'll send Luis the security overview myself. Thanks, S.\n- To customer (p_cust): messages to customer wait for the PM. Draft: Luis, we know your team is blocked at the calendar step, and we're working on a way to use Tallybird without connecting calendars first. I can't confirm a date yet. I'll update you before your trial ends on Friday, and I'll send the security overview I owe you. I'm sorry it's late. Thanks, S.\n- To peers (p_sales, p_sup, p_eng): messages to peers wait for the PM. Draft: Grace, Cobalt Ridge is blocked at the Outlook calendar step, the same pattern behind the Microsoft activation drop (39.4% to 30.6%). Restoring skip waits for me. Asks: Grace, promise Cobalt Ridge nothing on timing until I confirm; their trial ends Friday. Support, the admin-approval ticket tagging was due March 2; reply today with the date it will be done. Marco, hold the build until I confirm. I'll send Luis the security overview myself. Thanks, S.\n- To customer (p_cust): messages to customer wait for the PM. Draft: Luis, we know your team is blocked at the calendar step, and we're working on a way to use Tallybird without connecting calendars first. I can't confirm a date yet. I'll update you before your trial ends on Friday, and I'll send the security overview I owe you. I'm sorry it's late. Thanks, S.\n- To peers (p_sales, p_sup, p_eng): messages to peers wait for the PM. Draft: Grace, Cobalt Ridge's trial ends today and they are still blocked at the Outlook calendar step, the same pattern behind the Microsoft activation drop (39.4% to 30.6%). Restoring skip waits for me. Asks: Grace, promise Cobalt Ridge nothing on timing until I confirm, and tell me today if they need anything before the trial ends. Support, the admin-approval ticket tagging was due March 2; reply today with the date it will be done. Marco, hold the build until I confirm. I'll send Luis the security overview myself. Thanks, S.\n- To customer (p_cust): messages to customer wait for the PM. Draft: Luis, we know your team is blocked at the calendar step, and we're working on a way to use Tallybird without connecting calendars first. I can't confirm a date yet. I'm sorry your trial ends today before that is ready, and I'll send the security overview I owe you. Thanks, S.\n\n## Waiting for you (1)\n- **Decision: rollback rel_0412 for calendar_provider = microsoft.**\n  activation_rate_7d moved for calendar_provider = microsoft; the step that broke is first_meeting_rate_7d.\n  Quality: SHIP.\n  To decide: `python -m factory.loop --resume C:\\Users\\zuram\\projects\\factory-of-one\\runs\\autopilot\\week-live-2`\n\n## Bet's ranking for the week\n1. **Restore skip on the calendar step for Microsoft-calendar workspaces** ($25,209 a week). Needs from you: Approve turning on the Microsoft-only skip flag after review; PM is away so this is prepare-only.\n2. **Consent fallback: skip plus paste a meeting link (ONB-140)** ($54,540 a year). Needs from you: Choose Design option A or B and reply to Grace and Marco. A reply to Luis is customer-facing, so it waits for the PM.\n3. **Send SSO requirements to Platform for the March 9 sprint** ($64,800 a year). Needs from you: Review Nina's draft, decide the identity provider order, and OK it going to Omar.\n- Set aside: Zoom webinar recording and HIPAA agreement for Northwind Health. Strategy lists new meeting formats such as webinars and compliance programs such as HIPAA as not this half. Two requests are one account, and 'big logo; worth a look' is opinion, not evidence. It would come back if the CEO revises the H1 strategy, or several accounts ask.\n- Set aside: CRM sync and custom vocabulary. Small, two accounts, and not tied to a Q1 goal. It would come back if more accounts ask.\n\n## Chief handled\n- Triaged 5 emails: 4 act now, 1 delegate. Drafted replies; none were sent.\n- 3 chats need you, 5 requests are waiting on you.\n- 12 commitments tracked.\n\n## Not done while you were away\n- Nothing was applied or merged. Only the updates your decision rights allow were sent; everything else is held above.\n\n## Friday: back at the keyboard\n- Decided: iterate. The rollback recovered Microsoft activation. Next, retest v2 behind a flag with a consent fallback.\n- Verdict: activation_rate_7d in calendar_provider = microsoft went from 0.3024 to 0.4219 (improved).\n"
+}
