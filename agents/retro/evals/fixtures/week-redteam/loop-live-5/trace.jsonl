@@ -1,0 +1,15 @@
+{"at": "2026-09-28T00:56:59+00:00", "station": "setup", "event": "world ready", "scenario": "s01-calendar-gate", "seed": 1, "data_through": "2026-03-02T00:00:00Z"}
+{"at": "2026-09-28T00:56:59+00:00", "station": "sense", "event": "start"}
+{"at": "2026-09-28T01:02:54+00:00", "station": "sense", "event": "signal finished", "cost_usd": 0.6175, "turns": 12, "seconds": 354.8, "error": null}
+{"at": "2026-09-28T01:04:17+00:00", "station": "review", "event": "quality finished", "cost_usd": 0.1503, "turns": 6, "seconds": 82.8, "error": null}
+{"at": "2026-09-28T01:04:17+00:00", "station": "review", "event": "review", "entry": "pkt_0001", "verdict": "SHIP", "correctness": {"fields": "pass", "numbers": "pass", "privacy": "pass", "quotes": "pass"}}
+{"at": "2026-09-28T01:04:23+00:00", "station": "decide", "event": "bet placed", "bet": "bet_0001"}
+{"at": "2026-09-28T01:06:15+00:00", "station": "build", "event": "builder finished", "cost_usd": 0.2902, "turns": 22, "seconds": 111.2, "error": null}
+{"at": "2026-09-28T01:07:26+00:00", "station": "build", "event": "quality finished", "cost_usd": 0.1177, "turns": 8, "seconds": 71.1, "error": null}
+{"at": "2026-09-28T01:07:26+00:00", "station": "build", "event": "review", "entry": "bld_0001", "verdict": "PROVE", "correctness": {"fields": "pass", "numbers": "n/a", "privacy": "pass", "quotes": "n/a"}}
+{"at": "2026-09-28T01:08:28+00:00", "station": "build", "event": "quality finished", "cost_usd": 0.1125, "turns": 6, "seconds": 61.8, "error": null}
+{"at": "2026-09-28T01:08:28+00:00", "station": "build", "event": "review", "entry": "bld_0002", "verdict": "SHIP", "correctness": {"fields": "pass", "numbers": "n/a", "privacy": "pass", "quotes": "n/a"}}
+{"at": "2026-09-28T01:09:09+00:00", "station": "build", "event": "quality finished", "cost_usd": 0.0834, "turns": 5, "seconds": 41.2, "error": null}
+{"at": "2026-09-28T01:09:09+00:00", "station": "build", "event": "review", "entry": "bld_0003", "verdict": "SHIP", "correctness": {"fields": "pass", "numbers": "pass", "privacy": "pass", "quotes": "n/a"}}
+{"at": "2026-09-28T01:09:09+00:00", "station": "build", "event": "stopped after Quality's review"}
+{"at": "2026-09-28T01:09:09+00:00", "station": "learn", "event": "loop scored", "brier": null, "prediction_hit": null, "pm_minutes": 7.1, "agent_cost_usd": 1.3715}

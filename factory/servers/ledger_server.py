@@ -109,19 +109,24 @@ def write_entry(type: str, payload: dict, refs: list[str] | None = None) -> dict
     """Append one artifact. type is one of: signal_card, decision_packet, action, build, verdict, review, readout, commitment, patch."""
     if type not in PREFIX:
         return {"status": "rejection", "code": "type_not_allowed", "message": f"Agents cannot write {type} entries."}
-    problems = world_problems(type, payload)
-    if problems:
-        return {"status": "rejection", "code": "invalid_entry", "message": "; ".join(problems)}
     path = Path(os.environ["FACTORY_LEDGER"])
-    count = sum(1 for e in ledger.read(path) if e["type"] == type)
+    existing = ledger.read(path)
     entry = {
-        "id": f"{PREFIX[type]}_{count + 1:04d}",
+        "id": f"{PREFIX[type]}_{sum(1 for e in existing if e['type'] == type) + 1:04d}",
         "type": type,
         "ts": sim_now(),
         "author": {"kind": "agent", "name": os.environ.get("FACTORY_AGENT", "agent")},
         "refs": refs or [],
         "payload": payload,
     }
+    # Schema first: shape and field-level problems get a clean message here, before any custom check below
+    # has to assume a well-formed payload. A malformed write should never crash the tool.
+    shape_problems = ledger.errors(entry, {e["id"] for e in existing})
+    if shape_problems:
+        return {"status": "rejection", "code": "invalid_entry", "message": "; ".join(shape_problems)}
+    problems = world_problems(type, payload)
+    if problems:
+        return {"status": "rejection", "code": "invalid_entry", "message": "; ".join(problems)}
     try:
         ledger.append(path, entry)
     except ValueError as exc:

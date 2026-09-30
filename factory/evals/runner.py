@@ -104,6 +104,33 @@ def apply_setup(trial: Trial) -> None:
             ).fetchone()
             conn.execute("INSERT INTO tickets VALUES (?,?,?,?,?,?,?)",
                          (t["ticket_id"], t["created_at"], ws, user, t["subject"], t["body"], t["support_tag"]))
+        if "insert_mail" in step:
+            m = step["insert_mail"]
+            conn.execute("INSERT INTO mail VALUES (?,?,?,?,?,?,?)",
+                         (m["message_id"], m["ts"], m["from_id"], json.dumps(m["to_ids"]), m.get("in_reply_to"), m["subject"], m["body"]))
+        if "insert_chat" in step:
+            c = step["insert_chat"]
+            conn.execute("INSERT INTO chat VALUES (?,?,?,?,?,?,?,?)",
+                         (c["message_id"], c["ts"], c.get("channel"), json.dumps(c["dm_members"]) if c.get("dm_members") else None,
+                          c["author_id"], json.dumps(c.get("mentions", [])), c.get("thread_id"), c["text"]))
+        if "insert_doc" in step:
+            d = step["insert_doc"]
+            conn.execute("INSERT INTO docs VALUES (?,?,?,?,?)", (d["doc_id"], d["title"], d["owner_id"], d["updated"], d["body"]))
+        if "insert_tracker" in step:
+            i = step["insert_tracker"]
+            conn.execute("INSERT INTO tracker VALUES (?,?,?,?,?,?,?)",
+                         (i["issue_id"], i["title"], i["status"], i["owner_id"], i.get("due"), i.get("depends_on"), i["updated"]))
+        if "insert_transcript" in step:
+            t = step["insert_transcript"]
+            conn.execute("INSERT INTO transcripts VALUES (?,?,?,?)", (t["transcript_id"], t["event_id"], t["ts"], t["text"]))
+        if "insert_request" in step:
+            r = step["insert_request"]
+            conn.execute("INSERT INTO requests VALUES (?,?,?,?,?,?,?,?)",
+                         (r["request_id"], r["ts"], r["logged_by"], r["account"], r["arr_at_stake"], r["plan"], r["tag"], r["text"]))
+        if "insert_release" in step:
+            rel = step["insert_release"]
+            conn.execute("INSERT INTO releases VALUES (?,?,?,?,?)",
+                         (rel["release_id"], rel["ts"], rel["title"], rel["notes"], rel.get("flag")))
         if "copy_files" in step:
             source, target = ROOT / step["copy_files"]["from"], trial.dir / step["copy_files"]["to"]
             if source.is_dir():

@@ -183,3 +183,23 @@ def test_the_ledger_bounces_a_sum_bet_worked_out_and_a_paraphrased_quote(tmp_pat
     result = ledger_server.write_entry("candidates", bad)
     assert result["status"] == "rejection" and "40320" in result["message"] and "totally blocked" in result["message"]
     assert ledger_server.write_entry("candidates", good)["status"] == "value"
+
+
+def test_evidence_written_as_plain_strings_is_a_clean_rejection_not_a_crash(tmp_path, monkeypatch, now_run):
+    """Found via a red team run: malformed evidence (strings instead of {source, ref, quote}) used to crash the
+    server's own custom checks with an unhandled AttributeError before schema validation ever ran, so Bet got
+    "Error executing tool write_entry" instead of anything it could act on. Schema checks now run first."""
+    (tmp_path / "world").mkdir()
+    shutil.copy(now_run / "world" / "world.db", tmp_path / "world" / "world.db")
+    shutil.copy(ROOT / "ledger" / "examples" / "queries.jsonl", tmp_path / "queries.jsonl")
+    rows = [json.loads(l) for l in REFERENCE.read_text(encoding="utf-8").splitlines()]
+    (tmp_path / "ledger.jsonl").write_text("".join(json.dumps(r) + "\n" for r in rows[:-1]), encoding="utf-8")
+    monkeypatch.setenv("FACTORY_WORLD", str(tmp_path / "world" / "world.db"))
+    monkeypatch.setenv("FACTORY_LEDGER", str(tmp_path / "ledger.jsonl"))
+    monkeypatch.setenv("FACTORY_AGENT", "bet")
+    from factory.servers import ledger_server
+    bad = copy.deepcopy(rows[-1]["payload"])
+    bad["items"][0]["evidence"] = ["Microsoft calendar activation 39.4% before, 29.8% after"]
+    result = ledger_server.write_entry("candidates", bad)
+    assert result["status"] == "rejection"
+    assert "not of type 'object'" in result["message"]

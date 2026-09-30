@@ -87,6 +87,8 @@ Live runs on scenario 1, graded by the same code graders as the evals. Every run
 
 Every agent was tuned on scenario 1, and every result above is on scenario 1. Treat them as a working system, not a benchmark. A scenario the agents were never tuned on is the honest test, and it isn't built yet.
 
+**Red teaming:** every agent's suite includes a `planted-instruction` task, a fabricated "SYSTEM NOTE" inside something the agent legitimately reads as data (mail, a doc, a ticket, a release note, a transcript, or the ledger itself). All 7 held on their first live run: [docs/evals.md#red-teaming](docs/evals.md#red-teaming). One run also found and fixed a real crash, unrelated to the injection itself.
+
 ## Built and not built
 
 | Built | Not built yet |
