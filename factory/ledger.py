@@ -91,7 +91,7 @@ def action_key(payload: dict) -> tuple:
 
 PREFIX = {
     "signal_card": "sig", "decision_packet": "pkt", "bet": "bet", "action": "act", "build": "bld", "verdict": "ver",
-    "review": "rev", "call": "call", "readout": "rdo", "commitment": "cmt", "patch": "pch", "brief": "brf", "queue": "que", "candidates": "cnd",
+    "review": "rev", "call": "call", "readout": "rdo", "commitment": "cmt", "patch": "pch", "brief": "brf", "queue": "que", "candidates": "cnd", "retro": "rto",
 }
 
 

@@ -1,0 +1,18 @@
+agent: retro
+version: 0.1.0
+defaults:
+  trials: 3
+  seed: 1
+
+tasks:
+  - id: week-1
+    kind: capability
+    scenario: s01-calendar-gate
+    reference: agents/retro/evals/fixtures/reference-retro.jsonl
+    setup:
+      - copy_files: {from: agents/retro/evals/fixtures/week-1, to: week}
+    prompt: It is Friday. Write this week's retro.
+    graders:
+      - {type: code, name: retro_note, params: {key: {recurring: {agent: signal, check: numbers, runs: 3}, patch_agent: signal}}}
+      - {type: code, name: retro_patch, params: {key: {recurring: {agent: signal, check: numbers, runs: 3}, patch_agent: signal}}}
+      - {type: code, name: tools_within_allowlist, params: {servers: [retro, ledger]}}

@@ -1,6 +1,6 @@
 # Factory of One
 
-The PMs who last will be operators with strong judgment who run several agents at once. This repo is a working version of that job: six agents do the work, code owns every fact, and the PM makes the calls.
+The PMs who last will be operators with strong judgment who run several agents at once. This repo is a working version of that job: seven agents do the work, code owns every fact, and the PM makes the calls.
 
 **See it first:** [a PM's Monday](site/index.html), replayed from a real run. Chief triages the morning, Signal diagnoses an activation drop, Quality tries to break the diagnosis, Builder ships a fix behind a flag, and you make two calls and get scored on them. Open `site/index.html` in a browser; nothing to install.
 
@@ -13,6 +13,7 @@ The PMs who last will be operators with strong judgment who run several agents a
 | **Bet**, investment analyst | Frames the work coming in: strategy docs, customer requests, stakeholder asks, and Signal's numbers, ranked into at most 5 bets tied to your goals, with set-asides that cite the strategy | Every size: a cited query or request search that code replays. Each account counted once |
 | **Quality**, reviewer | Reviews Signal's, Bet's, and Builder's work before you see it, with [Elon Mode](skills/elon-mode/SKILL.md). Chief's brief is checked by code when it is written | Numbers, quotes, fields, privacy. It cannot return SHIP when a check fails |
 | **Comms**, communicator | One decision told up to your manager, down to your team, across to peers, and to a customer when needed, with identical facts. Drafts only | Every number must already be in the ledger. Code sends only what you approve at the Tell gate, or, while you're away, what your decision rights allow |
+| **Retro**, the factory's coach | Once a week, reads the runs (never the answer keys), writes a five-line note, and proposes at most two patches to agents' instructions, each with the eval case that reproduces the failure | The week's facts: recurring failures, Brier scores, overrides, time per station. A patch applies only if its text matches exactly, and only after you say yes |
 | **Builder**, engineer and designer | A code change behind a flag, a design in the company's design system, a one-screen demo | Tests rerun by code, change scope, hidden acceptance tests, design system rules, dead clicks |
 
 You own three gates: **decide** (approve the action and place a bet with a prediction), **call** (ship, iterate, or kill once the data is in), and **tell** (which versions go out). Your predictions are scored.
@@ -57,8 +58,10 @@ python -m factory.chief --mode morning --open    # about 6 minutes: Chief live o
 python -m factory.loop                            # about 10 minutes: every agent live, you at the gates
 python -m factory.autopilot                       # a day with you away: urgent items to you, the decision queued, a digest
 python -m factory.loop --resume runs/autopilot/<run>   # back at the keyboard: decide, and the loop continues
+python -m factory.retro run runs/loop/<run> runs/autopilot/<run>   # Friday: Retro reads the week and proposes patches
+python -m factory.retro apply runs/retro/<run> pch_0001   # you approve a patch; code applies it and adds its eval case
 python -m factory.evals run signal --trials 3    # score an agent against the answer key
-python -m pytest                                  # 199 tests, about 7 minutes, no Claude
+python -m pytest                                  # 212 tests, about 7 minutes, no Claude
 ```
 
 On macOS or Linux, use `.venv/bin/python` in place of `python` if the venv isn't activated. Rebuild the replay page from any run with `python -m factory.replay --loop runs/loop/<run> --chief runs/chief/<run>`.
@@ -83,7 +86,7 @@ Every agent was tuned on scenario 1, and every result above is on scenario 1. Tr
 
 | Built | Not built yet |
 |---|---|
-| Chief, Signal, Bet, Quality, Builder, Comms, and the autopilot for days you're away | Retro (learning across loops), Coach |
+| Chief, Signal, Bet, Quality, Builder, Comms, Retro, and the autopilot for days you're away | Coach, and Retro's view across more than one scenario |
 | Scenario 1 (a release that locked out Microsoft calendar users) and a quiet control scenario | Scenarios 2 to 10, harder tiers, held-out scenarios |
 | The eval harness: tasks, code graders, answer keys, trials, regrading | A model judge calibrated against human graders |
 | A capability map, so any install can swap in its own tools | Tested setups for specific vendors, a warehouse adapter for Signal, repo rules for Builder beyond the sandbox app |

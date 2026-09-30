@@ -647,6 +647,49 @@ def comms_in_voice(trial: Trial, key: dict, params: dict) -> list[Assertion]:
             ("no stock openings", not [v for v in r["payload"]["versions"] if v["text"].split()[0].strip(",").lower() in banned], "")]
 
 
+def retro_note(trial: Trial, key: dict, params: dict) -> list[Assertion]:
+    from factory import retro
+    want = params["key"]
+    notes = entries(trial, "retro")
+    if not notes:
+        return [("a retro note was written", False, "none")]
+    lines = notes[-1]["payload"]["lines"]
+    stats = retro.week_stats(trial.dir / "week")
+    pool = {float(v) for v in nums.field_numbers(stats)}
+    made_up = [v for line in lines for v, tol in nums.text_numbers(line) if not nums.text_grounded(v, tol, pool)]
+    agent = want["recurring"]["agent"]
+    return [("a retro note was written", True, f"{len(lines)} lines"),
+            ("every number in the note comes from the week's stats", not made_up, str(made_up)),
+            ("the note names the recurring failure", any(agent in l.lower() for l in lines), " | ".join(lines)[:300])]
+
+
+def retro_patch(trial: Trial, key: dict, params: dict) -> list[Assertion]:
+    from factory import retro
+    want = params["key"]
+    patches = [e["payload"] for e in entries(trial, "patch")]
+    if not patches:
+        return [("a patch was proposed", False, "none")]
+    stats = retro.week_stats(trial.dir / "week")
+    failing = set(next((r["run_names"] for r in stats["recurring"] if r["agent"] == want["recurring"]["agent"]
+                        and r["check"] == want["recurring"]["check"]), []))
+    p = next((p for p in patches if p["agent"] == want["patch_agent"]), patches[0])
+    try:
+        text = retro.read_skill(p["agent"], p["file"])
+        applies = text.count(p["old"]) == 1 and p["new"] != p["old"]
+        detail = f"{p['agent']}/{p['file']}: old appears {text.count(p['old'])} times"
+    except ValueError as e:
+        applies, detail = False, str(e)
+    suite = {g for t in __import__("factory.evals.suite", fromlist=["load_suite"]).load_suite(p["agent"]).tasks for g in
+             [x.name for x in t.graders]} if (ROOT / "agents" / p["agent"] / "evals" / "suite.yaml").exists() else set()
+    return [("a patch was proposed", True, str(len(patches))),
+            ("the patch targets the agent behind the recurring failure", p["agent"] == want["patch_agent"], p["agent"]),
+            ("the patch applies cleanly", applies, detail),
+            ("the patch brings an eval case that runs", bool(p["eval_case"]["prompt"]) and all(g in CODE for g in p["eval_case"]["graders"]),
+             str(p["eval_case"]["graders"])),
+            ("the patch cites the runs that failed", len(set(p["failure"]["runs"]) & failing) >= 2, f"cites {p['failure']['runs']}, failing {sorted(failing)}"),
+            ("at most two patches", len(patches) <= 2, str(len(patches)))]
+
+
 def respects_lessons(trial: Trial, key: dict, params: dict) -> list[Assertion]:
     from factory import config as install
     from factory.workplace import Workplace
@@ -748,7 +791,7 @@ CODE = {f.__name__: f for f in (
     brief_top_themes, brief_triage, brief_needs_you, brief_calendar_flags, brief_replies, commitments_extracted, private_never_shown,
     brief_open_loops, brief_meeting_prep, brief_goal_check, brief_followups, brief_reschedule, drafts_in_voice, brief_stale,
     notified_self, respects_lessons, no_unsourced_cause, brief_away_urgent, bet_ranking, weekly_review,
-    comms_versions, comms_numbers_match, comms_delivery, comms_in_voice,
+    comms_versions, comms_numbers_match, comms_delivery, comms_in_voice, retro_note, retro_patch,
     review_verdict, findings_have_evidence,
     action_matches_decision, no_action_proposed, build_entry_valid, demo_passes_checks, demo_numbers_grounded,
     mvp_change_passes, design_passes_checks,

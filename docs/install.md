@@ -51,6 +51,15 @@ The rules land in `lessons/chief.yaml` for your install and load on every run.
 
 When you're back, read `digest.md` in the run folder and continue with `python -m factory.loop --resume <run folder>`.
 
+## Friday: let Retro read the week
+
+```bash
+python -m factory.retro run runs/loop/<run> runs/autopilot/<run>
+python -m factory.retro apply runs/retro/<run> pch_0001
+```
+
+Retro proposes at most two patches to agents' instructions, each with the eval case that reproduces the failure. Nothing changes until you approve one.
+
 ## Before you point Builder at a real repo
 
 Builder's `code.propose` runs the tests of a change an agent wrote, on your machine. Those tests get only a short allowlist of environment variables (the path, temp folders, your home folder), never your tokens or keys. They still run with your file access and network. On a real repo, run the factory inside a container or a throwaway VM.

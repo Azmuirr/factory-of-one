@@ -52,6 +52,15 @@ capabilities:
   requests.search:
     description: Search customer requests logged by Sales and Customer Success. Returns distinct accounts and annual revenue at stake, counted once per account
     access: read
+  retro.week:
+    description: The week's observable facts across runs - Quality's reviews by agent and check, recurring failures, predictions and Brier scores, overrides, seconds per station
+    access: read
+  skills.list:
+    description: List the agents and their instruction files
+    access: read
+  skills.read:
+    description: Read one agent instruction file, to propose an exact edit
+    access: read
   code.list:
     description: List the files in the product codebase
     access: read

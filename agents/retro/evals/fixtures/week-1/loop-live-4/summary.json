@@ -1,0 +1,25 @@
+{
+  "scenario": "s01-calendar-gate",
+  "seed": 1,
+  "brier": 0.04,
+  "prediction_hit": true,
+  "pm_minutes": 7.3,
+  "gates": [
+    {
+      "gate": "decide",
+      "pm_minutes": 6.0,
+      "words_shown": 492,
+      "inputs": 7,
+      "wall_seconds": 0.0
+    },
+    {
+      "gate": "call",
+      "pm_minutes": 1.3,
+      "words_shown": 55,
+      "inputs": 2,
+      "wall_seconds": 0.0
+    }
+  ],
+  "agent_cost_usd": 0.973,
+  "ledger_entries": 15
+}

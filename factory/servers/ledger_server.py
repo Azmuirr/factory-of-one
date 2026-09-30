@@ -52,6 +52,8 @@ def world_problems(type: str, payload: dict) -> list[str]:
         problems += review.candidate_problems(world, payload, queries.load(queries.log_path(path)), earlier)
         problems += [f'"{q[:80]}" is not word for word in any source: quote exactly or drop the quote'
                      for q in review.candidate_quote_problems(world, payload, earlier)]
+    if type == "patch" and payload.get("status") != "proposed":
+        problems.append("agents propose patches; only the PM approves or rejects one")
     if type == "readout":
         # Every number Comms writes must be one the ledger already holds, so every version tells the same facts.
         from factory import comms

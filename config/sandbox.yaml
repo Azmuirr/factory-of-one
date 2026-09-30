@@ -19,6 +19,7 @@ servers:
   code:      {command: "{python}", args: [-m, factory.servers.code_server]}
   design:    {command: "{python}", args: [-m, factory.servers.design_server]}
   requests:  {command: "{python}", args: [-m, factory.servers.requests_server]}
+  retro:     {command: "{python}", args: [-m, factory.servers.retro_server]}
 server_env:
   FACTORY_WORLD: "{world}"
   FACTORY_LEDGER: "{ledger}"
@@ -26,6 +27,7 @@ server_env:
   FACTORY_DEMOS: "{demos}"
   FACTORY_CHANGES: "{changes}"
   FACTORY_DESIGNS: "{designs}"
+  FACTORY_WEEK: "{week}"
   FACTORY_CATALOGS: "{catalogs}"
   FACTORY_GOALS: "{goals}"
   PYTHONIOENCODING: utf-8
@@ -47,6 +49,9 @@ capabilities:
   docs.list: mcp__workplace__docs_list
   docs.read: mcp__workplace__doc_read
   requests.search: mcp__requests__search_requests
+  retro.week: mcp__retro__week_stats
+  skills.list: mcp__retro__list_skills
+  skills.read: mcp__retro__read_skill
   code.list: mcp__code__list_files
   code.read: mcp__code__read_file
   code.search: mcp__code__search_code

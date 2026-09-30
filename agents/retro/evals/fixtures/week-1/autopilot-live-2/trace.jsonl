@@ -1,0 +1,12 @@
+{"at": "2026-09-28T02:32:18+00:00", "station": "setup", "event": "world ready", "scenario": "s01-calendar-gate", "seed": 1, "data_through": "2026-03-02T00:00:00Z"}
+{"at": "2026-09-28T02:37:13+00:00", "station": "brief", "event": "chief finished", "cost_usd": 0.679, "turns": 45, "seconds": 294.7, "error": null}
+{"at": "2026-09-28T02:37:13+00:00", "station": "sense", "event": "start"}
+{"at": "2026-09-28T02:41:56+00:00", "station": "sense", "event": "signal finished", "cost_usd": 0.6102, "turns": 9, "seconds": 282.5, "error": null}
+{"at": "2026-09-28T02:42:49+00:00", "station": "review", "event": "quality finished", "cost_usd": 0.1018, "turns": 6, "seconds": 53.0, "error": null}
+{"at": "2026-09-28T02:42:49+00:00", "station": "review", "event": "review", "entry": "pkt_0001", "verdict": "FIX", "correctness": {"fields": "pass", "numbers": "fail", "privacy": "pass", "quotes": "pass"}}
+{"at": "2026-09-28T02:42:49+00:00", "station": "frame", "event": "start"}
+{"at": "2026-09-28T02:46:22+00:00", "station": "frame", "event": "bet finished", "cost_usd": 0.4329, "turns": 21, "seconds": 213.1, "error": null}
+{"at": "2026-09-28T02:47:43+00:00", "station": "frame", "event": "quality finished", "cost_usd": 0.175, "turns": 5, "seconds": 80.6, "error": null}
+{"at": "2026-09-28T02:47:43+00:00", "station": "frame", "event": "review", "entry": "cnd_0001", "verdict": "FIX", "correctness": {"fields": "pass", "numbers": "pass", "privacy": "pass", "quotes": "fail"}}
+{"at": "2026-09-28T02:47:44+00:00", "station": "queue", "event": "decision waiting for the PM", "packet": "pkt_0001"}
+{"at": "2026-09-28T02:47:44+00:00", "station": "notify", "event": "held for the digest: the daily limit is reached", "text": "activation_rate_7d moved for calendar_provider = microsoft. A decision is waiting for you; nothing was applied."}
