@@ -125,3 +125,34 @@ def test_ledger_entries_are_dated_the_day_theyre_written_not_a_day_later(week_ru
     entries = ledger.read(out / "ledger.jsonl")
     dates = sorted({e["ts"][:10] for e in entries if e["type"] in ("brief", "candidates") and e["author"]["kind"] == "agent"})
     assert dates == ["2026-03-02", "2026-03-03", "2026-03-04", "2026-03-05", "2026-03-06"]
+
+
+# The label reaches live agent writes too (not just fixtures) --------------------------------------------
+
+def test_the_ledger_server_stamps_with_the_label_when_one_is_given(tmp_path, monkeypatch, now_run):
+    monkeypatch.setenv("FACTORY_WORLD", str(now_run / "world" / "world.db"))
+    monkeypatch.setenv("FACTORY_LEDGER", str(tmp_path / "ledger.jsonl"))
+    monkeypatch.setenv("FACTORY_AGENT", "chief")
+    from factory.servers import ledger_server
+    without = ledger_server.sim_now()
+    monkeypatch.setenv("FACTORY_LABEL", "2026-03-03")
+    with_label = ledger_server.sim_now()
+    assert with_label == "2026-03-03T12:00:00Z" and with_label != without
+
+
+def test_run_agent_passes_todays_label_to_the_server_env(tmp_path, monkeypatch):
+    monkeypatch.setenv("CLAUDE_BIN", "claude")
+    from factory.loop.__main__ import Loop
+    from factory.loop.gates import Gates
+    loop = Loop("s01-calendar-gate", 1, tmp_path, Gates({}), None)
+    loop.label = "2026-03-03"
+    calls = []
+
+    def fake_run_claude(agent, trial):
+        calls.append(trial.task.env)
+        trial.dir.mkdir(parents=True, exist_ok=True)
+        (trial.dir / "transcript.jsonl").write_text("", encoding="utf-8")
+
+    monkeypatch.setattr("factory.loop.__main__.run_claude", fake_run_claude)
+    loop.run_agent("chief", "away-monday-s01", "brief")
+    assert calls == [{"FACTORY_LABEL": "2026-03-03"}]

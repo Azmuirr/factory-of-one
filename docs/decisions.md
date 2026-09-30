@@ -164,3 +164,16 @@ Each entry records the options, the choice, and what would reverse it. The reaso
 **Would change if:** a scenario plants a second, distinct problem mid-week. Then Signal would need a way to run again on demand, not only on the weekly cadence.
 
 **Also:** the generator's `generate()` takes an optional `now_day`, so the same scenario can be snapshotted at any day in its week, not only the day scenario.yaml calls "now". `Loop.advance_day()` uses this to move the workplace forward one day at a time without touching the ledger. Fixture-based agent output (`load_fixture`) is reassigned fresh ids and the current simulated time on each load, so the same canned fixture can stand in for a live agent on any day of the week, which is what keeps a full week's tests free to run.
+
+## D13. A multi-day run's own label, not the world's cutoff, goes on entries and in prompts
+
+| Option | Verdict |
+|---|---|
+| Stamp entries with the world's own `data_through` | Rejected. The cutoff is deliberately one tick past the day whose mail it reveals (a live agent's writes, and Quality's replay of an earlier day's citation, would land on the wrong day) |
+| **`advance_day` computes an explicit label for the day it just revealed. In-process code (fixture loads, prompts) uses it directly; a live agent's writes carry it to the ledger MCP server through `FACTORY_LABEL`, since that runs as its own subprocess with no access to the loop's own state** | **Chosen** |
+
+**Found by:** the first live `factory.autopilot --week` run. Friday's own brief was stamped `2026-03-07` (Saturday) by the live agent, one day after the four other Friday entries; the week page grouped it into a sixth, empty day. Two fixture-based unit tests (the ledger server's own `sim_now()`, and that `run_agent` passes the label) cover the exact path that failed, so a second live run wasn't needed to confirm the fix.
+
+**Also found, not fixed here:** Bet re-cited an earlier day's `query_id` for its top candidate's size on three later days. The size no longer matched on replay, since the query id's own world snapshot had moved on; Quality caught it every time (`review: numbers, fail`), but Bet kept resubmitting the same citation rather than querying again. Bet's instructions now say to requery on a later day rather than carry a citation forward; this fix has not yet been checked live.
+
+**Would change if:** a scenario needs a query cited on one day to still mean the same thing later. Then a cited query would need to snapshot the world it was computed against, not just its arguments.

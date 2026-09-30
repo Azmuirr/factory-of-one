@@ -20,6 +20,10 @@ server = MCPServer(
 
 
 def sim_now() -> str:
+    # During a multi-day run the world's own data_through is one tick past today (the cutoff has to be past today's
+    # own mail for it to be visible), so the loop passes the correct label here instead of the raw cutoff.
+    if os.environ.get("FACTORY_LABEL"):
+        return os.environ["FACTORY_LABEL"] + "T12:00:00Z"
     conn = sqlite3.connect(f"file:{Path(os.environ['FACTORY_WORLD']).as_posix()}?mode=ro", uri=True)
     value = conn.execute("SELECT value FROM meta WHERE key = 'data_through'").fetchone()[0]
     conn.close()

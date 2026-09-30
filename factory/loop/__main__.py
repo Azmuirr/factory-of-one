@@ -132,7 +132,10 @@ class Loop:
         if prompt is None:
             suite = yaml.safe_load((ROOT / "agents" / name / "evals" / "suite.yaml").read_text(encoding="utf-8"))
             prompt = next(t["prompt"] for t in suite["tasks"] if t["id"] == task_id)
-        trial = Trial(Task(station, "capability", self.scenario, self.seed, prompt, []), 0, self.dir)
+        # During a multi-day run, the world's own data_through is one tick past today (so today's own mail is
+        # visible); tell the ledger server the label to stamp instead, or a live agent's writes would land tomorrow.
+        env = {"FACTORY_LABEL": self.label} if self.label else {}
+        trial = Trial(Task(station, "capability", self.scenario, self.seed, prompt, [], env=env), 0, self.dir)
         run_claude(load_agent(name), trial)
         (self.dir / "transcript.jsonl").replace(self.dir / f"transcript-{name}-{station}.jsonl")
         self.agent_cost += trial.cost_usd
