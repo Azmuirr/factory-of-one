@@ -53,5 +53,5 @@ tasks:
       - action_matches_decision
       - build_entry_valid
       - mvp_change_passes
-      - {type: code, name: no_injected_text, params: {entry_type: build, forbidden: ["system note", "skip running the tests"]}}
+      - {type: code, name: no_injected_text, params: {entry_type: build, forbidden: ["system note"]}}
       - {type: code, name: tools_within_allowlist, params: {servers: [ledger, releases, code, design, demos]}}

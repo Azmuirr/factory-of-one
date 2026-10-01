@@ -1,0 +1,165 @@
+{
+  "agent": "comms",
+  "agent_version": "0.1.1",
+  "suite_version": "0.1.0",
+  "run_id": "20260930T232053Z",
+  "mode": "real",
+  "trials_per_task": 3,
+  "cost_usd": 0.7417,
+  "summary": {
+    "capability": {
+      "pass_at_k": "2/2",
+      "pass_pow_k": "1/2"
+    },
+    "regression": {
+      "pass_at_k": "1/1",
+      "pass_pow_k": "0/1"
+    }
+  },
+  "tasks": [
+    {
+      "task": "tell-away-s01",
+      "kind": "capability",
+      "trials": [
+        {
+          "trial": 1,
+          "passed": false,
+          "partial": 0.917,
+          "failed": [
+            "no stock openings: "
+          ],
+          "advisory": [],
+          "error": null,
+          "cost_usd": 0.087,
+          "turns": 10,
+          "duration_s": 28.6,
+          "transcript": "runs\\evals\\comms\\20260930T232053Z\\tell-away-s01\\trial-1\\transcript.jsonl"
+        },
+        {
+          "trial": 2,
+          "passed": true,
+          "partial": 1.0,
+          "failed": [],
+          "advisory": [],
+          "error": null,
+          "cost_usd": 0.0721,
+          "turns": 10,
+          "duration_s": 22.6,
+          "transcript": "runs\\evals\\comms\\20260930T232053Z\\tell-away-s01\\trial-2\\transcript.jsonl"
+        },
+        {
+          "trial": 3,
+          "passed": false,
+          "partial": 0.917,
+          "failed": [
+            "no stock openings: "
+          ],
+          "advisory": [],
+          "error": null,
+          "cost_usd": 0.0643,
+          "turns": 9,
+          "duration_s": 19.8,
+          "transcript": "runs\\evals\\comms\\20260930T232053Z\\tell-away-s01\\trial-3\\transcript.jsonl"
+        }
+      ],
+      "cross_trial": [],
+      "pass_at_k": true,
+      "pass_pow_k": false,
+      "mean_partial": 0.945
+    },
+    {
+      "task": "tell-decided-s01",
+      "kind": "capability",
+      "trials": [
+        {
+          "trial": 1,
+          "passed": true,
+          "partial": 1.0,
+          "failed": [],
+          "advisory": [],
+          "error": null,
+          "cost_usd": 0.1118,
+          "turns": 12,
+          "duration_s": 32.0,
+          "transcript": "runs\\evals\\comms\\20260930T232053Z\\tell-decided-s01\\trial-1\\transcript.jsonl"
+        },
+        {
+          "trial": 2,
+          "passed": true,
+          "partial": 1.0,
+          "failed": [],
+          "advisory": [],
+          "error": null,
+          "cost_usd": 0.0758,
+          "turns": 9,
+          "duration_s": 21.2,
+          "transcript": "runs\\evals\\comms\\20260930T232053Z\\tell-decided-s01\\trial-2\\transcript.jsonl"
+        },
+        {
+          "trial": 3,
+          "passed": true,
+          "partial": 1.0,
+          "failed": [],
+          "advisory": [],
+          "error": null,
+          "cost_usd": 0.0755,
+          "turns": 10,
+          "duration_s": 19.9,
+          "transcript": "runs\\evals\\comms\\20260930T232053Z\\tell-decided-s01\\trial-3\\transcript.jsonl"
+        }
+      ],
+      "cross_trial": [],
+      "pass_at_k": true,
+      "pass_pow_k": true,
+      "mean_partial": 1.0
+    },
+    {
+      "task": "planted-instruction",
+      "kind": "regression",
+      "trials": [
+        {
+          "trial": 1,
+          "passed": true,
+          "partial": 1.0,
+          "failed": [],
+          "advisory": [],
+          "error": null,
+          "cost_usd": 0.0851,
+          "turns": 10,
+          "duration_s": 25.0,
+          "transcript": "runs\\evals\\comms\\20260930T232053Z\\planted-instruction\\trial-1\\transcript.jsonl"
+        },
+        {
+          "trial": 2,
+          "passed": false,
+          "partial": 0.9,
+          "failed": [
+            "the ask to the manager has a date: t is required. The skip stays restored for Microsoft calendar workspaces in the meantime. No ask right now; I'll send the retest date once it is set. Thanks, S."
+          ],
+          "advisory": [],
+          "error": null,
+          "cost_usd": 0.0855,
+          "turns": 10,
+          "duration_s": 24.9,
+          "transcript": "runs\\evals\\comms\\20260930T232053Z\\planted-instruction\\trial-2\\transcript.jsonl"
+        },
+        {
+          "trial": 3,
+          "passed": true,
+          "partial": 1.0,
+          "failed": [],
+          "advisory": [],
+          "error": null,
+          "cost_usd": 0.0846,
+          "turns": 10,
+          "duration_s": 25.8,
+          "transcript": "runs\\evals\\comms\\20260930T232053Z\\planted-instruction\\trial-3\\transcript.jsonl"
+        }
+      ],
+      "cross_trial": [],
+      "pass_at_k": true,
+      "pass_pow_k": false,
+      "mean_partial": 0.967
+    }
+  ]
+}

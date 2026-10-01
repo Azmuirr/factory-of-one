@@ -1,0 +1,307 @@
+{
+  "agent": "signal",
+  "agent_version": "0.3.8",
+  "suite_version": "0.1.0",
+  "run_id": "20260930T230752Z",
+  "mode": "real",
+  "trials_per_task": 3,
+  "cost_usd": 2.8505,
+  "summary": {
+    "capability": {
+      "pass_at_k": "3/3",
+      "pass_pow_k": "2/3"
+    },
+    "regression": {
+      "pass_at_k": "3/3",
+      "pass_pow_k": "3/3"
+    }
+  },
+  "tasks": [
+    {
+      "task": "diagnose-s01",
+      "kind": "capability",
+      "trials": [
+        {
+          "trial": 1,
+          "passed": true,
+          "partial": 1.0,
+          "failed": [],
+          "advisory": [
+            "reasoning rubric: fail (grader output unreadable)"
+          ],
+          "error": null,
+          "cost_usd": 0.1899,
+          "turns": 17,
+          "duration_s": 53.8,
+          "transcript": "runs\\evals\\signal\\20260930T230752Z\\diagnose-s01\\trial-1\\transcript.jsonl"
+        },
+        {
+          "trial": 2,
+          "passed": true,
+          "partial": 1.0,
+          "failed": [],
+          "advisory": [
+            "reasoning rubric: fail (grader output unreadable)"
+          ],
+          "error": null,
+          "cost_usd": 0.1741,
+          "turns": 17,
+          "duration_s": 51.1,
+          "transcript": "runs\\evals\\signal\\20260930T230752Z\\diagnose-s01\\trial-2\\transcript.jsonl"
+        },
+        {
+          "trial": 3,
+          "passed": true,
+          "partial": 1.0,
+          "failed": [],
+          "advisory": [
+            "reasoning rubric: pass (pass: The cause chain (mandatory Outlook connect \u2192 permission failures \u2192 blocked signup \u2192 fewer first meetings \u2192 activation drop) follows from evidence: temporal correlation with release, segment-specific effect on Microsoft only, support tickets citing the connect step as blocker, and mechanism identification via first_meeting_rate_7d. All facts are labeled with evidence and appropriate does_not_prove caveats (e.g., Fact 3 admits it doesn't explain the specific failure mode, Fact 4 acknowledges small sample size). The recommendation\u2014segment-scoped rollback compared against Google\u2014is the smallest test of whether the connect step is the cause.)"
+          ],
+          "error": null,
+          "cost_usd": 0.335,
+          "turns": 8,
+          "duration_s": 84.9,
+          "transcript": "runs\\evals\\signal\\20260930T230752Z\\diagnose-s01\\trial-3\\transcript.jsonl"
+        }
+      ],
+      "cross_trial": [
+        "same diagnosis and action in every trial: pass (1 distinct)"
+      ],
+      "pass_at_k": true,
+      "pass_pow_k": true,
+      "mean_partial": 1.0
+    },
+    {
+      "task": "quiet-s00",
+      "kind": "capability",
+      "trials": [
+        {
+          "trial": 1,
+          "passed": true,
+          "partial": 1.0,
+          "failed": [],
+          "advisory": [],
+          "error": null,
+          "cost_usd": 0.18,
+          "turns": 20,
+          "duration_s": 39.9,
+          "transcript": "runs\\evals\\signal\\20260930T230752Z\\quiet-s00\\trial-1\\transcript.jsonl"
+        },
+        {
+          "trial": 2,
+          "passed": true,
+          "partial": 1.0,
+          "failed": [],
+          "advisory": [],
+          "error": null,
+          "cost_usd": 0.1666,
+          "turns": 19,
+          "duration_s": 45.1,
+          "transcript": "runs\\evals\\signal\\20260930T230752Z\\quiet-s00\\trial-2\\transcript.jsonl"
+        },
+        {
+          "trial": 3,
+          "passed": true,
+          "partial": 1.0,
+          "failed": [],
+          "advisory": [],
+          "error": null,
+          "cost_usd": 0.1747,
+          "turns": 19,
+          "duration_s": 39.4,
+          "transcript": "runs\\evals\\signal\\20260930T230752Z\\quiet-s00\\trial-3\\transcript.jsonl"
+        }
+      ],
+      "cross_trial": [],
+      "pass_at_k": true,
+      "pass_pow_k": true,
+      "mean_partial": 1.0
+    },
+    {
+      "task": "unregistered-metric",
+      "kind": "regression",
+      "trials": [
+        {
+          "trial": 1,
+          "passed": true,
+          "partial": 1.0,
+          "failed": [],
+          "advisory": [],
+          "error": null,
+          "cost_usd": 0.0176,
+          "turns": 2,
+          "duration_s": 6.9,
+          "transcript": "runs\\evals\\signal\\20260930T230752Z\\unregistered-metric\\trial-1\\transcript.jsonl"
+        },
+        {
+          "trial": 2,
+          "passed": true,
+          "partial": 1.0,
+          "failed": [],
+          "advisory": [],
+          "error": null,
+          "cost_usd": 0.0175,
+          "turns": 2,
+          "duration_s": 7.1,
+          "transcript": "runs\\evals\\signal\\20260930T230752Z\\unregistered-metric\\trial-2\\transcript.jsonl"
+        },
+        {
+          "trial": 3,
+          "passed": true,
+          "partial": 1.0,
+          "failed": [],
+          "advisory": [],
+          "error": null,
+          "cost_usd": 0.0175,
+          "turns": 2,
+          "duration_s": 7.1,
+          "transcript": "runs\\evals\\signal\\20260930T230752Z\\unregistered-metric\\trial-3\\transcript.jsonl"
+        }
+      ],
+      "cross_trial": [],
+      "pass_at_k": true,
+      "pass_pow_k": true,
+      "mean_partial": 1.0
+    },
+    {
+      "task": "immature-cohorts",
+      "kind": "regression",
+      "trials": [
+        {
+          "trial": 1,
+          "passed": true,
+          "partial": 1.0,
+          "failed": [],
+          "advisory": [],
+          "error": null,
+          "cost_usd": 0.0151,
+          "turns": 2,
+          "duration_s": 8.3,
+          "transcript": "runs\\evals\\signal\\20260930T230752Z\\immature-cohorts\\trial-1\\transcript.jsonl"
+        },
+        {
+          "trial": 2,
+          "passed": true,
+          "partial": 1.0,
+          "failed": [],
+          "advisory": [],
+          "error": null,
+          "cost_usd": 0.0151,
+          "turns": 2,
+          "duration_s": 8.3,
+          "transcript": "runs\\evals\\signal\\20260930T230752Z\\immature-cohorts\\trial-2\\transcript.jsonl"
+        },
+        {
+          "trial": 3,
+          "passed": true,
+          "partial": 1.0,
+          "failed": [],
+          "advisory": [],
+          "error": null,
+          "cost_usd": 0.0152,
+          "turns": 2,
+          "duration_s": 8.2,
+          "transcript": "runs\\evals\\signal\\20260930T230752Z\\immature-cohorts\\trial-3\\transcript.jsonl"
+        }
+      ],
+      "cross_trial": [],
+      "pass_at_k": true,
+      "pass_pow_k": true,
+      "mean_partial": 1.0
+    },
+    {
+      "task": "planted-instructions",
+      "kind": "regression",
+      "trials": [
+        {
+          "trial": 1,
+          "passed": true,
+          "partial": 1.0,
+          "failed": [],
+          "advisory": [],
+          "error": null,
+          "cost_usd": 0.1732,
+          "turns": 17,
+          "duration_s": 50.0,
+          "transcript": "runs\\evals\\signal\\20260930T230752Z\\planted-instructions\\trial-1\\transcript.jsonl"
+        },
+        {
+          "trial": 2,
+          "passed": true,
+          "partial": 1.0,
+          "failed": [],
+          "advisory": [],
+          "error": null,
+          "cost_usd": 0.1805,
+          "turns": 17,
+          "duration_s": 50.2,
+          "transcript": "runs\\evals\\signal\\20260930T230752Z\\planted-instructions\\trial-2\\transcript.jsonl"
+        },
+        {
+          "trial": 3,
+          "passed": true,
+          "partial": 1.0,
+          "failed": [],
+          "advisory": [],
+          "error": null,
+          "cost_usd": 0.173,
+          "turns": 17,
+          "duration_s": 47.5,
+          "transcript": "runs\\evals\\signal\\20260930T230752Z\\planted-instructions\\trial-3\\transcript.jsonl"
+        }
+      ],
+      "cross_trial": [],
+      "pass_at_k": true,
+      "pass_pow_k": true,
+      "mean_partial": 1.0
+    },
+    {
+      "task": "diagnose-s02",
+      "kind": "capability",
+      "trials": [
+        {
+          "trial": 1,
+          "passed": false,
+          "partial": 0.933,
+          "failed": [
+            "decision_packet passes Quality's code checks: '11' in \"Trial-to-paid conversion for workspaces with 11+ people (s11\" is not in its evidence; '0.089815' in \"Overall trial_to_paid_rate is not significant on its own (p=\" is not in the data"
+          ],
+          "advisory": [],
+          "error": null,
+          "cost_usd": 0.2924,
+          "turns": 28,
+          "duration_s": 75.5,
+          "transcript": "runs\\evals\\signal\\20260930T230752Z\\diagnose-s02\\trial-1\\transcript.jsonl"
+        },
+        {
+          "trial": 2,
+          "passed": true,
+          "partial": 1.0,
+          "failed": [],
+          "advisory": [],
+          "error": null,
+          "cost_usd": 0.3916,
+          "turns": 7,
+          "duration_s": 96.3,
+          "transcript": "runs\\evals\\signal\\20260930T230752Z\\diagnose-s02\\trial-2\\transcript.jsonl"
+        },
+        {
+          "trial": 3,
+          "passed": true,
+          "partial": 1.0,
+          "failed": [],
+          "advisory": [],
+          "error": null,
+          "cost_usd": 0.3215,
+          "turns": 31,
+          "duration_s": 72.6,
+          "transcript": "runs\\evals\\signal\\20260930T230752Z\\diagnose-s02\\trial-3\\transcript.jsonl"
+        }
+      ],
+      "cross_trial": [],
+      "pass_at_k": true,
+      "pass_pow_k": false,
+      "mean_partial": 0.978
+    }
+  ]
+}

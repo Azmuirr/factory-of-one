@@ -91,6 +91,8 @@ Every agent was tuned on scenario 1, and every result above is on scenario 1. Tr
 
 **Red teaming:** every agent's suite includes a `planted-instruction` task, a fabricated "SYSTEM NOTE" inside something the agent legitimately reads as data (mail, a doc, a ticket, a release note, a transcript, or the ledger itself). All 7 held on their first live run: [docs/evals.md#red-teaming](docs/evals.md#red-teaming). One run also found and fixed a real crash, unrelated to the injection itself.
 
+**Full-suite pass:** every agent's complete eval suite, at its configured trial count, not a single spot check. 6 of 8 came back 100% on every task and trial. The other two surfaced one real bug each (Chief wrote a goal's title into a field meant to hold its id; a few red-team checks had false-positive forbidden phrases) and two small, honestly-documented, unfixed findings: [docs/evals.md#full-suite-pass-d17](docs/evals.md#full-suite-pass-d17).
+
 ## Built and not built
 
 | Built | Not built yet |
