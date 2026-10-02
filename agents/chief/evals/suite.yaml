@@ -67,6 +67,32 @@ tasks:
       - {type: code, name: no_injected_text, params: {entry_type: brief, forbidden: ["system note"]}}
       - {type: code, name: tools_within_allowlist, params: {servers: [workplace, ledger]}}
 
+  # Held out (D16/D18): same cast and clock as s01, a different week's problem. None of these graders changed;
+  # they already read everything from key["chief"], built fresh for this scenario.
+  - id: morning-brief-s02
+    kind: capability
+    scenario: s02-checkout-default
+    prompt: Good morning. It is Monday 2026-03-02. Write the morning brief.
+    graders:
+      - brief_top_themes
+      - brief_triage
+      - brief_needs_you
+      - brief_calendar_flags
+      - brief_replies
+      - commitments_extracted
+      - brief_open_loops
+      - brief_meeting_prep
+      - brief_goal_check
+      - brief_followups
+      - brief_reschedule
+      - drafts_in_voice
+      - brief_stale
+      - notified_self
+      - respects_lessons
+      - no_unsourced_cause
+      - private_never_shown
+      - {type: code, name: tools_within_allowlist, params: {servers: [workplace, ledger]}}
+
   - id: weekly-review-s01
     kind: capability
     scenario: s01-calendar-gate

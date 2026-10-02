@@ -18,8 +18,13 @@ def recompute_pool(world: World, card: dict, diagnosis: dict | None) -> set[floa
     """Numbers an honest analyst could cite: every rate metric, overall and by each dimension, plus the sizing."""
     before, after = card["before"]["period"], card["after"]["period"]
     periods = (before["start"], before["end"], after["start"], after["end"])
-    segments = [card.get("segment") or None]
-    if diagnosis and diagnosis.get("segment"):
+    # Overall is always one of the comparisons an honest analyst could have run, whether or not the card or the
+    # diagnosis ended up segmented: Signal's own weekly check starts with it (SKILL.md step 1), so a number from
+    # it is always fair game to cite, even in an aside that says it fell short of being material.
+    segments = [None]
+    if card.get("segment"):
+        segments.append(card["segment"])
+    if diagnosis and diagnosis.get("segment") and diagnosis["segment"] not in segments:
         segments.append(diagnosis["segment"])
     results = []
     for metric_id, m in catalog()[0].items():

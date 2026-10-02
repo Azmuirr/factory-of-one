@@ -579,23 +579,23 @@ def bet_ranking(trial: Trial, key: dict, params: dict) -> list[Assertion]:
     aside = [theme_of(a, want["themes"]) for a in c.get("set_aside", [])]
     non_goal = want["non_goal"]
     handled = non_goal["theme"] in aside and any(non_goal["doc"] in a.get("sources", []) for a in c.get("set_aside", []) if theme_of(a, want["themes"]) == non_goal["theme"])
-    # Replay every request search the consent bet cites: a tag-only search finds 2 of the 3 accounts.
+    # Replay every request search the rank_1 bet cites: a tag-only search finds fewer accounts than its words do.
     from factory import queries
     from factory.metrics import World
     log = queries.load(trial.dir / "queries.jsonl")
-    consent_items = [i for i in c["items"] if theme_of(i, want["themes"]) == "consent"]
-    cited = [r for i in consent_items for r in [i["size"]["ref"], *[e.get("ref", "") for e in i.get("evidence", [])]]
+    top_items = [i for i in c["items"] if theme_of(i, want["themes"]) == want["rank_1"]]
+    cited = [r for i in top_items for r in [i["size"]["ref"], *[e.get("ref", "") for e in i.get("evidence", [])]]
              if log.get(r, {}).get("tool") == "search_requests"]
     accounts = max((queries.run(World(trial.world_path), "search_requests", log[r]["args"])["distinct_accounts"] for r in cited), default=0)
-    consent_refs = {r for i in consent_items for r in [*i.get("sources", []), *[e.get("ref", "") for e in i.get("evidence", [])]]}
+    top_refs = {r for i in top_items for r in [*i.get("sources", []), *[e.get("ref", "") for e in i.get("evidence", [])]]}
     return [("a ranked list was written", True, str(ranked)),
             ("the first bet is the one the numbers show", ranked[:1] == [want["rank_1"]], str(ranked)),
             ("the deadline-driven goal is in the top 3", set(want["top_3_includes"]) <= set(ranked[:3]), str(ranked)),
             ("no loud trap in the top 2", not set(want["not_top_2"]) & set(ranked[:2]), str(ranked)),
             ("the strategy's non-goal is set aside, citing the strategy", handled, f"set aside: {aside}"),
             ("requests are found by their words, not only their tags",
-             accounts >= want["consent_accounts_min"] or want["mislabeled"] in consent_refs,
-             f"the consent bet cites request searches finding {accounts} accounts, and {'cites' if want['mislabeled'] in consent_refs else 'misses'} {want['mislabeled']}")]
+             accounts >= want["consent_accounts_min"] or want["mislabeled"] in top_refs,
+             f"the top bet cites request searches finding {accounts} accounts, and {'cites' if want['mislabeled'] in top_refs else 'misses'} {want['mislabeled']}")]
 
 
 DATE_WORDS = re.compile(r"\b(monday|tuesday|wednesday|thursday|friday|saturday|sunday|today|tomorrow|tonight|noon|this week|next week|"

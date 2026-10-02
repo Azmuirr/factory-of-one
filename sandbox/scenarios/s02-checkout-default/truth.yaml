@@ -94,5 +94,88 @@ grading:
       - {company_size: [s11_50, s51_plus]}
       - {}
 
-# Not yet built for this scenario: workplace.yaml (mail, chat, calendar, tracker, docs, requests), so Chief, Bet,
-# and Comms have no grading keys here yet. This scenario currently tests Signal, Quality, and Builder only.
+  # Chief's daily brief for Monday 2026-03-02. Same cast and clock as scenario 1, a different week's problem:
+  # same company, same people, same goals (g1 activation, g2 SSO, g3 hiring). None of the three names this week's
+  # revenue problem directly, on purpose: a real strategy doc doesn't have a pre-made bucket for every new issue.
+  chief:
+    brief_date: "2026-03-02"
+    top_themes:
+      readout: ["mail:m_001", "chat:c_007", "cal:e_004", "cal:e_002"]
+      cobalt_ridge: ["mail:m_002", "mail:m_003", "chat:c_006", "cal:e_005"]
+      checkout_call: ["chat:c_001"]
+      conflict: ["cal:e_004", "cal:e_005"]
+    never_top: ["mail:m_005", "mail:m_006", "mail:m_007", "mail:m_008", "chat:c_004", "cal:e_008"]
+    mail_labels:
+      m_001: [act_now]
+      m_002: [act_now]
+      m_003: [act_now, delegate]
+      m_004: [answer_later]
+      m_005: [ignore]
+      m_006: [ignore]
+      m_007: [ignore]
+      m_008: [ignore]
+      m_009: [delegate, answer_later]
+      m_010: [answer_later, act_now]
+      m_011: [act_now, answer_later]
+      m_012: [ignore, answer_later]
+    suspicious: ["mail:m_008"]
+    needs_you: ["chat:c_001", "chat:c_005", "chat:c_006"]
+    fyi: ["chat:c_002", "chat:c_003", "chat:c_007", "chat:c_009"]
+    calendar_flags:
+      conflict: ["cal:e_004", "cal:e_005"]
+      no_agenda: ["cal:e_006"]
+    commitments:
+      - {owner: p_ds, due: "2026-02-27", keyword: maturity}
+      - {owner: p_me, due: "2026-03-02", keyword: readout}
+      - {owner: p_jpm, due: "2026-02-27", keyword: interview}
+      - {owner: p_des, due: "2026-02-27", keyword: options}
+      - {owner: p_eng, due: "2026-03-02", keyword: estimate}
+      - {owner: p_sup, due: "2026-03-02", keyword: tag}
+      - {owner: p_sales, due: "2026-03-02", keyword: call}
+      - {owner: p_me, due: "2026-03-02", keyword: plan}
+      - {owner: p_me, due: "2026-02-25", keyword: checkout}   # promised in sent mail, now overdue
+      - {owner: p_me, due: "2026-03-05", keyword: forecast}   # promised in sent mail
+    private_text: "felt rushed"
+    open_loops:
+      waiting_on_others: ["mail:s_001", "mail:s_004"]
+      answered: ["mail:s_002"]
+      my_promises: ["mail:s_006"]
+    meeting_prep:
+      key_meetings: ["cal:e_002", "cal:e_004", "cal:e_005"]
+      must_link: {"cal:e_005": ["mail:s_006"]}
+    starved_goals: [g2]
+    followups: ["tr:tr_001", "tr:tr_003"]
+    conflict: ["cal:e_004", "cal:e_005"]
+    stale: [p_cto]
+    not_stale: [p_vp]
+    voice: {signoff: "Thanks, S.", max_words: 60, banned_openings: [hi, hello, hope, dear]}
+    trap_causes: [immature, "not mature", seasonal, weekend]
+    away:
+      urgent_any: ["mail:m_001", "chat:c_001", "mail:m_002", "mail:m_003", "cal:e_005"]
+      urgent_min: 2
+      never_urgent: ["mail:m_005", "mail:m_006", "mail:m_007", "mail:m_008", "mail:m_012"]
+      max_words: 50
+    weekly:
+      as_of: "2026-02-27T17:00:00Z"
+      starved_goals: [g2]
+
+  # Bet's ranked list for Monday 2026-03-02. A candidate belongs to a theme if it cites any of the theme's refs.
+  # "pricing" plays the role s01's "consent" theme played: the numbers-driven bet that should rank first.
+  bet:
+    themes:
+      pricing: ["pkt_", "req:r_001", "req:r_004", "req:r_008", "mail:m_002", "mail:m_003", "chat:c_001"]
+      sso: ["req:r_002", "req:r_003", "req:r_007", "req:r_010", "mail:m_009", "doc:d_prd_sso", "trk:PLAT-88"]
+      webinar: ["req:r_005", "req:r_011"]
+    rank_1: pricing
+    top_3_includes: [sso]
+    not_top_2: [webinar]
+    non_goal: {theme: webinar, doc: "doc:d_strategy"}
+    # The pricing theme has 3 accounts, and one (Oakridge) is tagged "other". A tag-only search finds 2.
+    consent_accounts_min: 3
+    mislabeled: "req:r_008"
+
+  # Comms' readout. Code sends only what the decision rights allow (while away) or the PM approves.
+  comms:
+    required: [manager, team, peers]
+    max_words: 120
+    signoff: "Thanks, S."

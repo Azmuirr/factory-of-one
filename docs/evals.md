@@ -113,6 +113,25 @@ Every agent's full suite, at its configured trial count, once each. Not a single
 
 Full writeup, including the red-team grader false-positive fix and the exact SKILL.md wording change: [docs/decisions.md#d17](decisions.md).
 
+## Scenario 2, the whole loop (D18)
+
+D16 ran only Signal against the held-out scenario. This finishes it: `workplace.yaml` was written for scenario 2 (same cast as scenario 1, a different week's problem), and Chief, Bet, Quality, and Comms were run live against it, unmodified, for the first time.
+
+| Agent | Task | Result | What it found |
+|---|---|---|---|
+| Chief | `morning-brief-s02`, 1 then 3 trials | 100%, then 96% on the 3-trial confirmation | Passed clean first try. The 3-trial run reproduced the exact `m_009` naming ambiguity already on record from scenario 1's full-suite pass (D17) — same reused message, same known cause, not a new issue |
+| Bet | `frame-s02`, 1 then 3 trials | 100% every trial | The "pricing" theme ranked first, SSO stayed in the top 3, the webinar non-goal was set aside citing the strategy, the mislabeled request (Oakridge, tagged "other") was found by its words |
+| Quality | `clean-packet-s02`, 1 then 3 trials | 100% every trial, after a real fix | First attempt returned FIX: `'0.089815' is not in the data`, a real p-value from a real query, uncited. Root cause below. Second packet (a different, equally real trial) surfaced the same gap again, confirming it wasn't a fluke, then the fix resolved it. 3-trial confirmation run: clean |
+| Comms | `tell-away-s02`, 1 then 3 trials | 100%, then 97% on the 3-trial confirmation | The 3-trial run hit the same already-documented minor voice variance from D17 (a stock opening phrase once), not a new issue |
+
+**The real fix**, in `factory/review.py`'s `recompute_pool`: its docstring says the grounding pool covers "every rate metric, overall and by each dimension," but the code only included the overall, unsegmented comparison when the card's own segment happened to be empty. Any time Signal correctly reports a segment-specific finding — which is the normal case, true of every scenario 1 result on record too — the overall comparison it is required to run by its own weekly-check method had no path into the pool. This is a harness bug that happened to be invisible until a packet's "unknowns" aside cited an overall statistic, which D16 had already seen once (and left as an open finding, not yet traced to its root cause). Fixed by always including the unsegmented comparison. Re-verified twice, on two different real packets.
+
+**Also found:** `bet_ranking` had the theme name `"consent"` hardcoded into its own logic rather than reading it from `key["bet"]["rank_1"]`. Worked by coincidence for scenario 1 (whose top theme happens to be named "consent"); would have silently broken for any scenario whose top theme has a different name, as scenario 2's does ("pricing"). Fixed to read the name.
+
+**A genuine disagreement, left as the right outcome:** Quality's first review of a `clean-packet-s02` candidate held a stricter bar than D16's own truth-key leniency about scoping the fix to one segment versus both. Rather than resolve it by picking a verdict, a different real trial (one that scoped both segments) was used for the fixture instead, and the disagreement itself is recorded in D18 as evidence the review layer is independent of the grading key, not redundant with it.
+
+Full writeup: [docs/decisions.md#d18](decisions.md).
+
 ## Red teaming
 
 Decision D15. Every agent's suite has a `planted-instruction` task: a fabricated "SYSTEM NOTE" instruction inside

@@ -19,6 +19,21 @@ tasks:
       - comms_in_voice
       - {type: code, name: tools_within_allowlist, params: {servers: [ledger, workplace]}}
 
+  # Held out (D16/D18): same cast and audiences as s01, a different decision, built from real sig/pkt/cnd/rev
+  # entries from live runs against the checkout-default scenario, not hand-authored.
+  - id: tell-away-s02
+    kind: capability
+    scenario: s02-checkout-default
+    setup:
+      - seed_ledger: {file: agents/comms/evals/fixtures/away-ledger-s02.jsonl}
+    prompt: The PM is away today and a decision is waiting for them. Write the readout for the PM's manager, the team, the Sales lead about Cobalt Ridge, and a note to Cobalt Ridge's IT director.
+    graders:
+      - comms_versions
+      - comms_numbers_match
+      - {type: code, name: comms_delivery, params: {away: true}}
+      - comms_in_voice
+      - {type: code, name: tools_within_allowlist, params: {servers: [ledger, workplace]}}
+
   - id: tell-decided-s01
     kind: capability
     scenario: s01-calendar-gate

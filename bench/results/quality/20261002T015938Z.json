@@ -1,0 +1,41 @@
+{
+  "agent": "quality",
+  "agent_version": "0.1.0",
+  "suite_version": "0.2.0",
+  "run_id": "20261002T015938Z",
+  "mode": "real",
+  "trials_per_task": 1,
+  "cost_usd": 0.055,
+  "summary": {
+    "capability": {
+      "pass_at_k": "0/1",
+      "pass_pow_k": "0/1"
+    }
+  },
+  "tasks": [
+    {
+      "task": "clean-packet-s02",
+      "kind": "capability",
+      "trials": [
+        {
+          "trial": 1,
+          "passed": false,
+          "partial": 0.5,
+          "failed": [
+            "verdict is one of ['SHIP']: FIX"
+          ],
+          "advisory": [],
+          "error": null,
+          "cost_usd": 0.055,
+          "turns": 7,
+          "duration_s": 24.7,
+          "transcript": "runs\\evals\\quality\\20261002T015938Z\\clean-packet-s02\\trial-1\\transcript.jsonl"
+        }
+      ],
+      "cross_trial": [],
+      "pass_at_k": false,
+      "pass_pow_k": false,
+      "mean_partial": 0.5
+    }
+  ]
+}

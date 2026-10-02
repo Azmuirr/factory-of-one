@@ -1,0 +1,70 @@
+{
+  "agent": "chief",
+  "agent_version": "0.3.0",
+  "suite_version": "0.5.0",
+  "run_id": "20261002T020554Z",
+  "mode": "real",
+  "trials_per_task": 3,
+  "cost_usd": 1.6363,
+  "summary": {
+    "capability": {
+      "pass_at_k": "0/1",
+      "pass_pow_k": "0/1"
+    }
+  },
+  "tasks": [
+    {
+      "task": "morning-brief-s02",
+      "kind": "capability",
+      "trials": [
+        {
+          "trial": 1,
+          "passed": false,
+          "partial": 0.972,
+          "failed": [
+            "mail drafts open with the person's first name: ['mail:m_009']"
+          ],
+          "advisory": [],
+          "error": null,
+          "cost_usd": 0.5584,
+          "turns": 49,
+          "duration_s": 143.0,
+          "transcript": "runs\\evals\\chief\\20261002T020554Z\\morning-brief-s02\\trial-1\\transcript.jsonl"
+        },
+        {
+          "trial": 2,
+          "passed": false,
+          "partial": 0.944,
+          "failed": [
+            "a reply is suggested for everything that needs one: missing ['mail:m_002', 'mail:m_003', 'mail:m_010', 'mail:m_011']",
+            "no cause Chief cannot know, least of all a planted trap: ['Aiko says recent cohorts are immature, so do not read the recent dip as the real number.']"
+          ],
+          "advisory": [],
+          "error": null,
+          "cost_usd": 0.4653,
+          "turns": 52,
+          "duration_s": 116.8,
+          "transcript": "runs\\evals\\chief\\20261002T020554Z\\morning-brief-s02\\trial-2\\transcript.jsonl"
+        },
+        {
+          "trial": 3,
+          "passed": false,
+          "partial": 0.972,
+          "failed": [
+            "mail drafts open with the person's first name: ['mail:m_009', 'mail:m_009']"
+          ],
+          "advisory": [],
+          "error": null,
+          "cost_usd": 0.6126,
+          "turns": 52,
+          "duration_s": 157.3,
+          "transcript": "runs\\evals\\chief\\20261002T020554Z\\morning-brief-s02\\trial-3\\transcript.jsonl"
+        }
+      ],
+      "cross_trial": [],
+      "pass_at_k": false,
+      "pass_pow_k": false,
+      "mean_partial": 0.963
+    }
+  ]
+}

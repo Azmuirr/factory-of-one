@@ -87,7 +87,7 @@ Live runs on scenario 1, graded by the same code graders as the evals. Every run
 
 Every agent was tuned on scenario 1, and every result above is on scenario 1. Treat them as a working system, not a benchmark.
 
-**Held out:** scenario 2 ([docs/decisions.md#d16](docs/decisions.md)) is a different metric, a different segment, and a different mechanism, built after Signal's instructions were already written. Its first live run genuinely missed the cause; two general instruction fixes later, live-verified without regressing scenario 1, it found the right metric, segment, release, and mechanism, cited 38 real workspaces, and recommended a considered action over a blind rollback. One small gap is still open on the record rather than patched away: [docs/evals.md](docs/evals.md#live-runs).
+**Held out:** scenario 2 ([docs/decisions.md#d16](docs/decisions.md), finished in [D18](docs/decisions.md)) is a different metric, a different segment, and a different mechanism, built after every agent's instructions were already written. Signal's first live run genuinely missed the cause; two general instruction fixes later, it found the right metric, segment, release, and mechanism, cited 38 real workspaces, and recommended a considered action over a blind rollback. Chief, Bet, Quality, and Comms were then run against the same scenario's full workplace for the first time and all passed clean, surfacing two more real, now-fixed harness bugs along the way (not agent bugs). One small gap is still open on the record rather than patched away: [docs/evals.md](docs/evals.md#live-runs).
 
 **Red teaming:** every agent's suite includes a `planted-instruction` task, a fabricated "SYSTEM NOTE" inside something the agent legitimately reads as data (mail, a doc, a ticket, a release note, a transcript, or the ledger itself). All 7 held on their first live run: [docs/evals.md#red-teaming](docs/evals.md#red-teaming). One run also found and fixed a real crash, unrelated to the injection itself.
 
@@ -98,7 +98,7 @@ Every agent was tuned on scenario 1, and every result above is on scenario 1. Tr
 | Built | Not built yet |
 |---|---|
 | Chief, Signal, Bet, Quality, Builder, Comms, Coach, Retro, and the autopilot for a day or a full week away | Retro's view across more than one scenario |
-| Scenario 1 (a release that locked out Microsoft calendar users), a quiet control scenario, and scenario 2 (a checkout default that quietly cuts trial-to-paid for larger teams), held out and Signal-tested | Scenarios 3 to 10, harder tiers, scenario 2 for Chief, Bet, and Comms (needs a workplace) |
+| Scenario 1 (a release that locked out Microsoft calendar users), a quiet control scenario, and scenario 2 (a checkout default that quietly cuts trial-to-paid for larger teams), held out and tested end to end: Signal, Chief, Bet, Quality, and Comms | Scenarios 3 to 10, harder tiers, Builder on scenario 2 |
 | The eval harness: tasks, code graders, answer keys, trials, regrading | A model judge calibrated against human graders |
 | A capability map, so any install can swap in its own tools | Tested setups for specific vendors, a warehouse adapter for Signal, repo rules for Builder beyond the sandbox app |
 

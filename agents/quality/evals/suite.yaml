@@ -16,6 +16,18 @@ tasks:
     graders:
       - {type: code, name: review_verdict, params: {target: pkt_0001, allowed: [SHIP]}}
 
+  # Held out (D16/D18): Signal's real, clean packet from the checkout-default scenario. Must SHIP, same as the
+  # scenario 1 clean packet.
+  - id: clean-packet-s02
+    kind: capability
+    scenario: s02-checkout-default
+    setup:
+      - copy_files: {from: ledger/examples/s02-queries.jsonl, to: queries.jsonl}
+      - seed_ledger: {file: ledger/examples/s02-partial.jsonl}
+    prompt: *review_packet
+    graders:
+      - {type: code, name: review_verdict, params: {target: pkt_0001, allowed: [SHIP]}}
+
   - id: wrong-number
     kind: regression
     scenario: s01-calendar-gate
