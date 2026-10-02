@@ -16,7 +16,9 @@ CLASS_ATTR = re.compile(r'class\s*=\s*["\']([^"\']*)["\']', re.I)
 RULES = [
     (re.compile(r"\sstyle\s*=", re.I), "uses an inline style; use design system classes"),
     (re.compile(r"<style", re.I), "has a <style> tag; the page shell adds the stylesheet"),
-    (re.compile(r"<(script|img|iframe|link)[^>]+(src|href)\s*=\s*[\"']?https?:", re.I), "loads an external resource"),
+    (re.compile(r"<script", re.I), "has a <script> tag; a design is static markup, never code"),
+    (re.compile(r"<(img|iframe|link)[^>]+(src|href)\s*=\s*[\"']?https?:", re.I), "loads an external resource"),
+    (re.compile(r"\son\w+\s*=", re.I), "uses an inline event handler; a design is static markup, never code"),
     (re.compile(r"\s(color|bgcolor|fill|stroke)\s*=", re.I), "sets a color outside the tokens"),
 ]
 

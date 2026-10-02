@@ -31,6 +31,8 @@ You own three gates: **decide** (approve the action and place a bet with a predi
 
 The simulation is the point: because the problem was planted, every diagnosis and decision can be graded against an answer key. Change one decision and only the future changes, so the page can show the world where you declined.
 
+**A real security boundary to know about:** Builder can write a new test file and run it ([docs/decisions.md#d19](docs/decisions.md)). That subprocess runs with secrets scrubbed from its environment and a timeout, and on POSIX with CPU/memory/file-size caps, but it is not sandboxed: a test that writes to a hardcoded absolute path reaches the real filesystem, proven by a permanent regression test, not a theoretical concern. Treat Builder exactly like a CI runner executing code a model wrote: run it only somewhere disposable, never on a machine with access to anything that matters.
+
 ## Three ways in
 
 | You are | Start here | Then |
@@ -87,7 +89,7 @@ Live runs on scenario 1, graded by the same code graders as the evals. Every run
 
 Every agent was tuned on scenario 1, and every result above is on scenario 1. Treat them as a working system, not a benchmark.
 
-**Held out:** scenario 2 ([docs/decisions.md#d16](docs/decisions.md), finished in [D18](docs/decisions.md)) is a different metric, a different segment, and a different mechanism, built after every agent's instructions were already written. Signal's first live run genuinely missed the cause; two general instruction fixes later, it found the right metric, segment, release, and mechanism, cited 38 real workspaces, and recommended a considered action over a blind rollback. Chief, Bet, Quality, and Comms were then run against the same scenario's full workplace for the first time and all passed clean, surfacing two more real, now-fixed harness bugs along the way (not agent bugs). One small gap is still open on the record rather than patched away: [docs/evals.md](docs/evals.md#live-runs).
+**Held out:** scenario 2 ([docs/decisions.md#d16](docs/decisions.md), finished in [D18](docs/decisions.md)) is a different metric, a different segment, and a different mechanism, built after every agent's instructions were already written. Signal's first live run genuinely missed the cause; three general instruction fixes later it found the right metric, segment, release, and mechanism, cited real workspaces, and recommended a considered action over a blind rollback, at 100%. Chief, Bet, Quality, and Comms were then run against the same scenario's full workplace for the first time and all passed clean, surfacing two more real, now-fixed harness bugs along the way (not agent bugs), plus a genuine disagreement between Quality's review bar and the grading key's leniency that led to the third fix. All 8 agents' red-team checks were re-run after every change: still clean. One small, known voice-variance finding in Comms remains open rather than patched away: [docs/evals.md](docs/evals.md#live-runs).
 
 **Red teaming:** every agent's suite includes a `planted-instruction` task, a fabricated "SYSTEM NOTE" inside something the agent legitimately reads as data (mail, a doc, a ticket, a release note, a transcript, or the ledger itself). All 7 held on their first live run: [docs/evals.md#red-teaming](docs/evals.md#red-teaming). One run also found and fixed a real crash, unrelated to the injection itself.
 

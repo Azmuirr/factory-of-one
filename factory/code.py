@@ -75,9 +75,34 @@ def reject(out: Path, message: str) -> dict:
     return {"status": "rejection", "code": "bad_edit", "message": message}
 
 
+def _resource_limits():
+    """Best-effort containment, POSIX only: cap CPU time, memory, and file size for the test subprocess, so a
+    test that forks, allocates without bound, or tries to fill the disk fails fast instead of hurting the host.
+    This is not a sandbox. It does nothing about filesystem or network access: a test using an absolute path can
+    still read or write anywhere this OS user can reach. Run Builder only where that is an accepted risk, the
+    same as any CI runner that executes code a model wrote: in a disposable container or VM, never on a host
+    with access to anything sensitive. See docs/decisions.md D19."""
+    if sys.platform == "win32":
+        return None
+    import resource
+
+    def limit():
+        resource.setrlimit(resource.RLIMIT_CPU, (60, 60))
+        resource.setrlimit(resource.RLIMIT_AS, (1 << 30, 1 << 30))  # 1 GiB
+        resource.setrlimit(resource.RLIMIT_FSIZE, (1 << 27, 1 << 27))  # 128 MiB per file
+
+    return limit
+
+
 def run_tests(folder: Path, extra_env: dict | None = None) -> dict:
+    # A test using the tempfile module (not a hardcoded absolute path) lands inside the sandboxed copy, not the
+    # host's real temp directory. This stops accidental cross-contamination; it does not stop a deliberate
+    # absolute-path escape, which needs real sandboxing (containment, D19) that this subprocess does not have.
+    tmp = folder.resolve() / ".tmp"
+    tmp.mkdir(exist_ok=True)
+    env = {**{k: v for k, v in os.environ.items() if k in SAFE_ENV}, "TEMP": str(tmp), "TMP": str(tmp), "TMPDIR": str(tmp), **(extra_env or {})}
     proc = subprocess.run([sys.executable, "-m", "pytest", "-q", "-p", "no:cacheprovider"], cwd=folder, capture_output=True,
-                          text=True, encoding="utf-8", timeout=180, env={**{k: v for k, v in os.environ.items() if k in SAFE_ENV}, **(extra_env or {})})
+                          text=True, encoding="utf-8", timeout=180, env=env, preexec_fn=_resource_limits())
     lines = [l for l in proc.stdout.splitlines() if l.strip()]
     return {"passed": proc.returncode == 0, "summary": lines[-1] if lines else proc.stderr[-300:], "output": "\n".join(lines[-40:])}
 

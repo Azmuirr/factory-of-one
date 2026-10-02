@@ -6,6 +6,7 @@ import sqlite3
 from pathlib import Path
 
 ROW_LIMIT = 500
+STEP_LIMIT = 5_000_000  # an unindexed cross join over the largest tables here finishes well under this
 READ_ACTIONS = {sqlite3.SQLITE_SELECT, sqlite3.SQLITE_READ, sqlite3.SQLITE_FUNCTION}
 
 
@@ -19,10 +20,23 @@ def query(db_path: Path, sql: str, limit: int = ROW_LIMIT) -> dict:
         return {"status": "rejection", "code": "read_only", "message": "Only a single SELECT or WITH statement is allowed."}
     conn = sqlite3.connect(f"file:{Path(db_path).as_posix()}?mode=ro", uri=True)
     conn.set_authorizer(_authorize)
+    steps = 0
+
+    def abort_if_runaway():
+        nonlocal steps
+        steps += 1
+        return steps > STEP_LIMIT // 1000  # set_progress_handler fires every N VM instructions, not every one
+
+    conn.set_progress_handler(abort_if_runaway, 1000)
     try:
         cursor = conn.execute(statement)
         rows = cursor.fetchmany(limit + 1)
         columns = [c[0] for c in cursor.description]
+    except sqlite3.OperationalError as exc:
+        if "interrupted" in str(exc).lower():
+            return {"status": "rejection", "code": "query_too_expensive",
+                    "message": "This query did too much work without returning a row. Narrow it: filter first, or query one table at a time."}
+        return {"status": "error", "message": str(exc)}
     except sqlite3.Error as exc:
         return {"status": "error", "message": str(exc)}
     finally:

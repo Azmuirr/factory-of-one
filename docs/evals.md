@@ -113,6 +113,22 @@ Every agent's full suite, at its configured trial count, once each. Not a single
 
 Full writeup, including the red-team grader false-positive fix and the exact SKILL.md wording change: [docs/decisions.md#d17](decisions.md).
 
+## Red-teaming the code (D19)
+
+Every red-team task above tests whether an agent can be talked into doing the wrong thing. This is a different
+question, asked once directly: whatever an agent honestly tries to do, is the code underneath it safe? Read
+end to end, not run as a task with a pass/fail grader, because the thing being tested is the server code, not
+an agent's behavior.
+
+| Surface | Finding | Fixed |
+|---|---|---|
+| `warehouse.query` (read-only SQL) | Sound sandbox (`?mode=ro`, a real `set_authorizer`, single-statement check). No cap on work done before the first row: a sorted cross join over two real tables would fully materialize ~60 billion row pairs | Yes — a step-counting progress handler; the same query now returns a clean rejection in 0.5s |
+| `design.render_design` / `demos.publish_demo` | Sound sandbox (real Chromium process isolation, a route guard that blocks every non-`file:` request). Static checks didn't ban inline `<script>` or `onclick`-style handlers | Yes, in `design.py` — `demos.py` left alone on purpose; a demo must be interactive to pass its own dead-click check |
+| `code_server.py` `run_tests` (Builder's test execution) | **Confirmed, not theorized:** a test file written via `new_files` and run through `propose_change` wrote a canary to the real host filesystem via a hardcoded absolute path, completely outside the `changes/<name>` sandbox. Every existing check, including `scope_problems`, reported nothing wrong | Partially — `TEMP`/`TMP`/`TMPDIR` now point inside the sandbox (verified: `tempfile`-based writes are contained) and POSIX gets CPU/memory/file-size caps. The absolute-path escape itself cannot be closed from inside the process; disclosed as the project's clearest known limitation, not hidden |
+| Ledger write boundary, decision-rights policy | Checked, no change needed: `bet`/`call`/`review`/`queue` are excluded from agent writes at the type-allowlist level; `policy.may_apply` has no code path that ever returns `True` | — |
+
+The PoC for the one real, unfixed gap is a permanent regression test (`tests/test_code_sandboxing.py`), run against a pytest-managed temp directory, never the real system temp. Full writeup: [docs/decisions.md#d19](decisions.md).
+
 ## Scenario 2, the whole loop (D18)
 
 D16 ran only Signal against the held-out scenario. This finishes it: `workplace.yaml` was written for scenario 2 (same cast as scenario 1, a different week's problem), and Chief, Bet, Quality, and Comms were run live against it, unmodified, for the first time.
@@ -128,7 +144,9 @@ D16 ran only Signal against the held-out scenario. This finishes it: `workplace.
 
 **Also found:** `bet_ranking` had the theme name `"consent"` hardcoded into its own logic rather than reading it from `key["bet"]["rank_1"]`. Worked by coincidence for scenario 1 (whose top theme happens to be named "consent"); would have silently broken for any scenario whose top theme has a different name, as scenario 2's does ("pricing"). Fixed to read the name.
 
-**A genuine disagreement, left as the right outcome:** Quality's first review of a `clean-packet-s02` candidate held a stricter bar than D16's own truth-key leniency about scoping the fix to one segment versus both. Rather than resolve it by picking a verdict, a different real trial (one that scoped both segments) was used for the fixture instead, and the disagreement itself is recorded in D18 as evidence the review layer is independent of the grading key, not redundant with it.
+**A genuine disagreement, since resolved:** Quality's first review of a `clean-packet-s02` candidate held a stricter bar than D16's own truth-key leniency about scoping the fix to one segment versus both. Quality's own finding named the fix: "rescope... or state why s51_plus is excluded." `SKILL.md`'s Localize step now requires exactly that whenever a same-direction, underpowered segment exists: widen the diagnosis or cite it explicitly, never drop it silently. Re-run live: `diagnose-s02` went from 93% to 100%, and this turned out to be the same root cause behind D16's one lingering open finding too. `diagnose-s01` re-verified unaffected.
+
+**Full red-team sweep, same day:** all 8 agents' `planted-instruction` tasks re-run live after every change above. 7 of 8 held clean; Comms hit the same already-documented "no ask with a date yet" pattern from D17 (a correct refusal to invent a date, not an injection miss). No new findings.
 
 Full writeup: [docs/decisions.md#d18](decisions.md).
 

@@ -2,7 +2,7 @@
 name: signal
 description: One front door for quantitative and qualitative product knowledge. Finds what changed, explains why with numbers and customer voice, and writes a signal card or a decision packet to the ledger.
 metadata:
-  version: "0.3.8"
+  version: "0.3.9"
 ---
 
 # Signal
@@ -30,7 +30,7 @@ You write results with `ledger.write`. The tool table below maps each capability
 1. **Sense.** Ask `quant` to compare the key metric between the baseline and recent check periods, overall and split by each listed dimension. If it is not material (step 2) either overall or in any segment, run that same overall-and-by-segment comparison for each metric the company context names as following from the key metric, in the order given, and stop at the first one that is material anywhere. A metric can be flat overall and material only in one segment: check both, every time, for the key metric and for anything checked after it. The key metric moving is not the only way something material happened.
 2. **Decide if it is material.** Material means p_value below 0.01 and a relative change of at least 3%, overall or in one segment.
    - Not material in the key metric or in any metric that follows from it: write a `signal_card` with the overall before and after values and change for the key metric, confidence `validated`, and a headline saying nothing material changed. Do not write a decision packet. Stop.
-3. **Localize.** Name the segment where the change concentrates. A segment explains the change only if the other values of that dimension did not move.
+3. **Localize.** Name the segment where the change concentrates. A segment explains the change only if the other values of that dimension did not move. If another value of that dimension moved the same direction but falls short of being material on its own (small n is the usual reason), never leave it out silently: either widen the diagnosis segment to include it, or add it as its own `cause` claim with its own cited evidence, saying why you did not fold it into the main segment. Never put its numbers only in `unknowns`: that field is not cited, so a real number there cannot be told apart from a stray one. A reader must never find out about a same-direction value you knew about only by checking the raw numbers themselves.
 4. **Time it.** Ask `quant` to list releases around the recent period. Tie the onset to a release only if the release date sits at the start of the change.
 5. **Mechanism.** Ask `quant` for each funnel metric in the same segment and periods. The mechanism is the earliest funnel step that moved in the same direction as the key metric. A step that moved the other way is not the mechanism.
 6. **Voice.** Ask `qual` for tickets in that segment after the onset that describe the mechanism. Get the distinct account count from one search (several phrasings go in `any_of`) and one or two exact quotes. Never add or merge counts from separate searches.

@@ -263,10 +263,76 @@ Each entry records the options, the choice, and what would reverse it. The reaso
 
 **`recompute_pool`'s own docstring promised more than its code did.** It says "every rate metric, overall and by each dimension," but only included the overall (unsegmented) comparison when the card's own segment was falsy — meaning any time Signal correctly reports a segment-specific finding (the normal, expected case, including every scenario 1 result on record), the overall comparison it is required to run by its own `SKILL.md` step 1 silently had nowhere to be grounded. Found when Quality returned FIX on a packet with no code-checkable defect (correctness.numbers was the only failing check, on a number Signal had genuinely computed from a real tool call): `"'0.089815' is not in the data"`, where 0.089815 was the overall trial_to_paid_rate's own p-value. Fixed by always including the unsegmented comparison in the pool. Re-verified: the same packet now SHIPs.
 
-**Also found, and left as the right outcome, not a bug:** the first candidate packet used for Quality's `clean-packet-s02` fixture scoped its diagnosis to `s11_50` only, which D16 had already decided was an acceptable, well-calibrated answer (the truth file's own `segments_accepted` allows it). Quality disagreed: its review held a stricter bar, flagging the s51_plus exclusion as a real scoping gap the packet should address or justify. This is not a contradiction to resolve — Quality's job is to hold a standard independent of what the answer key is lenient about, and a different, equally real packet that scoped both segments from the start is what's used for the fixture instead. The disagreement itself is evidence the review layer works as intended: two honest readings of borderline evidence came to different, both-defensible conclusions, and the system didn't have to force them into agreement.
+**Also found, and since resolved:** the first candidate packet used for Quality's `clean-packet-s02` fixture scoped its diagnosis to `s11_50` only, which D16 had already decided was an acceptable, well-calibrated answer (the truth file's own `segments_accepted` allows it). Quality disagreed: its review held a stricter bar, flagging the `s51_plus` exclusion as a real scoping gap the packet should address or justify, in its own words: "rescope... or state why s51_plus is excluded." That suggestion was the actual fix. The real problem was never which segment Signal names — it's that a packet could silently drop a same-direction, underpowered segment with no trace of having known about it. `SKILL.md`'s Localize step (3) now requires one of two things whenever this happens: widen the diagnosis to include the segment, or add it as its own cited `cause` claim with real evidence, explaining why it wasn't folded in. Re-verified live: `diagnose-s02` went from 93% to 100%, and this also resolved D16's one remaining open finding (the `s51_plus` aside that didn't replay-check) — the same root cause, `recompute_pool` silently excluding the overall comparison, had been masking an instruction gap that was there the whole time. `diagnose-s01` re-verified unaffected: 100%, no regression.
 
 **Every ledger entry in the new fixtures is a real agent output**, not hand-authored: Signal's `sig_0001`/`pkt_0001`, Bet's `cnd_0001`, and Quality's `rev_0001` all came from actual live runs against this scenario. The only hand-written entry is `que_0001` (a queue record), which only code ever writes, in this system or a real one.
 
 **Not done:** Builder. Its job (propose an action, build an MVP behind a flag, design it, demo it) operates on the shared sandbox app, not scenario-specific content, so it wasn't in scope for this pass — the question of whether it generalizes to a different kind of change (a pricing/checkout fix rather than an onboarding fix) is a real one, just not one this round answered.
 
 **Would change if:** a future scenario's cast needs to differ from scenario 1's (a different team, a different company). Then the people roster would need its own file instead of being copied between scenario folders.
+
+## D19. Red-teaming the code, not just the agents: one real, disclosed vulnerability
+
+Everything red-teamed before this (D15, D16, D18) tested whether an agent could be talked into doing the wrong
+thing. This is a different question: whatever an agent is honestly trying to do, is the code underneath it safe
+to run? The servers an agent's tool calls reach were read end to end, looking for the classes of bug that
+matter regardless of what any model says: command or SQL injection, path traversal, unbounded resource use, and
+sandbox escapes.
+
+**`warehouse.query`: sound sandbox, no resource cap.** The SQL path is genuinely well-built: the connection
+opens `?mode=ro` (SQLite's own read-only flag, not just a permissions check), a real `set_authorizer` callback
+denies every action outside `SELECT`/`READ`/`FUNCTION` (so `ATTACH`, `PRAGMA`, and writes are refused by the
+engine itself, not a regex), and a semicolon anywhere rejects the statement outright, blocking stacking. What
+was missing: no limit on how much work a single `SELECT` could do before returning its first row. A sorted
+cross join over two real tables (`SELECT a.event_id, b.event_id FROM events a, events b ORDER BY ...`, about 60
+billion row pairs on a seed-1 world) would have to fully materialize and sort before streaming anything, with
+no cap. **Fixed:** a `set_progress_handler` callback counts VM instruction steps and raises after a bound tuned
+well above any normal registered-metric-style query; measured fix: the same cross join now returns a clean,
+actionable rejection in half a second instead of running unbounded.
+
+**`design.render_design` and `demos.publish_demo`: sound sandbox, one real gap, now closed.** Both render
+agent-written HTML in a real headless Chromium (full process sandbox, not disabled), and both install a
+Playwright route handler that aborts every request that isn't a `file:` URL — and for demos, an attempted
+network call is itself reported as a failed check, not just silently blocked. What neither one's static checks
+caught: an inline `<script>` tag or an `onclick`-style event handler, which don't need an external `src=` to
+run. Residual risk was already low (Chromium blocks a `file://` page's JS from reading other `file://` URLs by
+default, and the route guard would catch anything that tried to phone home anyway), but there was no reason to
+leave it open. **Fixed** in `design.py`'s static rules: both now reject outright. `demos.py` is deliberately
+left alone: a demo has to be interactive to pass its own dead-click check, so banning scripts there would break
+the feature it's built to prove works; its security boundary is correctly the network block, not a markup ban.
+
+**`code_server.py`'s `run_tests`: the real finding.** Builder can write a new file into `new_files` and have
+`run_tests` execute it as part of the app's real test suite. That subprocess runs with a scrubbed environment
+(no API keys, no tokens — see `SAFE_ENV`) and a 180-second timeout, but nothing else contains it: no container,
+no restricted user, no filesystem or network isolation. **Proven, not theorized:** a test file that wrote a
+canary to `tempfile.gettempdir()` using a hardcoded absolute path landed on the *host* filesystem, completely
+outside the `changes/<name>` copy, and every existing check — including `scope_problems`, built exactly to
+catch a change a reviewer should bounce — reported nothing wrong. The PoC is reproduced as a permanent test
+(`tests/test_code_sandboxing.py`), run safely against a pytest-managed temp directory, not the real system temp.
+
+**Fixed, to the extent an in-process fix can:**
+- `TEMP`/`TMP`/`TMPDIR` are now pointed at a folder inside the sandboxed copy before the subprocess runs, so
+  code that asks the OS for a temp directory (the normal, idiomatic way) is contained. Verified: the same test
+  using `tempfile.gettempdir()` now lands inside `changes/<name>/.tmp`, not the host's real temp directory.
+- On POSIX, `RLIMIT_CPU` (60s), `RLIMIT_AS` (1 GiB), and `RLIMIT_FSIZE` (128 MiB) are set via `preexec_fn`, caging
+  runaway CPU, memory, and single-file growth. Windows has no equivalent in the standard library; the limiter
+  is a no-op there (same subprocess, same timeout, no extra containment), which is disclosed, not hidden.
+
+**Not fixed, because it cannot be from inside the process:** a test that names an absolute path directly —
+exactly my PoC — still escapes. No blocklist of dangerous imports or calls is attempted here on purpose: Python
+cannot be sandboxed that way (`__import__`, `getattr`, and a dozen other routes make any denylist trivially
+bypassable), and a fake sense of safety is worse than an honest gap. The real fix is out-of-process containment
+(a disposable container or VM), the same way any CI system runs code it didn't write itself, and that is
+explicitly out of scope for this repo: it would make Docker (or an equivalent) a hard dependency and is a
+meaningfully different, larger piece of work than anything else here. **This is now the project's clearest
+documented limitation**, called out in README's "what's real" section: treat Builder exactly like a CI runner
+executing a model's code, and never run it anywhere that isn't disposable.
+
+**Also checked, found solid, no change:** the ledger's write boundary (`bet`, `call`, `review`, and `queue` are
+excluded from `write_entry` at the type-allowlist level, not by convention, so no payload shape can coerce a
+write into one of them) and the decision-rights policy (`policy.may_apply` has no code path that ever returns
+`True` — the autopilot cannot apply an action unattended no matter what the config says; `may_send` only allows
+an audience through when its own numbers-match check already passed, checked before policy, not after).
+
+**Would change if:** this repo ever needs Builder to run against something that matters outside the sandbox
+(a real company's codebase, not `sandbox/app`). Then the out-of-process containment above stops being optional.

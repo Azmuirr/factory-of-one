@@ -1,0 +1,43 @@
+{
+  "agent": "signal",
+  "agent_version": "0.3.9",
+  "suite_version": "0.1.0",
+  "run_id": "20261002T033534Z",
+  "mode": "real",
+  "trials_per_task": 1,
+  "cost_usd": 0.2045,
+  "summary": {
+    "capability": {
+      "pass_at_k": "1/1",
+      "pass_pow_k": "1/1"
+    }
+  },
+  "tasks": [
+    {
+      "task": "diagnose-s01",
+      "kind": "capability",
+      "trials": [
+        {
+          "trial": 1,
+          "passed": true,
+          "partial": 1.0,
+          "failed": [],
+          "advisory": [
+            "reasoning rubric: pass (pass: Cause follows from evidence (metric drop + segment isolation + release timing + mechanism corroboration); facts and assumptions correctly labeled with appropriate does_not_prove caveats; recommendation targets minimal test (restore skip for Microsoft only) matching the identified mechanism.)"
+          ],
+          "error": null,
+          "cost_usd": 0.2045,
+          "turns": 17,
+          "duration_s": 70.6,
+          "transcript": "runs\\evals\\signal\\20261002T033534Z\\diagnose-s01\\trial-1\\transcript.jsonl"
+        }
+      ],
+      "cross_trial": [
+        "same diagnosis and action in every trial: pass (1 distinct)"
+      ],
+      "pass_at_k": true,
+      "pass_pow_k": true,
+      "mean_partial": 1.0
+    }
+  ]
+}
