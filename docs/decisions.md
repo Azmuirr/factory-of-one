@@ -2,6 +2,29 @@
 
 Each entry records the options, the choice, and what would reverse it. The reasoning is part of the product: a junior PM can follow it, and a VP can challenge it.
 
+| # | Decision |
+|---|---|
+| [D1](#d1-who-the-repo-is-for) | Who the repo is for |
+| [D2](#d2-the-simulated-company) | The simulated company |
+| [D3](#d3-activation-event) | Activation event |
+| [D4](#d4-name) | Name |
+| [D5](#d5-baseline-scale) | Baseline scale |
+| [D6](#d6-how-agents-run-no-extra-spend) | How agents run: no extra spend |
+| [D7](#d7-agents-name-capabilities-not-tools) | Agents name capabilities, not tools |
+| [D8](#d8-every-metric-number-cites-its-query-and-code-replays-it) | Every metric number cites its query, and code replays it |
+| [D9](#d9-builders-code-is-graded-by-hidden-acceptance-tests) | Builder's code is graded by hidden acceptance tests |
+| [D10](#d10-when-the-pm-is-away-the-factory-prepares-and-never-applies) | When the PM is away, the factory prepares and never applies |
+| [D11](#d11-comms-drafts-code-sends) | Comms drafts; code sends |
+| [D12](#d12-signal-runs-weekly-not-daily-while-the-pm-is-away) | Signal runs weekly, not daily, while the PM is away |
+| [D13](#d13-a-multi-day-runs-own-label-not-the-worlds-cutoff-goes-on-entries-and-in-prompts) | A multi-day run's own label, not the world's cutoff, goes on entries and in prompts |
+| [D14](#d14-coachs-hard-lines-are-enforced-by-the-schema-not-by-reading-its-own-output) | Coach's hard lines are enforced by the schema, not by reading its own output |
+| [D15](#d15-every-agent-gets-a-red-team-task-not-just-signal) | Every agent gets a red team task, not just Signal |
+| [D16](#d16-scenario-2-held-out-built-after-every-agents-instructions-were-already-written) | Scenario 2: held out, built after every agent's instructions were already written |
+| [D17](#d17-the-first-full-suite-pass-real-findings-were-in-the-harness-and-the-skillmd-wording-not-the-agents) | The first full-suite pass: real findings were in the harness and the SKILL.md wording, not the agents |
+| [D18](#d18-scenario-2-finished-chief-bet-quality-and-comms-all-read-the-held-out-scenario-now-not-just-signal) | Scenario 2, finished: Chief, Bet, Quality, and Comms all read the held-out scenario now, not just Signal |
+| [D19](#d19-red-teaming-the-code-not-just-the-agents-one-real-disclosed-vulnerability) | Red-teaming the code, not just the agents: one real, disclosed vulnerability |
+| [D20](#d20-five-things-that-were-judgment-but-have-one-right-answer) | Five things that were judgment but have one right answer |
+
 ## D1. Who the repo is for
 
 | Reader | What they need in 10 minutes | Where they start |
