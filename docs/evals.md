@@ -192,6 +192,23 @@ A duplicate key in `config/capabilities.yaml`, introduced and caught in the same
 project's own config-loading safety net (`factory/config.py`'s vocabulary check) raised immediately on the next
 test run, before any live call used the broken config. Full writeup: [docs/decisions.md#d20](decisions.md).
 
+## Scenario 2, the last agent (D21)
+
+Builder was the one agent D18 left untested, because it needed real app code to build against, not just a
+ledger to read. Added `sandbox/app/tallybird/checkout.py`, a `render_checkout` screen, a hand-authored `bet_0001`
+predicting `trial_to_paid_rate` recovery for the segment the pricing redesign hurt, and a new `build-s02` task.
+
+| Task | Result | What it found |
+|---|---|---|
+| `build-s02`, 1 trial | 100% | Proposed `start_experiment` (the scenario's other accepted action besides `rollback`), scoped the new `checkout_annual_default` flag's rule to exactly the segment named in the bet, shipped it `enabled: false`, edited `checkout.py` behind it, added a test. No agent bug, unlike every other agent's scenario-2 run this session |
+
+**The real bug was in the harness, not the agent.** The full suite's one failure after this:
+`agents/quality/evals/fixtures/sibling-builds` is a frozen full-app snapshot, and adding `checkout.py` /
+`tests/test_checkout.py` to the shared `sandbox/app` baseline made it stale — `code.scope()` diffs a change
+folder against the *current* baseline, so it read the fixture's old `screens.py` and missing `test_checkout.py`
+as that change having deleted two tests it never had. Fixed by syncing the fixture's untouched files to the new
+baseline. Full suite re-verified clean afterward. Full writeup: [docs/decisions.md#d21](decisions.md).
+
 ## Grader changes
 
 Graders have bugs too. Each fix is logged, and saved transcripts are regraded with `python -m factory.evals regrade <agent> <run_id>`.

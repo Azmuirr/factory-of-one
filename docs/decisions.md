@@ -24,6 +24,7 @@ Each entry records the options, the choice, and what would reverse it. The reaso
 | [D18](#d18-scenario-2-finished-chief-bet-quality-and-comms-all-read-the-held-out-scenario-now-not-just-signal) | Scenario 2, finished: Chief, Bet, Quality, and Comms all read the held-out scenario now, not just Signal |
 | [D19](#d19-red-teaming-the-code-not-just-the-agents-one-real-disclosed-vulnerability) | Red-teaming the code, not just the agents: one real, disclosed vulnerability |
 | [D20](#d20-five-things-that-were-judgment-but-have-one-right-answer) | Five things that were judgment but have one right answer |
+| [D21](#d21-scenario-2-the-last-agent-builder-and-a-fixture-that-went-stale) | Scenario 2, the last agent: Builder, and a fixture that went stale |
 
 ## D1. Who the repo is for
 
@@ -420,3 +421,43 @@ was needed this session.
 **Would change if:** a scenario's strategy doc ever names a goal for a problem that doesn't exist yet at
 write time (the opposite of this session's problem, where goals existed and a candidate didn't map to one
 cleanly). Then `priority_score` would need a defined behavior for "no goal fits" instead of a hard rejection.
+
+## D21. Scenario 2, the last agent: Builder, and a fixture that went stale
+
+The one agent D18 left untested against the held-out scenario was Builder, because it needed real app code to
+build against: `sandbox/app/tallybird/checkout.py`, a `render_checkout` screen, and a hand-authored `bet_0001`
+predicting `trial_to_paid_rate` recovery for the segment the pricing redesign hurt (`s11_50`, `s51_plus`). All
+three, plus a new `build-s02` task mirroring `build-s01`, were added and run live.
+
+**The clean result.** Unlike every other agent's scenario-2 run this session, this one surfaced no agent bug.
+Builder proposed `start_experiment` (`truth.yaml`'s `names_accepted` for this scenario is `[rollback,
+start_experiment]`: the fix is a pricing change, and validating it on the affected segment before fully
+committing is at least as sound a call as a blind rollback), scoped the new `checkout_annual_default` flag's
+rule to exactly `company_size: [s11_50, s51_plus]` — the segment named in the bet, not copied from scenario 1 —
+shipped it `enabled: false`, edited `checkout.py` to restore `annual_shown_first` and `savings_shown` behind
+that flag, and wrote a new test. Every build entry's honesty label matched what it actually was (`live` for the
+code change, `mocked` for the design, `hardcoded` for the demo). Nothing here was memorized from scenario 1;
+the segment, the flag name, and the file didn't exist until this session.
+
+**The real bug, found by the harness, not the agent.** The first full-suite run after this failed one test:
+`agents/quality/evals/fixtures/sibling-builds` is a frozen snapshot of a full code change, copied from
+`sandbox/app` at some earlier point. Adding `checkout.py` and `tests/test_checkout.py` to the shared app
+baseline this session made that snapshot stale: `code.scope()` diffs a change folder against the *current*
+`sandbox/app`, so it now read the fixture's old `screens.py` (pre-`render_checkout`) and missing
+`test_checkout.py` as the fixture's change having deleted two tests that, from the live baseline's point of
+view, the fixture never had. `test_the_sibling_builds_fixture_passes_every_code_check` caught it immediately.
+Fixed by copying the three new/changed baseline files into the fixture's untouched-by-its-own-change folders,
+bringing the frozen snapshot back in sync with the live app it's diffed against. Live-verified: the specific
+test passes again, and the full suite passes clean.
+
+**The general risk this points at, not fixed now.** Any fixture that holds a full copy of the app (not just a
+diff) goes stale the next time the shared baseline grows, and nothing currently catches that except the one
+test that happens to exercise `code.scope` against that fixture. There's exactly one such fixture today, and
+it was the one that broke. A second one would need the same manual sync. Left as a known risk rather than
+built out, consistent with this session's rule against opportunistic scope growth: no second occurrence yet to
+generalize from.
+
+**Would change if:** a second frozen-snapshot fixture is added. At that point the sync should stop being a
+manual `cp` run by whoever next touches `sandbox/app`, and become a small check (or a fixture-regeneration
+script) that fails loudly the moment the baseline and a fixture diverge, the same way `factory/config.py`'s
+vocabulary check already does for capabilities.

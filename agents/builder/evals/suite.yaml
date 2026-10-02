@@ -22,6 +22,21 @@ tasks:
       - design_passes_checks
       - {type: code, name: tools_within_allowlist, params: {servers: [ledger, releases, code, design, demos]}}
 
+  - id: build-s02
+    kind: capability
+    scenario: s02-checkout-default
+    setup:
+      - seed_ledger: {file: ledger/examples/s02-happy-path.jsonl}
+    prompt: *check_bets
+    graders:
+      - action_matches_decision
+      - build_entry_valid
+      - demo_passes_checks
+      - demo_numbers_grounded
+      - mvp_change_passes
+      - design_passes_checks
+      - {type: code, name: tools_within_allowlist, params: {servers: [ledger, releases, code, design, demos]}}
+
   - id: no-bet
     kind: capability
     scenario: s00-quiet
