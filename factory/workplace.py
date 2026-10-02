@@ -290,8 +290,26 @@ class Workplace:
         t = text.lower()
         return [g["id"] for g in self.plan.get("goals", []) if any(k in t for k in g["keywords"])]
 
+    def priority_score(self, size_value: float, size_unit: str, goal: str) -> dict:
+        """A bet's size, annualized, times its goal's own weight: one number, computed the same way every time,
+        to rank bets against. It is a starting point, not a verdict: a deadline, how reversible the bet is, or
+        how strong the evidence is can all be good reasons the actual rank differs from this order. Cite the
+        score and say so when it does."""
+        goals = {g["id"]: g for g in self.plan.get("goals", [])}
+        if goal not in goals:
+            return {"status": "rejection", "code": "unknown_goal", "message": f"{goal!r} is not a goal id from goals.get"}
+        if size_unit not in ("usd_per_week", "usd_per_year"):
+            return {"status": "rejection", "code": "unknown_unit", "message": "size_unit must be usd_per_week or usd_per_year"}
+        annual = size_value * 52 if size_unit == "usd_per_week" else size_value
+        weight = goals[goal]["weight"]
+        return {"status": "value", "goal": goal, "weight": weight, "annual_usd": round(annual, 2),
+                "score": round(annual * weight, 2),
+                "does_not_prove": "That this is the right rank. It weighs size against the goal's weight only, nothing about the deadline, how reversible the bet is, or how strong the evidence is."}
+
     def time_by_goal(self, start: str, end: str) -> dict:
-        """Meeting hours per goal in a period, matched by each goal's keywords. A goal with under a third of its weight is starved."""
+        """Meeting hours per goal in a period, matched by each goal's keywords, against its weight: the share of
+        attention a goal's own weight says it should get. Under a third of that share is starved; over one and
+        a half times it is over. `status` is the one of the three Chief's goal_check should copy, not re-derive."""
         hours = {g["id"]: 0.0 for g in self.plan.get("goals", [])}
         other = 0.0
         for r in self.my_events(start, end):
@@ -307,8 +325,11 @@ class Workplace:
         goals = []
         for g in self.plan.get("goals", []):
             share = hours[g["id"]] / total if total else 0.0
+            starved = share < g["weight"] / 3
+            over = share > g["weight"] * 1.5
+            status = "starved" if starved else "over" if over else "on_track"
             goals.append({"goal": g["id"], "title": g["title"], "weight": g["weight"], "hours": round(hours[g["id"]], 2),
-                          "share": round(share, 3), "starved": share < g["weight"] / 3})
+                          "share": round(share, 3), "starved": starved, "over": over, "status": status})
         return {"period": {"start": start, "end": end}, "goals": goals, "other_hours": round(other, 2), "total_hours": round(total, 2)}
 
     # Transcripts and tracker -----------------------------------------------------

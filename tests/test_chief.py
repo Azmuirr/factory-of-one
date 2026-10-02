@@ -71,6 +71,47 @@ def test_time_by_goal_finds_the_starved_goal(wp):
     assert not goals["g1"]["starved"]
 
 
+def test_time_by_goal_computes_status_so_chief_does_not_have_to(wp):
+    """Deterministic criterion #4: on_track/starved/over is a threshold comparison against the goal's own
+    weight, not a judgment call. Chief copies `status`; it never re-derives it from the raw hours."""
+    goals = {g["goal"]: g for g in wp.time_by_goal("2026-02-23", "2026-03-03")["goals"]}
+    assert goals["g2"]["status"] == "starved"
+    assert goals["g1"]["status"] in ("on_track", "over")
+    assert all(g["status"] == ("starved" if g["starved"] else "over" if g["over"] else "on_track") for g in goals.values())
+
+
+def test_priority_score_is_size_annualized_times_the_goals_weight(wp):
+    """Deterministic criterion #5: ranking itself is a real tradeoff and stays Bet's call, but the size-times-
+    weight arithmetic that should anchor it has one right answer."""
+    weekly = wp.priority_score(1000, "usd_per_week", "g1")
+    assert weekly["status"] == "value"
+    assert weekly["annual_usd"] == pytest.approx(52000)
+    assert weekly["score"] == pytest.approx(52000 * weekly["weight"])
+    yearly = wp.priority_score(52000, "usd_per_year", "g1")
+    assert yearly["score"] == pytest.approx(weekly["score"])
+
+
+def test_priority_score_rejects_an_unknown_goal_or_unit(wp):
+    assert wp.priority_score(1000, "usd_per_week", "g99")["status"] == "rejection"
+    assert wp.priority_score(1000, "usd_per_month", "g1")["status"] == "rejection"
+
+
+def test_a_goal_getting_far_more_time_than_its_weight_warrants_is_over():
+    import json
+    from unittest.mock import MagicMock
+
+    from factory.workplace import Workplace
+
+    wp = MagicMock()
+    wp.plan = {"goals": [{"id": "g1", "title": "A", "weight": 0.2, "keywords": ["a"]}, {"id": "g2", "title": "B", "weight": 0.8, "keywords": ["b"]}]}
+    wp.goals_for = Workplace.goals_for.__get__(wp)
+    row = lambda title: {"attendees": json.dumps(["p_me", "p_other"]), "start": "2026-01-01T00:00:00Z", "end": "2026-01-01T01:00:00Z", "title": title, "agenda": ""}
+    wp.my_events.return_value = [row("a")] * 9 + [row("b")]  # g1 gets 90% of the time against a 20% weight
+    result = Workplace.time_by_goal(wp, "2026-01-01", "2026-01-02")
+    by_id = {g["goal"]: g for g in result["goals"]}
+    assert by_id["g1"]["status"] == "over"
+
+
 def test_staleness_follows_the_cadence_the_pm_set(wp):
     assert [s["person"]["id"] for s in wp.stale_stakeholders()] == ["p_cto"]
 

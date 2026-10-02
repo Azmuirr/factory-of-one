@@ -280,22 +280,31 @@ class World:
         return [{"group": dict(zip(groups, key)), **self._aggregate(m, buckets[key])} for key in sorted(buckets, key=str)]
 
 
+MATERIAL_P = 0.01
+MATERIAL_RELATIVE = 0.03
+
+
 def change(before: dict, after: dict, rate: bool) -> dict:
     if before["value"] is None or after["value"] is None:
-        return {"before": before["value"], "after": after["value"], "absolute": None, "relative": None,
+        return {"before": before["value"], "after": after["value"], "absolute": None, "relative": None, "material": None,
                 "note": "No eligible workspaces in one period, so there is nothing to compare."}
+    relative = round((after["value"] - before["value"]) / before["value"], 4) if before["value"] else None
     out = {
         "before": before["value"],
         "after": after["value"],
         "absolute": round(after["value"] - before["value"], 4),
-        "relative": round((after["value"] - before["value"]) / before["value"], 4) if before["value"] else None,
+        "relative": relative,
     }
     if rate:
         n1, n2 = before["denominator"], after["denominator"]
         pooled = (before["numerator"] + after["numerator"]) / (n1 + n2)
         se = math.sqrt(pooled * (1 - pooled) * (1 / n1 + 1 / n2)) if 0 < pooled < 1 else 0
         z = (after["value"] - before["value"]) / se if se else 0.0
-        out.update({"z": round(z, 2), "p_value": round(math.erfc(abs(z) / math.sqrt(2)), 6), "n_before": n1, "n_after": n2})
+        p_value = round(math.erfc(abs(z) / math.sqrt(2)), 6)
+        out.update({"z": round(z, 2), "p_value": p_value, "n_before": n1, "n_after": n2,
+                    "material": p_value < MATERIAL_P and relative is not None and abs(relative) >= MATERIAL_RELATIVE})
+    else:
+        out["material"] = None  # no significance test for a sum; materiality needs a rate metric
     return out
 
 

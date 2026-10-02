@@ -3,10 +3,20 @@ schema itself has no field for a rating, ranking, or score, so Coach cannot writ
 
 from __future__ import annotations
 
+import re
 import sqlite3
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+
+RATING = re.compile(
+    r"\b\d{1,2}\s*(?:/|out of)\s*10\b"       # "2 out of 10", "2/10"
+    r"|\b\d{1,3}\s*(?:/|out of)\s*100\b"      # "60/100"
+    r"|\b[1-5]\s*-?\s*stars?\b"               # "2 stars", "2-star"
+    r"|\b[A-F][+-]?\s*(?:grade|rating)\b"     # "a B+ rating"
+    r"|\brat(?:e|ed|es|ing)\b\s+(?:her|him|them|his|their)\b"  # "rate her", "rated them"
+    r"|\b(?:a |an )?(?:score|rating|grade) of\b",             # "a score of", "rating of"
+    re.I)
 
 TABLE = {
     "cal": ("calendar", "event_id"),
@@ -50,6 +60,15 @@ def about_problems(world_path: Path, payload: dict) -> list[str]:
     conn.close()
     about = payload.get("about")
     return [] if about in known else [f"about: {about!r} is not a person id from the directory"]
+
+
+def rating_language_problems(payload: dict) -> list[str]:
+    """D14 blocks a rating as a schema field; nothing stopped one from being written into free text instead.
+    Catches the shape of a rating (a number out of some scale, a letter grade, "rate her"), not every possible
+    phrasing: a determined rewrite could still get a judgment past a regex. The schema is the real backstop for
+    the field that matters; this is a second layer for the field that has none."""
+    texts = [p["text"] for p in payload.get("talking_points", [])] + [p["text"] for p in payload.get("open_items", [])]
+    return [f'"{t[:80]}" reads like a rating, ranking, or score. Coach prepares; it never rates.' for t in texts if RATING.search(t)]
 
 
 def main() -> None:

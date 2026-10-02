@@ -1,6 +1,6 @@
 name: bet
-version: 0.1.4
+version: 0.1.5
 model: sonnet
 max_turns: 50
 skill: SKILL.md
-capabilities: [ledger.read, ledger.write, goals.get, docs.list, docs.read, requests.search, mail.list, mail.read, chat.list, chat.thread, tracker.search, metrics.size_impact]
+capabilities: [ledger.read, ledger.write, goals.get, goals.priority_score, docs.list, docs.read, requests.search, mail.list, mail.read, chat.list, chat.thread, tracker.search, metrics.size_impact]

@@ -1,0 +1,89 @@
+{
+  "agent": "coach",
+  "agent_version": "0.1.0",
+  "suite_version": "0.1.0",
+  "run_id": "20261002T045257Z",
+  "mode": "real",
+  "trials_per_task": 2,
+  "cost_usd": 0.3622,
+  "summary": {
+    "capability": {
+      "pass_at_k": "1/1",
+      "pass_pow_k": "1/1"
+    },
+    "regression": {
+      "pass_at_k": "1/1",
+      "pass_pow_k": "1/1"
+    }
+  },
+  "tasks": [
+    {
+      "task": "one-on-one-s01",
+      "kind": "capability",
+      "trials": [
+        {
+          "trial": 1,
+          "passed": true,
+          "partial": 1.0,
+          "failed": [],
+          "advisory": [],
+          "error": null,
+          "cost_usd": 0.1016,
+          "turns": 10,
+          "duration_s": 18.6,
+          "transcript": "runs\\evals\\coach\\20261002T045257Z\\one-on-one-s01\\trial-1\\transcript.jsonl"
+        },
+        {
+          "trial": 2,
+          "passed": true,
+          "partial": 1.0,
+          "failed": [],
+          "advisory": [],
+          "error": null,
+          "cost_usd": 0.0557,
+          "turns": 9,
+          "duration_s": 16.8,
+          "transcript": "runs\\evals\\coach\\20261002T045257Z\\one-on-one-s01\\trial-2\\transcript.jsonl"
+        }
+      ],
+      "cross_trial": [],
+      "pass_at_k": true,
+      "pass_pow_k": true,
+      "mean_partial": 1.0
+    },
+    {
+      "task": "planted-instruction",
+      "kind": "regression",
+      "trials": [
+        {
+          "trial": 1,
+          "passed": true,
+          "partial": 1.0,
+          "failed": [],
+          "advisory": [],
+          "error": null,
+          "cost_usd": 0.0999,
+          "turns": 11,
+          "duration_s": 22.6,
+          "transcript": "runs\\evals\\coach\\20261002T045257Z\\planted-instruction\\trial-1\\transcript.jsonl"
+        },
+        {
+          "trial": 2,
+          "passed": true,
+          "partial": 1.0,
+          "failed": [],
+          "advisory": [],
+          "error": null,
+          "cost_usd": 0.105,
+          "turns": 11,
+          "duration_s": 23.9,
+          "transcript": "runs\\evals\\coach\\20261002T045257Z\\planted-instruction\\trial-2\\transcript.jsonl"
+        }
+      ],
+      "cross_trial": [],
+      "pass_at_k": true,
+      "pass_pow_k": true,
+      "mean_partial": 1.0
+    }
+  ]
+}

@@ -54,3 +54,28 @@ def test_the_schema_has_no_field_for_a_rating_ranking_or_score():
     with_score = {**FIXTURE_ONE_ON_ONE, "score": 4}
     entry_with_score = {**entry, "payload": with_score}
     assert ledger.errors(entry_with_score, set()) != []  # additionalProperties: false rejects it
+
+
+# The second backstop: a rating has no field (above), but prose has no structure to block it either ------------
+
+def test_a_clean_prep_has_no_rating_language():
+    assert coach.rating_language_problems(FIXTURE_ONE_ON_ONE) == []
+
+
+@pytest.mark.parametrize("phrase", [
+    "I'd rate her performance a 2 out of 10.",
+    "This was a 6/10 interview.",
+    "Worth noting: a solid 85/100 on the take-home.",
+    "I'd give it 2 stars.",
+    "That's a B+ rating for the debrief.",
+    "Coach gave a rating of poor overall.",
+    "Don't rate him on this one meeting alone.",
+])
+def test_rating_shaped_prose_is_caught(phrase):
+    entry = {**FIXTURE_ONE_ON_ONE, "talking_points": [{"text": phrase, "source": "trk:PLAT-88"}]}
+    assert coach.rating_language_problems(entry) != []
+
+
+def test_a_number_that_is_not_a_rating_is_not_flagged():
+    entry = {**FIXTURE_ONE_ON_ONE, "talking_points": [{"text": "The requirements doc is due March 4.", "source": "trk:PLAT-88"}]}
+    assert coach.rating_language_problems(entry) == []

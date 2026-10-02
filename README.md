@@ -33,6 +33,8 @@ The simulation is the point: because the problem was planted, every diagnosis an
 
 **A real security boundary to know about:** Builder can write a new test file and run it ([docs/decisions.md#d19](docs/decisions.md)). That subprocess runs with secrets scrubbed from its environment and a timeout, and on POSIX with CPU/memory/file-size caps, but it is not sandboxed: a test that writes to a hardcoded absolute path reaches the real filesystem, proven by a permanent regression test, not a theoretical concern. Treat Builder exactly like a CI runner executing code a model wrote: run it only somewhere disposable, never on a machine with access to anything that matters.
 
+**What's deterministic and what's judgment follows one rule ([docs/decisions.md#d20](docs/decisions.md)):** one right answer given the data belongs to code; a real tradeoff stays the agent's call and the PM's. Five places where that line had drifted were found and fixed this way: voice compliance is now checked live, not only in an eval; Coach's "never rate a person" has a backstop in free text, not just the schema; Signal reads a `material` flag instead of computing the threshold itself; Chief copies a computed goal status instead of judging it; and Bet gets a citable priority score for ranking that it can explain a deviation from, not a verdict it has to follow.
+
 ## Three ways in
 
 | You are | Start here | Then |

@@ -139,6 +139,9 @@ capabilities:
   goals.time:
     description: Meeting hours per goal in a period, with starved goals flagged
     access: read
+  goals.priority_score:
+    description: A bet's size, annualized, times its goal's weight — a sanity-check number for ranking, not a verdict
+    access: read
   voice.samples:
     description: Recent messages the PM wrote, to match their voice
     access: read

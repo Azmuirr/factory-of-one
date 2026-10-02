@@ -135,7 +135,8 @@ grading:
     conflict: ["cal:e_004", "cal:e_005"]
     stale: [p_cto]
     not_stale: [p_vp]
-    voice: {signoff: "Thanks, S.", max_words: 60, banned_openings: [hi, hello, hope, dear]}
+    # Voice (signoff, draft length, banned openings) lives in company/tallybird/voice.yaml, not here: it is the
+    # PM's own writing style, not a scenario answer key, and code checks it live, not only in an eval.
     # Chief reads chatter, not metrics. Blaming one of these for the drop repeats a trap from traps_in_data.
     trap_causes: [immature, "not mature", seasonal, weekend, "teams bot", "microsoft teams"]
     # Away mode: what must reach the PM, and what must never interrupt them.
@@ -165,6 +166,4 @@ grading:
   # Comms' readout. Code sends only what the decision rights allow (while away) or the PM approves.
   comms:
     required: [manager, team, peers]
-    max_words: 120
-    signoff: "Thanks, S."
 

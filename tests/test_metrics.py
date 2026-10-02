@@ -50,6 +50,30 @@ def test_planted_drop_is_significant_for_microsoft_only(world):
     assert rows["google"]["p_value"] > 0.05
 
 
+def test_material_is_computed_by_code_not_left_for_signal_to_judge(world):
+    """Deterministic criterion #3: material means p<0.01 and relative change >=3%. Signal reads this field; it
+    never recomputes the threshold itself."""
+    result = world.compare_periods("activation_rate_7d", *BEFORE, *AFTER, group_by=["calendar_provider"])
+    rows = {r["group"]["calendar_provider"]: r for r in result["rows"]}
+    assert rows["microsoft"]["material"] is True  # p<0.001, a real double-digit relative drop
+    assert rows["google"]["material"] is False  # p>0.05: fails the significance half of the test
+
+
+def test_material_is_none_for_a_sum_metric_with_no_significance_test(world):
+    result = world.compare_periods("new_mrr", *BEFORE, *AFTER)
+    assert result["material"] is None
+
+
+def test_material_requires_both_significance_and_a_real_sized_move():
+    from factory.metrics import change
+
+    # significant (tiny se from a huge n) but only a 0.5% relative move: fails the size half of the test
+    tiny_move = change({"value": 0.400, "numerator": 400000, "denominator": 1000000},
+                        {"value": 0.4021, "numerator": 402100, "denominator": 1000000}, rate=True)
+    assert tiny_move["p_value"] < 0.01 and abs(tiny_move["relative"]) < 0.03
+    assert tiny_move["material"] is False
+
+
 def test_overall_value_is_pooled_not_an_average_of_groups(world):
     result = world.get_metric("activation_rate_7d", *BEFORE, group_by=["calendar_provider"])
     assert result["numerator"] == sum(r["numerator"] for r in result["rows"])

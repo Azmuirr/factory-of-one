@@ -5,6 +5,7 @@ catalogs: catalogs
 goals: company/tallybird/goals.yaml
 lessons: company/tallybird/lessons
 decision_rights: company/tallybird/decision_rights.yaml
+voice: company/tallybird/voice.yaml
 
 # MCP servers. Placeholders: {python}, {world}, {ledger}, {agent}, {catalogs}, {goals}, {demos}. ${NAME} reads an environment variable.
 servers:
@@ -30,6 +31,7 @@ server_env:
   FACTORY_WEEK: "{week}"
   FACTORY_CATALOGS: "{catalogs}"
   FACTORY_GOALS: "{goals}"
+  FACTORY_VOICE: "{voice}"
   PYTHONIOENCODING: utf-8
 
 capabilities:
@@ -78,6 +80,7 @@ capabilities:
   calendar.free: mcp__workplace__free_slots
   goals.get: mcp__workplace__goals_get
   goals.time: mcp__workplace__time_by_goal
+  goals.priority_score: mcp__workplace__priority_score
   voice.samples: mcp__workplace__writing_samples
   notify.self: mcp__workplace__post_to_self
   commitments.due: mcp__ledger__commitments_due

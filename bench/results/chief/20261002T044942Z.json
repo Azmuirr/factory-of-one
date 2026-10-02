@@ -1,0 +1,41 @@
+{
+  "agent": "chief",
+  "agent_version": "0.3.0",
+  "suite_version": "0.5.0",
+  "run_id": "20261002T044942Z",
+  "mode": "real",
+  "trials_per_task": 1,
+  "cost_usd": 0.5501,
+  "summary": {
+    "capability": {
+      "pass_at_k": "0/1",
+      "pass_pow_k": "0/1"
+    }
+  },
+  "tasks": [
+    {
+      "task": "morning-brief-s01",
+      "kind": "capability",
+      "trials": [
+        {
+          "trial": 1,
+          "passed": false,
+          "partial": 0.972,
+          "failed": [
+            "a reply is suggested for everything that needs one: missing ['mail:m_003', 'mail:m_011']"
+          ],
+          "advisory": [],
+          "error": null,
+          "cost_usd": 0.5501,
+          "turns": 52,
+          "duration_s": 145.5,
+          "transcript": "runs\\evals\\chief\\20261002T044942Z\\morning-brief-s01\\trial-1\\transcript.jsonl"
+        }
+      ],
+      "cross_trial": [],
+      "pass_at_k": false,
+      "pass_pow_k": false,
+      "mean_partial": 0.972
+    }
+  ]
+}

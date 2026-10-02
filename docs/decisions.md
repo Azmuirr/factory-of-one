@@ -336,3 +336,64 @@ an audience through when its own numbers-match check already passed, checked bef
 
 **Would change if:** this repo ever needs Builder to run against something that matters outside the sandbox
 (a real company's codebase, not `sandbox/app`). Then the out-of-process containment above stops being optional.
+
+## D20. Five things that were judgment but have one right answer
+
+The criterion, stated once so each item below can just cite it: **one right answer, given the data → code owns
+it. A real tradeoff → the agent frames it and the PM decides.** Even inside a judgment-heavy task, individual
+checkable sub-properties should still be code-owned. Getting a mechanical fact wrong is an error, worth
+preventing for free; two reasonable people landing on different sides of a real tradeoff is not an error, and
+coding in an answer there would just hide whoever wrote the code's judgment in place of the PM's.
+
+**1. Voice compliance (max words, sign-off, no stock openings, opens with the recipient's first name) is now
+checked live, not only in an eval.** It wasn't deterministic in practice before this: the rules lived in
+`truth.yaml`, which no agent tool, and no live server, is allowed to read — so `ledger_server.py`'s
+`world_problems()` had nothing to check against even if it wanted to. Moved the rules to
+`company/tallybird/voice.yaml` (company style, not a scenario answer key) and wrote one shared module,
+`factory/voice.py`, that both `world_problems()` (live) and the eval graders (`drafts_in_voice`,
+`comms_in_voice`) call, so there is exactly one implementation instead of two that could drift. Caught one real
+bug while porting it: the old grader only checked sign-off and the recipient's name for `mail:` refs, correctly
+skipping chat replies, which my first pass missed and applied to everything; fixed before it shipped.
+Live-verified: Chief and Comms both still pass clean with the check live; a deliberately bad brief is now
+rejected by the ledger itself, not just scored lower afterward.
+
+**2. Coach's "never rate a person" has a schema backstop (D14) and now a prose backstop too.** The schema
+blocks a dedicated rating field; nothing stopped the same judgment from being written into a talking point's
+free text. `coach.rating_language_problems` catches the *shape* of a rating (a number out of some scale, a
+letter grade, "rate her") in `world_problems()` for every `prep` write, live. It is deliberately not exhaustive:
+a determined rewrite could still get a judgment past a regex, the same limit D19 names for Python sandboxing —
+this is a second layer for the one field that had zero layers, not a claim of completeness. The red team task's
+`no_injected_text` check, which only ever caught this one planted phrase, was replaced by this structural one.
+
+**3. Signal no longer computes its own materiality threshold.** "p<0.01 and relative change >=3%" was arithmetic
+the model had to apply correctly every time it read two numbers off a result. `compare_periods`'s own `change()`
+now returns a `material` field (`true`/`false`/`null` for a sum metric, where no significance test applies) on
+every result, overall and per segment value, computed identically every time. `SKILL.md` step 2 now says to
+read the field, never recompute it. Live-verified on both scenarios, no regression.
+
+**4. Chief's goal-check status was closer to deterministic than it looked.** `time_by_goal` already computed a
+`starved` boolean; it had no `over` case, and nothing told Chief to use either field directly instead of
+judging the hours itself. Added `over` (more than 1.5x the share a goal's weight implies) and a `status` field
+that is the literal value `goal_check[].status` should carry. `SKILL.md` now says to copy it, not re-derive it.
+Not done, and said so rather than silently skipped: live replay-checking that a written `status` matches a
+fresh `time_by_goal` call would need to pin down the exact period Chief used, which is a real design question
+on its own, not a cheap addition — left as a gap, not papered over.
+
+**5. The one item flagged as a real design call, not just a wiring job.** Ranking itself stays judgment: there
+is no single correct order for bets weighing size against a deadline, reversibility, and evidence strength, and
+coding one in would just hide a code author's opinion inside what's supposed to be the PM's call. What changed
+is that the one piece of that judgment with a right answer — a bet's annualized size times its goal's own
+weight — now has a number: `goals.priority_score`, a new tool, explicitly documented as a starting point, not
+a verdict (`does_not_prove` names exactly what it leaves out). `SKILL.md` tells Bet to cite it and say so when
+the actual rank departs from it. Live-verified, and better than hoped: Bet called it, then wrote "I put #2
+above #3 even though #3 is bigger, because the Mar 4 deadline is firm" — anchoring to the number and explaining
+the deviation, exactly the intended shape, not chosen by the prompt.
+
+**Found and fixed along the way, not one of the five:** `config/capabilities.yaml` got a duplicate `access:
+read` key and a goal that lost its own while adding the new capability, caught immediately by `factory/config.py`'s
+own vocabulary check raising on load — the safety net the project already had did its job the first time it
+was needed this session.
+
+**Would change if:** a scenario's strategy doc ever names a goal for a problem that doesn't exist yet at
+write time (the opposite of this session's problem, where goals existed and a candidate didn't map to one
+cleanly). Then `priority_score` would need a defined behavior for "no goal fits" instead of a hard rejection.

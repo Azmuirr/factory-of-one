@@ -1,0 +1,7 @@
+# The PM's writing voice. Not a scenario answer key: every agent that writes in the PM's voice may read this,
+# live or in an eval. Chief and Comms both draft in this voice; code checks it when either writes.
+signoff: "Thanks, S."
+banned_openings: [hi, hello, hope, dear]
+max_words:
+  draft_reply: 60
+  readout: 120

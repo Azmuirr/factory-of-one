@@ -159,6 +159,15 @@ def time_by_goal(start: str, end: str) -> dict:
 
 
 @server.tool()
+def priority_score(size_value: float, size_unit: str, goal: str) -> dict:
+    """A sanity-check number for ranking bets: size, annualized, times the goal's own weight (from goals.get).
+    A starting point, not a verdict: cite it, and say when a deadline, reversibility, or the strength of the
+    evidence is why the actual rank differs."""
+    with wp() as w:
+        return w.priority_score(size_value, size_unit, goal)
+
+
+@server.tool()
 def stale_stakeholders() -> dict:
     """Stakeholders the PM has not been in direct contact with for longer than their cadence."""
     with wp() as w:

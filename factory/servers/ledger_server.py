@@ -7,7 +7,7 @@ from pathlib import Path
 
 from mcp.server.mcpserver import MCPServer
 
-from factory import ledger
+from factory import ledger, voice
 from factory.metrics import catalog
 
 # Humans write bets and calls. Reviews go through the review server, which runs the code checks.
@@ -79,16 +79,23 @@ def world_problems(type: str, payload: dict) -> list[str]:
             known = comms.people(Path(os.environ["FACTORY_WORLD"]))
             problems += [f"{v['audience']}: {t!r} is not a person id from the directory or a #channel; use the id from directory.lookup"
                          for v in payload.get("versions", []) for t in v.get("to", []) if not t.startswith("#") and t not in known]
+        if voice.config_path():
+            problems += [p["message"] for p in voice.version_problems(payload.get("versions", []), voice.load(voice.config_path()))]
     if type == "brief":
         from factory.review import unsourced_causes
         problems += [f'This says why a metric moved, and you have no metrics: "{s}". Attribute it to the person who said it, '
                      "or leave the cause to the readout." for s in unsourced_causes(payload)]
-    if type == "prep" and os.environ.get("FACTORY_WORLD"):
+        if voice.config_path() and os.environ.get("FACTORY_WORLD"):
+            drafts = voice.all_drafts(payload)
+            problems += [p["message"] for p in voice.draft_problems(drafts, Path(os.environ["FACTORY_WORLD"]), voice.load(voice.config_path()))]
+    if type == "prep":
         from factory import coach
-        world = Path(os.environ["FACTORY_WORLD"])
-        earlier = ledger.read(Path(os.environ["FACTORY_LEDGER"]))
-        problems += coach.ref_problems(world, payload, earlier)
-        problems += coach.about_problems(world, payload)
+        problems += coach.rating_language_problems(payload)
+        if os.environ.get("FACTORY_WORLD"):
+            world = Path(os.environ["FACTORY_WORLD"])
+            earlier = ledger.read(Path(os.environ["FACTORY_LEDGER"]))
+            problems += coach.ref_problems(world, payload, earlier)
+            problems += coach.about_problems(world, payload)
     if type == "build" and os.environ.get("FACTORY_DEMOS"):
         location = Path(os.environ["FACTORY_DEMOS"]).parent / payload.get("location", "")
         if payload.get("kind") == "mvp":

@@ -2,7 +2,7 @@
 name: bet
 description: Frames the work coming in. Reads strategy and product docs, customer requests, stakeholder asks, and the numbers, and writes a ranked list of candidate bets tied to the PM's goals, each sized by code, with the cheapest test and a kill trigger.
 metadata:
-  version: "0.1.4"
+  version: "0.1.5"
 ---
 
 # Bet
@@ -25,7 +25,7 @@ You turn everything asking for the PM's attention into a short, ranked list of b
 2. **The numbers.** Read the ledger for Signal's decision packets. Each one is a candidate, sized by its packet.
 3. **Requests.** Find the themes in customer requests. For each theme, run one `requests.search` with the phrasings that cover it, and keep its `query_id`.
 4. **Asks and deadlines.** Check mail, chat, and the tracker for stakeholder asks and deadlines tied to each theme.
-5. **Rank.** At most 5 candidates. Weigh the size, the goal's weight, the deadline, how reversible the bet is, and how strong the evidence is. A problem the numbers show usually outweighs requests about it, because most affected users never write in. Say so when it applies.
+5. **Rank.** At most 5 candidates. For each, ask `goals.priority_score` for its size and its goal: one number, computed the same way every time, a starting point for the order, not a verdict. Weigh it against the deadline, how reversible the bet is, and how strong the evidence is, and say so plainly whenever the actual rank moves an item up or down from what the score alone would say. A problem the numbers show usually outweighs requests about it, because most affected users never write in. Say so when it applies.
 6. **Write** one `candidates` entry with `ledger.write`: `date`, `items` (each with `rank`, `title`, `goal`, `problem`, `sources`, `evidence`, `assumptions`, `size`, `deadline` when there is one, `cheapest_test`, `kill_trigger`, and `needs_from_pm`: the one thing the PM must decide or do), and `set_aside`. `sources` name the items themselves: `pkt_0001`, `req:r_001` (a request's id, from the search results), `doc:d_strategy`, `mail:<id>`, `chat:<id>`, `trk:<id>`. A query_id is never a source.
 
 Your final reply is the top 3 in three short lines.

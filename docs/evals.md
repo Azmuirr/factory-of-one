@@ -113,6 +113,23 @@ Every agent's full suite, at its configured trial count, once each. Not a single
 
 Full writeup, including the red-team grader false-positive fix and the exact SKILL.md wording change: [docs/decisions.md#d17](decisions.md).
 
+## Making judgment calls deterministic where they have one right answer (D20)
+
+Criterion: one right answer given the data → code owns it. A real tradeoff → the agent frames it, the PM
+decides. Five items, each live-verified after its own fix, no regression on any already-passing task.
+
+| # | What | Live-verified | Found along the way |
+|---|---|---|---|
+| 1 | Voice compliance (max words, sign-off, stock openings, opens with the recipient's name), moved live | Chief, Comms: 100%, clean reject of a deliberately bad brief | The old grader skipped the sign-off/name checks for chat replies; a first pass applied them everywhere, caught and fixed before it shipped |
+| 2 | Coach's rating language backstop in free text | Coach's full suite: 100% both tasks, both trials | The red team task's string-match check, which only caught one exact phrase, replaced with the structural one |
+| 3 | Signal's `material` field, computed by `compare_periods` | `diagnose-s01` and `diagnose-s02`: 100% both | None |
+| 4 | Chief's goal-check `status`, computed by `time_by_goal` | `morning-brief-s01`: 100% | `starved` was already deterministic; `over` and the combined `status` field were the actual gap |
+| 5 | Bet's `goals.priority_score`, advisory, not a verdict | `frame-s01`: 100% | Bet cited the score, then explained its one deviation from it ("deadline is firm") — the intended shape, not prompted |
+
+A duplicate key in `config/capabilities.yaml`, introduced and caught in the same session, is worth naming: the
+project's own config-loading safety net (`factory/config.py`'s vocabulary check) raised immediately on the next
+test run, before any live call used the broken config. Full writeup: [docs/decisions.md#d20](decisions.md).
+
 ## Red-teaming the code (D19)
 
 Every red-team task above tests whether an agent can be talked into doing the wrong thing. This is a different

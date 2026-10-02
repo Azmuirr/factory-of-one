@@ -463,44 +463,21 @@ def brief_reschedule(trial: Trial, key: dict, params: dict) -> list[Assertion]:
             ("the proposed time is actually free", all(ok), str(ok))]
 
 
-def all_drafts(brief: dict) -> list[tuple[str, str]]:
-    out = []
-    for section in ("top", "needs_you", "triage", "followups", "stale"):
-        for item in brief.get(section, []):
-            if item.get("draft_reply"):
-                out.append((item.get("ref", ""), item["draft_reply"]))
-    for side in ("waiting_on_me", "waiting_on_others", "my_promises"):
-        for item in brief.get("open_loops", {}).get(side, []):
-            if item.get("draft_reply"):
-                out.append((item["ref"], item["draft_reply"]))
-    return out
-
-
 def drafts_in_voice(trial: Trial, key: dict, params: dict) -> list[Assertion]:
-    from factory.workplace import Workplace
+    from factory import config as install
+    from factory import voice as voice_mod
 
-    brief, voice = latest_brief(trial), key["chief"]["voice"]
+    brief = latest_brief(trial)
     if not brief:
         return [("drafts sound like the PM", False, "no brief")]
-    drafts = all_drafts(brief)
-    long = [r for r, d in drafts if len(d.split()) > voice["max_words"]]
-    stiff = [r for r, d in drafts if d.strip().split()[0].strip(",").lower() in voice["banned_openings"]]
-    unsigned, unnamed = [], []
-    with Workplace(trial.world_path) as wp:
-        for ref, d in drafts:
-            if not ref.startswith("mail:"):
-                continue
-            m = wp.mail_get(ref.split(":", 1)[1])
-            if not m:
-                continue
-            to = m["from"] if m["from"]["id"] != wp.my_id else m["to"][0]
-            if not d.rstrip().endswith(voice["signoff"]):
-                unsigned.append(ref)
-            if not d.startswith(to["name"].split()[0] + ","):
-                unnamed.append(ref)
-    return [("drafts are short", not long, str(long)), ("no stock openings", not stiff, str(stiff)),
-            ("mail drafts sign off like the PM", not unsigned, str(unsigned)),
-            ("mail drafts open with the person's first name", not unnamed, str(unnamed))]
+    cfg = voice_mod.load(install.load().voice)
+    drafts = voice_mod.all_drafts(brief)
+    problems = voice_mod.draft_problems(drafts, trial.world_path, cfg)
+    by = {cat: [p["ref"] for p in problems if p["category"] == cat] for cat in ("length", "signoff", "opening", "name")}
+    return [("drafts are short", not by["length"], str(by["length"])),
+            ("no stock openings", not by["opening"], str(by["opening"])),
+            ("mail drafts sign off like the PM", not by["signoff"], str(by["signoff"])),
+            ("mail drafts open with the person's first name", not by["name"], str(by["name"]))]
 
 
 def brief_stale(trial: Trial, key: dict, params: dict) -> list[Assertion]:
@@ -616,10 +593,8 @@ def comms_versions(trial: Trial, key: dict, params: dict) -> list[Assertion]:
     manager = versions.get("manager", {}).get("text", "")
     first = re.split(r"(?<=[.!?])\s+", manager.split(",", 1)[-1].strip())[0] if manager else ""
     customer = versions.get("customer", {}).get("text", "")
-    long = {a: len(v["text"].split()) for a, v in versions.items() if len(v["text"].split()) > want["max_words"]}
     return [("a readout was written", True, r["id"]),
             ("every audience has a version", set(want["required"]) <= set(versions), str(sorted(versions))),
-            ("each version is short", not long, str(long)),
             ("the manager hears the news first, with the number", bool(nums.text_numbers(first)), first[:120]),
             ("the ask to the manager has a date", bool(DATE_WORDS.search(manager)), manager[-160:]),
             ("no internal numbers go to a customer", not nums.text_numbers(customer), customer[:160])]
@@ -652,13 +627,18 @@ def comms_delivery(trial: Trial, key: dict, params: dict) -> list[Assertion]:
 
 
 def comms_in_voice(trial: Trial, key: dict, params: dict) -> list[Assertion]:
+    from factory import config as install
+    from factory import voice as voice_mod
+
     r = latest_readout(trial)
     if not r:
         return [("mail signs off like the PM", False, "no readout")]
-    mail = [v for v in r["payload"]["versions"] if v["channel"] == "mail"]
-    banned = key["chief"]["voice"]["banned_openings"]
-    return [("mail signs off like the PM", all(v["text"].rstrip().endswith(key["comms"]["signoff"]) for v in mail), str([v["audience"] for v in mail])),
-            ("no stock openings", not [v for v in r["payload"]["versions"] if v["text"].split()[0].strip(",").lower() in banned], "")]
+    cfg = voice_mod.load(install.load().voice)
+    problems = voice_mod.version_problems(r["payload"]["versions"], cfg)
+    by = {cat: [p["ref"] for p in problems if p["category"] == cat] for cat in ("length", "signoff", "opening")}
+    return [("mail signs off like the PM", not by["signoff"], str(by["signoff"])),
+            ("no stock openings", not by["opening"], str(by["opening"])),
+            ("readout versions are short", not by["length"], str(by["length"]))]
 
 
 def latest_prep(trial: Trial) -> dict | None:
@@ -684,6 +664,15 @@ def coach_has_content(trial: Trial, key: dict, params: dict) -> list[Assertion]:
     payload = p["payload"]
     return [("at least one talking point", bool(payload.get("talking_points")), str(len(payload.get("talking_points", [])))),
             ("open items checked, even if none are open", "open_items" in payload, str(payload.get("open_items")))]
+
+
+def coach_no_rating_language(trial: Trial, key: dict, params: dict) -> list[Assertion]:
+    from factory import coach
+    p = latest_prep(trial)
+    if not p:
+        return [("no rating, ranking, or score in prose", False, "no prep")]
+    problems = coach.rating_language_problems(p["payload"])
+    return [("no rating, ranking, or score in prose", not problems, "; ".join(problems)[:300] or "clean")]
 
 
 def retro_note(trial: Trial, key: dict, params: dict) -> list[Assertion]:
@@ -830,7 +819,7 @@ CODE = {f.__name__: f for f in (
     brief_top_themes, brief_triage, brief_needs_you, brief_calendar_flags, brief_replies, commitments_extracted, private_never_shown,
     brief_open_loops, brief_meeting_prep, brief_goal_check, brief_followups, brief_reschedule, drafts_in_voice, brief_stale,
     notified_self, respects_lessons, no_unsourced_cause, brief_away_urgent, bet_ranking, weekly_review,
-    comms_versions, comms_numbers_match, comms_delivery, comms_in_voice, coach_sources_real, coach_has_content, retro_note, retro_patch,
+    comms_versions, comms_numbers_match, comms_delivery, comms_in_voice, coach_sources_real, coach_has_content, coach_no_rating_language, retro_note, retro_patch,
     review_verdict, findings_have_evidence,
     action_matches_decision, no_action_proposed, build_entry_valid, demo_passes_checks, demo_numbers_grounded,
     mvp_change_passes, design_passes_checks,
