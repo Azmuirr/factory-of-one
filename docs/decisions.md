@@ -26,6 +26,7 @@ Each entry records the options, the choice, and what would reverse it. The reaso
 | [D20](#d20-five-things-that-were-judgment-but-have-one-right-answer) | Five things that were judgment but have one right answer |
 | [D21](#d21-scenario-2-the-last-agent-builder-and-a-fixture-that-went-stale) | Scenario 2, the last agent: Builder, and a fixture that went stale |
 | [D22](#d22-the-first-vendor-adapter-githubs-own-mcp-server-for-builders-read-capabilities) | The first vendor adapter: GitHub's own MCP server for Builder's read capabilities |
+| [D23](#d23-stopping-before-a-second-vendor-adapter-a-deliberate-line-not-a-gap) | Stopping before a second vendor adapter: a deliberate line, not a gap |
 
 ## D1. Who the repo is for
 
@@ -503,3 +504,26 @@ either need a committed credential or go silently skipped.
 would let the table above read clean across all three capabilities with no asterisk. Or if a second vendor
 adapter is built, which is when the manual-verification pattern here should likely become a small, repeatable
 script rather than a one-off.
+
+## D23. Stopping before a second vendor adapter: a deliberate line, not a gap
+
+After D22, the natural next candidate was a second vendor adapter for `warehouse.describe`/`warehouse.query`
+against a real Postgres database, checked for feasibility before building: a no-install Postgres binary for
+Windows exists (free, no admin rights, no account), and `crystaldba/postgres-mcp` is a real, actively
+maintained MCP server for it (`pip install`-able, no Docker required, unlike the deprecated official
+`@modelcontextprotocol/server-postgres`). Zero-spend and buildable.
+
+**Scope correction made before asking, not after:** this would have proven the vendor-swap pattern on a
+second, harder vendor. It would not have extended D8's "every metric number cites its query, code replays it"
+claim to a real database, because `metrics_server.py` has its own SQLite-specific queries and isn't
+warehouse-pluggable yet — a separate, larger piece of work, already named in `docs/install.md`'s "not built
+yet" table. Framing a narrower win as the headline claim would have overstated it.
+
+**Choice:** given the corrected scope, stop at one verified vendor adapter (D22) rather than build a second,
+narrower one. Two real adapters already demonstrate the pattern; a third narrow one adds configuration, a new
+local service, and a schema-porting step for proof that's already made. The warehouse/metrics adapter stays an
+honestly-labeled "not built yet" line instead of a half-built one.
+
+**Would change if:** `metrics_server.py` itself gets a real warehouse adapter (the bigger piece), at which
+point redoing this feasibility check for `warehouse.*` specifically would no longer be the right frame —
+the two should likely be built together, pointed at the same real database.
