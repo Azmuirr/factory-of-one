@@ -1,0 +1,107 @@
+# A real vendor adapter, not a template: the sandbox install (config/sandbox.yaml) with Builder's three
+# read-only code capabilities pointed at a real repo through GitHub's own official MCP server
+# (github/github-mcp-server) instead of the simulated sandbox app. Everything else — metrics, the ledger,
+# demos, design, workplace — stays on the simulated company, same as sandbox.yaml. code.propose and code.test
+# stay on the factory's own code server too: GitHub's MCP server reads a repo, it does not run a change's
+# tests in an isolated copy, so there is nothing there to swap in for those two capabilities yet.
+#
+# Needs: a free, read-only GitHub personal access token (Settings > Developer settings > Fine-grained tokens,
+# "Public Repositories (read-only)", no other permissions) in the GITHUB_PERSONAL_ACCESS_TOKEN environment
+# variable, and the github-mcp-server binary from https://github.com/github/github-mcp-server/releases at the
+# path below (see docs/install.md#a-real-vendor-adapter-github). Both are free; no paid API or Copilot
+# subscription is used.
+mode: live
+company: company/tallybird/context.md
+catalogs: catalogs
+goals: company/tallybird/goals.yaml
+lessons: company/tallybird/lessons
+decision_rights: company/tallybird/decision_rights.yaml
+voice: company/tallybird/voice.yaml
+
+servers:
+  metrics:   {command: "{python}", args: [-m, factory.servers.metrics_server]}
+  warehouse: {command: "{python}", args: [-m, factory.servers.warehouse_server]}
+  support:   {command: "{python}", args: [-m, factory.servers.support_server]}
+  releases:  {command: "{python}", args: [-m, factory.servers.releases_server]}
+  ledger:    {command: "{python}", args: [-m, factory.servers.ledger_server]}
+  demos:     {command: "{python}", args: [-m, factory.servers.demos_server]}
+  review:    {command: "{python}", args: [-m, factory.servers.review_server]}
+  workplace: {command: "{python}", args: [-m, factory.servers.workplace_server]}
+  code:      {command: "{python}", args: [-m, factory.servers.code_server]}   # code.propose, code.test only
+  design:    {command: "{python}", args: [-m, factory.servers.design_server]}
+  requests:  {command: "{python}", args: [-m, factory.servers.requests_server]}
+  retro:     {command: "{python}", args: [-m, factory.servers.retro_server]}
+  # The real vendor: GitHub's own MCP server, read-only, over the public factory-of-one repo itself.
+  github:
+    command: ".tools/github-mcp-server.exe"
+    args: [stdio, --read-only, "--toolsets=repos"]
+    env:
+      GITHUB_PERSONAL_ACCESS_TOKEN: "${GITHUB_PERSONAL_ACCESS_TOKEN}"
+      GITHUB_TOOLSET_REPO: "Azmuirr/factory-of-one"
+
+server_env:
+  FACTORY_WORLD: "{world}"
+  FACTORY_LEDGER: "{ledger}"
+  FACTORY_AGENT: "{agent}"
+  FACTORY_DEMOS: "{demos}"
+  FACTORY_CHANGES: "{changes}"
+  FACTORY_DESIGNS: "{designs}"
+  FACTORY_WEEK: "{week}"
+  FACTORY_CATALOGS: "{catalogs}"
+  FACTORY_GOALS: "{goals}"
+  FACTORY_VOICE: "{voice}"
+  PYTHONIOENCODING: utf-8
+
+capabilities:
+  metrics.list: mcp__metrics__list_metrics
+  metrics.get: mcp__metrics__get_metric
+  metrics.compare: mcp__metrics__compare_periods
+  metrics.size_impact: mcp__metrics__estimate_weekly_arr_impact
+  warehouse.describe: mcp__warehouse__describe_tables
+  warehouse.query: mcp__warehouse__query
+  support.search: mcp__support__search_tickets
+  support.volume: mcp__support__ticket_volume
+  support.get: mcp__support__get_ticket
+  releases.list: mcp__releases__list_releases
+  flags.state: mcp__releases__flag_state
+  demo.publish: mcp__demos__publish_demo
+  demo.check: mcp__demos__check_demo
+  docs.list: mcp__workplace__docs_list
+  docs.read: mcp__workplace__doc_read
+  requests.search: mcp__requests__search_requests
+  retro.week: mcp__retro__week_stats
+  skills.list: mcp__retro__list_skills
+  skills.read: mcp__retro__read_skill
+  # The three read capabilities a real vendor now serves, over the real repo named above:
+  code.list: mcp__github__get_file_contents
+  code.read: mcp__github__get_file_contents
+  code.search: mcp__github__search_code
+  code.propose: mcp__code__propose_change
+  code.test: mcp__code__run_tests
+  design.system: mcp__design__get_design_system
+  design.render: mcp__design__render_design
+  review.check: mcp__review__check_entry
+  review.submit: mcp__review__submit_review
+  mail.list: mcp__workplace__mail_list
+  mail.read: mcp__workplace__mail_read
+  chat.list: mcp__workplace__chat_list
+  chat.thread: mcp__workplace__chat_thread
+  calendar.list: mcp__workplace__calendar_list
+  transcripts.list: mcp__workplace__transcripts_list
+  transcripts.read: mcp__workplace__transcript_read
+  directory.lookup: mcp__workplace__directory_lookup
+  tracker.search: mcp__workplace__tracker_search
+  mail.sent: mcp__workplace__mail_sent
+  loops.list: mcp__workplace__open_loops
+  people.history: mcp__workplace__people_history
+  people.stale: mcp__workplace__stale_stakeholders
+  calendar.context: mcp__workplace__meeting_context
+  calendar.free: mcp__workplace__free_slots
+  goals.get: mcp__workplace__goals_get
+  goals.time: mcp__workplace__time_by_goal
+  goals.priority_score: mcp__workplace__priority_score
+  voice.samples: mcp__workplace__writing_samples
+  notify.self: mcp__workplace__post_to_self
+  commitments.due: mcp__ledger__commitments_due
+  ledger.write: mcp__ledger__write_entry
+  ledger.read: mcp__ledger__read_entries

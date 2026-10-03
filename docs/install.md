@@ -66,6 +66,35 @@ Retro proposes at most two patches to agents' instructions, each with the eval c
 
 Builder's `code.propose` runs the tests of a change an agent wrote, on your machine. Those tests get only a short allowlist of environment variables (the path, temp folders, your home folder), never your tokens or keys. They still run with your file access and network. On a real repo, run the factory inside a container or a throwaway VM.
 
+## A real vendor adapter: GitHub
+
+`config/vendors/github-code.yaml` is a filled-in, runnable example of the pattern above, not a template: the
+sandbox install with Builder's three read-only code capabilities (`code.list`, `code.read`, `code.search`)
+pointed at a real public repository through GitHub's own official MCP server
+([github/github-mcp-server](https://github.com/github/github-mcp-server)), instead of the simulated sandbox
+app. Everything else (metrics, the ledger, demos, design, workplace) stays on the simulated company.
+`code.propose` and `code.test` stay on the factory's own code server: GitHub's MCP server reads a repo, it
+does not run a change's tests in an isolated copy, so there's nothing to swap in for those two yet.
+
+Setup, free end to end:
+
+1. Download the `github-mcp-server` binary for your OS from its
+   [releases page](https://github.com/github/github-mcp-server/releases) and place it at `.tools/` (gitignored).
+2. Create a fine-grained personal access token at github.com with only "Public Repositories (read-only)"
+   access — no other permissions, free, revocable anytime.
+3. Put `GITHUB_PERSONAL_ACCESS_TOKEN=<token>` in a `.env` file at the repo root (already gitignored) or export
+   it as an environment variable. Never commit it.
+4. `FACTORY_CONFIG=config/vendors/github-code.yaml python -m factory.evals run builder --task <a task that only needs code.list/read/search>`
+
+No paid API and no Copilot subscription: the binary is free, the token is free, and reads against a public
+repo cost nothing.
+
+**Live-verified**, not just configured: `code.list` and `code.read` (both `get_file_contents`) returned real
+directory listings and real file content from this repo's actual latest commit. `code.search`
+(`search_code`) calls the real API correctly — proven against other repos — but returns zero results for this
+repo specifically, because GitHub's code-search index does not yet cover it. That is a real vendor limitation,
+disclosed rather than hidden behind a cleaner-looking demo repo. Full writeup: [docs/decisions.md#d22](decisions.md).
+
 ## Rules the install cannot change
 
 | Rule | How it is enforced |
@@ -81,5 +110,5 @@ Builder's `code.propose` runs the tests of a change an agent wrote, on your mach
 |---|---|
 | Warehouse adapter for Postgres, BigQuery, or Snowflake | Planned. Today `metrics` and `warehouse` read a SQLite world |
 | Live loop scheduling (daily runs, waiting for review dates) | Planned. Today the loop advances a simulated world |
-| A tested setup for specific vendor MCP servers | Planned. Each vendor gets verified when wired in |
+| A tested setup for specific vendor MCP servers | GitHub, done and live-verified ([docs/decisions.md#d22](decisions.md)): `code.list`/`code.read` proven against the real repo; `code.search` calls the real API correctly but this repo isn't yet in GitHub's code-search index, disclosed rather than hidden. Other vendors (Slack, Gmail, a warehouse) still planned |
 | `code` scope rules for your repo | Planned. Today the flag file and the folders a change may touch are the sandbox app's. Point `FACTORY_APP` at a clone to read and test; scope rules come next |

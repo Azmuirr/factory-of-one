@@ -25,6 +25,7 @@ Each entry records the options, the choice, and what would reverse it. The reaso
 | [D19](#d19-red-teaming-the-code-not-just-the-agents-one-real-disclosed-vulnerability) | Red-teaming the code, not just the agents: one real, disclosed vulnerability |
 | [D20](#d20-five-things-that-were-judgment-but-have-one-right-answer) | Five things that were judgment but have one right answer |
 | [D21](#d21-scenario-2-the-last-agent-builder-and-a-fixture-that-went-stale) | Scenario 2, the last agent: Builder, and a fixture that went stale |
+| [D22](#d22-the-first-vendor-adapter-githubs-own-mcp-server-for-builders-read-capabilities) | The first vendor adapter: GitHub's own MCP server for Builder's read capabilities |
 
 ## D1. Who the repo is for
 
@@ -461,3 +462,44 @@ generalize from.
 manual `cp` run by whoever next touches `sandbox/app`, and become a small check (or a fixture-regeneration
 script) that fails loudly the moment the baseline and a fixture diverge, the same way `factory/config.py`'s
 vocabulary check already does for capabilities.
+
+## D22. The first vendor adapter: GitHub's own MCP server for Builder's read capabilities
+
+D7 claims agents name capabilities, not tools, so any install can swap in its own tools. Until now that claim
+was architecturally true (`config/live.example.yaml` shows the pattern) but never exercised end to end against
+a real vendor. `config/vendors/github-code.yaml` wires `code.list` and `code.read` (both to `get_file_contents`)
+and `code.search` (to `search_code`) to GitHub's own official MCP server (`github/github-mcp-server`, the
+actively maintained one; the community npm package is deprecated), run read-only, over the public
+`Azmuirr/factory-of-one` repo itself. `code.propose` and `code.test` stay on the factory's own code server:
+GitHub's MCP server reads a repo, it does not run a change's tests in an isolated copy.
+
+**Free end to end**, matching D6: the server binary is a free download, the credential is a fine-grained
+personal access token scoped to nothing but "Public Repositories (read-only)," and reads against a public
+repo cost nothing. No Copilot subscription, no paid API.
+
+**Live-verified, not just configured:**
+
+| Capability | Tool called | Result |
+|---|---|---|
+| `code.read` | `get_file_contents` on `sandbox/app/tallybird/checkout.py` | Returned the real file, matching the exact commit (`948ccfc`) pushed in D21 |
+| `code.list` | `get_file_contents` on the `tallybird/` directory | Returned a real directory listing, with real blob SHAs and URLs |
+| `code.search` | `search_code` for `render_checkout` in this repo | Zero results |
+
+**The honest finding on `code.search`:** zero results is not a bug in the adapter or the wiring. The same tool
+against `torvalds/linux` returned 5,632 matches, and an unscoped query for `"Tallybird"` returned 127 matches
+across public GitHub — proving `search_code` itself works and the token is valid. A query scoped to
+`repo:Azmuirr/factory-of-one` for even a bare `def` returned zero, which means GitHub's code-search index does
+not yet cover this specific repo (small, recently active repos aren't guaranteed indexing, and GitHub does not
+document a timeline). This is a real limitation of the vendor, not a mock standing in for one, which is itself
+the point: a real adapter inherits the real vendor's real limitations, something a simulated tool never would.
+Disclosed rather than swapped for a repo chosen to make the demo look cleaner.
+
+**Not added as an automated regression test**, unlike D19's sandboxing PoC: that check needed no secret and no
+network, so it could run in CI. This one needs a live token and a live GitHub API call, so it stays a documented,
+repeatable manual verification (`docs/install.md#a-real-vendor-adapter-github`) rather than a test that would
+either need a committed credential or go silently skipped.
+
+**Would change if:** `search_code` against this repo starts returning results on its own (reindexing), which
+would let the table above read clean across all three capabilities with no asterisk. Or if a second vendor
+adapter is built, which is when the manual-verification pattern here should likely become a small, repeatable
+script rather than a one-off.

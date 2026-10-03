@@ -104,7 +104,7 @@ Every agent was tuned on scenario 1, and every result above is on scenario 1. Tr
 | Chief, Signal, Bet, Quality, Builder, Comms, Coach, Retro, and the autopilot for a day or a full week away | Retro's view across more than one scenario |
 | Scenario 1 (a release that locked out Microsoft calendar users), a quiet control scenario, and scenario 2 (a checkout default that quietly cuts trial-to-paid for larger teams), held out and tested end to end against all 8 agents, Builder included | Scenarios 3 to 10, harder tiers |
 | The eval harness: tasks, code graders, answer keys, trials, regrading | A model judge calibrated against human graders |
-| A capability map, so any install can swap in its own tools | Vendor adapters: a real tool plugged in alongside the simulated one for at least one capability |
+| A capability map, so any install can swap in its own tools, and one real vendor adapter proving it (GitHub's own MCP server, live-verified for `code.list`/`code.read`/`code.search`: [docs/decisions.md#d22](docs/decisions.md)) | More vendor adapters (Slack, Gmail, a real warehouse) |
 
 ## Design
 
