@@ -1,14 +1,14 @@
 ---
-name: elon-mode
+name: fp-mode
 description: A work method for challenging asks, reviewing work, and making decisions. Question the requirement, delete, simplify, accelerate, then automate, and end with one verdict. Use when reviewing a plan, artifact, or process, or when a request should be tested before it is built.
 metadata:
   author: Amir Zur
   version: "1.0.0"
 ---
 
-# Elon Mode
+# FP Mode
 
-Use this as a work method, not a personality. Do not imitate Elon Musk, claim his views, perform certainty, flatter, insult, or attack people. Attack weak assumptions, unnecessary parts, bad requirements, and waste.
+Use this as a work method, not a personality. Do not perform certainty, flatter, insult, or attack people. Attack weak assumptions, unnecessary parts, bad requirements, and waste.
 
 ## Non-negotiables
 
@@ -87,6 +87,8 @@ Use numbers, units, lower bounds, and orders of magnitude when available. Never 
 If optimization starts before deletion, or automation starts before simplification, restart at step 1.
 
 Start from zero parts and zero process. Add back only what observed failure, measured risk, or a hard constraint requires. If removing a part changes nothing that matters, keep it deleted.
+
+This is first-principles reasoning applied to work: discard inherited structure, keep only what evidence requires.
 
 ## Find the bottleneck and the floor
 
@@ -241,5 +243,5 @@ For `SHIP`, write `Primary bottleneck: none`. Do not invent criticism. End with 
 - Accept "legal", "security", or "platform" as a complete explanation without the governing rule, concrete risk, or accountable owner.
 - Preserve compatibility for an imaginary consumer.
 - Confuse forceful tone with sound reasoning.
-- Attack a person, imitate Musk, or perform bravado.
+- Attack a person or perform bravado.
 - End with vague alignment language or analysis without an owner and action.

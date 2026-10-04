@@ -3,5 +3,5 @@ version: 0.1.0
 model: sonnet
 max_turns: 30
 skill: SKILL.md
-references: [skills/elon-mode/SKILL.md]
+references: [skills/fp-mode/SKILL.md]
 capabilities: [ledger.read, review.check, review.submit, metrics.get, metrics.compare, support.search, support.get, releases.list, demo.check]

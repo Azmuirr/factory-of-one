@@ -17,7 +17,7 @@ Tool names below describe capabilities. Each install maps capabilities to real t
 | The model owns intent, planning, and narrative | Which question to ask, what to try, how to explain it |
 | Agents propose, you apply | Tools can queue an action or a draft. Only a human gate executes it |
 | Stop, don't guess | Missing data becomes `Unknown` or an escalation, never a filled gap |
-| One vocabulary | Every claim is a fact, hard constraint, assumption, or unknown (Elon Mode reality ledger). Evidence carries a "Does NOT prove" line |
+| One vocabulary | Every claim is a fact, hard constraint, assumption, or unknown (FP Mode reality ledger). Evidence carries a "Does NOT prove" line |
 | Truth is unreachable | No tool can read the answer key |
 
 ## Artifacts passed between agents
@@ -98,7 +98,7 @@ Two passes on every artifact before it reaches you.
 | Pass | Checks |
 |---|---|
 | Correctness (code, `review.check`) | Cited queries are replayed and must match; signal cards are recomputed exactly; the size must equal the sizing tool; quotes match a ticket or release note word for word; fields are valid; no email addresses. `review.submit` fills these checks itself and refuses SHIP if one failed |
-| Elon Mode review ([skills/elon-mode](../skills/elon-mode/SKILL.md), by Amir Zur) | Outcome and acceptance bar, strongest counterexample, the 5-step algorithm, the required proof tier. Returns SHIP, FIX, PROVE, DELETE, or STOP with at most 3 findings |
+| FP Mode review ([skills/fp-mode](../skills/fp-mode/SKILL.md), by Amir Zur) | Outcome and acceptance bar, strongest counterexample, the 5-step algorithm, the required proof tier. Returns SHIP, FIX, PROVE, DELETE, or STOP with at most 3 findings |
 
 Tools: read-only `metrics`, `support`, `transcripts`, `github`, `design`. Gate: you define the bar.
 Scored on: planted defects caught, unnecessary flags raised.
@@ -132,7 +132,7 @@ Runs at the end of every simulated week. It never sees the answer key, so it lea
 | 3. Find patterns | Quality rejections, your overrides, questions Signal couldn't answer, the slowest station |
 | 4. Propose a patch | A skill change plus a new eval case that reproduces the failure |
 | 5. You approve | The eval harness runs. The version goes up only with the failure linked |
-| 6. Elon Mode on the factory | What to delete, which manual task has earned automation |
+| 6. FP Mode on the factory | What to delete, which manual task has earned automation |
 
 Output: a 5-line weekly note. Tools: `ledger`, eval history, scripts for Brier score, overdue bets, and rejection frequency.
 

@@ -132,7 +132,7 @@ Each entry records the options, the choice, and what would reverse it. The reaso
 
 **Also:** a signal card is recomputed exactly from its metric, periods, and segment. The size must equal the sizing tool's answer.
 
-**What code still cannot catch:** a packet whose numbers and quotes are all true but whose causal story is wrong, such as blaming a release that shipped before the drop. That is the job of Quality's Elon Mode disproof pass, and Quality's eval suite plants exactly that case.
+**What code still cannot catch:** a packet whose numbers and quotes are all true but whose causal story is wrong, such as blaming a release that shipped before the drop. That is the job of Quality's FP Mode disproof pass, and Quality's eval suite plants exactly that case.
 
 **Would change if:** replay becomes too slow on a real warehouse. Then log results with a hash instead of replaying.
 

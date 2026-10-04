@@ -11,7 +11,7 @@ The PMs who last will be operators with strong judgment who run several agents a
 | **Chief**, chief of staff | Morning brief: triage, open loops, commitments, meeting prep, goal check, replies drafted in your voice. Sends nothing except one note to you | Sender weight, suspicious senders, who replied, calendar conflicts, free slots, hours per goal, stakeholder staleness |
 | **Signal**, analyst | What changed and why, with numbers and customer voice. Writes a decision packet | Every number: each one cites a query that code replays |
 | **Bet**, investment analyst | Frames the work coming in: strategy docs, customer requests, stakeholder asks, and Signal's numbers, ranked into at most 5 bets tied to your goals, with set-asides that cite the strategy | Every size: a cited query or request search that code replays. Each account counted once |
-| **Quality**, reviewer | Reviews Signal's, Bet's, and Builder's work before you see it, with [Elon Mode](skills/elon-mode/SKILL.md). Chief's brief is checked by code when it is written | Numbers, quotes, fields, privacy. It cannot return SHIP when a check fails |
+| **Quality**, reviewer | Reviews Signal's, Bet's, and Builder's work before you see it, with [FP Mode](skills/fp-mode/SKILL.md). Chief's brief is checked by code when it is written | Numbers, quotes, fields, privacy. It cannot return SHIP when a check fails |
 | **Comms**, communicator | One decision told up to your manager, down to your team, across to peers, and to a customer when needed, with identical facts. Drafts only | Every number must already be in the ledger. Code sends only what you approve at the Tell gate, or, while you're away, what your decision rights allow |
 | **Coach**, people partner | Prepares you for a 1:1, feedback, or a hiring conversation. Runs only when you start it | There is no field for a rating, ranking, or score anywhere in its schema. Every talking point and open item cites a real calendar event, transcript, doc, or earlier ledger entry |
 | **Retro**, the factory's coach | Once a week, reads the runs (never the answer keys), writes a five-line note, and proposes at most two patches to agents' instructions, each with the eval case that reproduces the failure | The week's facts: recurring failures, Brier scores, overrides, time per station. A patch applies only if its text matches exactly, and only after you say yes |
@@ -120,4 +120,4 @@ Every agent was tuned on scenario 1, and every result above is on scenario 1. Tr
 
 ## Credits and license
 
-[Elon Mode](skills/elon-mode/SKILL.md), the review method Quality uses, is by Amir Zur. The code is under the [MIT license](LICENSE).
+[FP Mode](skills/fp-mode/SKILL.md), the review method Quality uses, is by Amir Zur. The code is under the [MIT license](LICENSE).

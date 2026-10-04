@@ -4,4 +4,4 @@ model: sonnet
 max_turns: 30
 skill: SKILL.md
 capabilities: [retro.week, skills.list, skills.read, ledger.write]
-references: [skills/elon-mode/SKILL.md]
+references: [skills/fp-mode/SKILL.md]
