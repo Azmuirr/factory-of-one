@@ -32,6 +32,13 @@ schtasks /Create /SC WEEKLY /D MON,TUE,WED,THU,FRI /ST 07:30 /TN "Chief morning"
 
 Chief posts its note to your own private channel through `notify.self`. In the sandbox that note lands in the run folder's `outbox.jsonl`. In a live install, map `notify.self` to a direct message to yourself.
 
+On Windows, `scripts/install_schedule.ps1` turns the four `schtasks` lines above into working automation instead
+of copy-paste: it installs the four real Scheduled Tasks (`-Uninstall` removes them). Live-verified against the
+sandbox ([docs/decisions.md#d24](decisions.md)): fired by Task Scheduler itself, not by calling Python directly,
+with the real brief and exit code captured in the task's own run history. Each scheduled run also reads
+`company/<company>/lessons/chief.yaml`, so a later scheduled run sees a correction an earlier one (scheduled or
+manual) produced — the thing a bare cron entry by itself doesn't prove.
+
 Teach Chief when it gets something wrong:
 
 ```bash
@@ -109,6 +116,7 @@ disclosed rather than hidden behind a cleaner-looking demo repo. Full writeup: [
 | Piece | Status |
 |---|---|
 | Warehouse adapter for Postgres, BigQuery, or Snowflake | Planned. Today `metrics` and `warehouse` read a SQLite world |
-| Live loop scheduling (daily runs, waiting for review dates) | Planned. Today the loop advances a simulated world |
+| Real OS-level scheduling for Chief's daily cadence | Windows, done and live-verified ([docs/decisions.md#d24](decisions.md)): `scripts/install_schedule.ps1`. macOS/Linux `crontab` lines above are still manual, not scripted |
+| The loop itself waiting on a bet's real `review_date` | Planned. Today `factory.loop`/`factory.autopilot` advance a simulated world (`world.db`), not real calendar time |
 | A tested setup for specific vendor MCP servers | GitHub, done and live-verified ([docs/decisions.md#d22](decisions.md)): `code.list`/`code.read` proven against the real repo; `code.search` calls the real API correctly but this repo isn't yet in GitHub's code-search index, disclosed rather than hidden. Other vendors (Slack, Gmail, a warehouse) still planned |
 | `code` scope rules for your repo | Planned. Today the flag file and the folders a change may touch are the sandbox app's. Point `FACTORY_APP` at a clone to read and test; scope rules come next |

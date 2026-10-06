@@ -27,6 +27,7 @@ Each entry records the options, the choice, and what would reverse it. The reaso
 | [D21](#d21-scenario-2-the-last-agent-builder-and-a-fixture-that-went-stale) | Scenario 2, the last agent: Builder, and a fixture that went stale |
 | [D22](#d22-the-first-vendor-adapter-githubs-own-mcp-server-for-builders-read-capabilities) | The first vendor adapter: GitHub's own MCP server for Builder's read capabilities |
 | [D23](#d23-stopping-before-a-second-vendor-adapter-a-deliberate-line-not-a-gap) | Stopping before a second vendor adapter: a deliberate line, not a gap |
+| [D24](#d24-real-scheduling-not-just-documented-scheduling) | Real scheduling, not just documented scheduling |
 
 ## D1. Who the repo is for
 
@@ -527,3 +528,39 @@ honestly-labeled "not built yet" line instead of a half-built one.
 **Would change if:** `metrics_server.py` itself gets a real warehouse adapter (the bigger piece), at which
 point redoing this feasibility check for `warehouse.*` specifically would no longer be the right frame —
 the two should likely be built together, pointed at the same real database.
+
+## D24. Real scheduling, not just documented scheduling
+
+`docs/install.md` already named Chief's four-mode daily cadence and gave copy-paste `crontab`/`schtasks`
+lines for it, but nobody had run them: "scheduled" meant "documented," not "proven." `scripts/install_schedule.ps1`
+turns the Windows half into working automation — it installs four real Scheduled Tasks (morning, midday,
+evening on Mon-Fri; weekly on Fri), each calling `python -m factory.chief --mode <mode>` through a short batch
+wrapper (`scripts/run_chief.bat`), needed only because `schtasks /TR` has a 261-character command-line limit
+that the direct command line blew past.
+
+**Live-verified, not just installed:** created all four tasks, confirmed each one's schedule via
+`schtasks /Query /V`, then fired `FactoryChiefMorning` with `schtasks /Run` — through Task Scheduler itself,
+not by calling Python. It produced a real brief (`runs/chief/.../brief.html`), posted its top-3 note to the
+outbox the way a manual run does, and Task Scheduler's own history recorded `Last Result: 0`. The log landed
+230 seconds after the trigger, consistent with a live agent call, not a stub.
+
+**What "connected to the whole loop" means here:** a single successful firing proves the trigger is real, not
+that repeated runs accumulate anything. The actual connection is `company/tallybird/lessons/chief.yaml`
+(`factory/chief/correct.py`): every Chief run, scheduled or manual, reads whatever corrections exist at call
+time and will see one a different run — scheduled or not — wrote earlier. That is the loop a bare cron entry
+doesn't prove by itself: later triggers inherit what earlier ones taught.
+
+**Scope, named plainly:** this demonstrates the scheduling mechanism against the sandbox's one fixed scenario
+day (every trigger's `--as-of` lands on `2026-03-02`, since the sandbox's `world.db` is a snapshot, not a
+calendar that actually advances). It does not demonstrate five different simulated days firing on five
+different real triggers — that would need `factory.loop.advance_day`, built for the loop's own internal
+multi-day replay, wired into a live install's actual daily cadence, which is a separate, larger piece of work.
+
+**Removed after verification**, not left running: four real tasks firing indefinitely against a frozen
+one-day demo, with no one reviewing the output day to day, is a real recurring cost for no ongoing benefit.
+`-Uninstall` removed all four; confirmed by `schtasks /Query` failing to find them afterward. The script stays
+committed for anyone who wants the real cadence running on their own install.
+
+**Would change if:** `factory.loop.advance_day` gets wired into a live install's daily trigger, at which point
+the sandbox demo above should be rebuilt around five real triggers each advancing the simulated day, not one
+fixed `--as-of` reused four times.
