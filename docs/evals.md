@@ -230,6 +230,18 @@ writeup: [docs/decisions.md#d25](decisions.md).
 Both agents' red-team tasks re-run live afterward: still clean. Six new generator regression tests
 (`tests/test_generator_s03.py`) and the full suite (291/291) pass.
 
+## Retro across scenarios (D26)
+
+Both of Retro's existing tasks only ever fed it runs from one scenario. `week-cross-scenario` mixes 3 real s01
+runs with 1 real s02 run, all genuine historical occurrences of the same already-fixed `(signal, numbers)` bug,
+not fabricated.
+
+| Task | Result | What it found |
+|---|---|---|
+| `week-cross-scenario`, 1 then 3 trials | 100% every trial | The proposed patch's own failure summary named each run's specific defect by content, correctly tying three different concrete mistakes across two scenarios to the same underlying pattern |
+
+Red-team task re-run afterward: still clean. Full writeup: [docs/decisions.md#d26](decisions.md).
+
 ## Grader changes
 
 Graders have bugs too. Each fix is logged, and saved transcripts are regraded with `python -m factory.evals regrade <agent> <run_id>`.

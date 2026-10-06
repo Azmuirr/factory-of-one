@@ -1,0 +1,19 @@
+{"at": "2026-09-27T03:46:59+00:00", "station": "setup", "event": "world ready", "scenario": "s01-calendar-gate", "seed": 1, "data_through": "2026-03-02T00:00:00Z"}
+{"at": "2026-09-27T03:46:59+00:00", "station": "sense", "event": "start"}
+{"at": "2026-09-27T03:50:38+00:00", "station": "sense", "event": "signal finished", "cost_usd": 0.5172, "turns": 7, "seconds": 218.5, "error": null}
+{"at": "2026-09-27T03:51:17+00:00", "station": "review", "event": "quality finished", "cost_usd": 0.0523, "turns": 4, "seconds": 38.6, "error": null}
+{"at": "2026-09-27T03:51:17+00:00", "station": "review", "event": "review", "entry": "pkt_0001", "verdict": "FIX", "correctness": {"fields": "pass", "numbers": "fail", "privacy": "pass", "quotes": "pass"}}
+{"at": "2026-09-27T03:51:21+00:00", "station": "decide", "event": "bet placed", "bet": "bet_0001"}
+{"at": "2026-09-27T03:52:50+00:00", "station": "build", "event": "builder finished", "cost_usd": 0.206, "turns": 17, "seconds": 88.7, "error": null}
+{"at": "2026-09-27T03:53:34+00:00", "station": "build", "event": "quality finished", "cost_usd": 0.0803, "turns": 6, "seconds": 43.8, "error": null}
+{"at": "2026-09-27T03:53:34+00:00", "station": "build", "event": "review", "entry": "bld_0001", "verdict": "SHIP", "correctness": {"fields": "pass", "numbers": "n/a", "privacy": "pass", "quotes": "n/a"}}
+{"at": "2026-09-27T03:54:00+00:00", "station": "build", "event": "quality finished", "cost_usd": 0.0568, "turns": 4, "seconds": 26.4, "error": null}
+{"at": "2026-09-27T03:54:00+00:00", "station": "build", "event": "review", "entry": "bld_0002", "verdict": "SHIP", "correctness": {"fields": "pass", "numbers": "n/a", "privacy": "pass", "quotes": "n/a"}}
+{"at": "2026-09-27T03:54:29+00:00", "station": "build", "event": "quality finished", "cost_usd": 0.0603, "turns": 5, "seconds": 29.2, "error": null}
+{"at": "2026-09-27T03:54:29+00:00", "station": "build", "event": "review", "entry": "bld_0003", "verdict": "SHIP", "correctness": {"fields": "pass", "numbers": "pass", "privacy": "pass", "quotes": "n/a"}}
+{"at": "2026-09-27T03:54:31+00:00", "station": "build", "event": "proposal matches the approved decision", "action": "act_0002"}
+{"at": "2026-09-27T03:54:51+00:00", "station": "apply", "event": "world advanced with the action", "data_through": "2026-03-16T00:00:00Z", "seconds": 18.2}
+{"at": "2026-09-27T03:54:54+00:00", "station": "prove", "event": "verdict written", "verdict": "ver_0001", "outcome": "improved", "before": 0.3052, "after": 0.3817, "prediction_hit": true}
+{"at": "2026-09-27T03:54:56+00:00", "station": "call", "event": "call made", "call": "call_0001", "decision": "iterate"}
+{"at": "2026-09-27T03:54:56+00:00", "station": "tell", "event": "Comms is not built yet. Nothing is sent."}
+{"at": "2026-09-27T03:54:56+00:00", "station": "learn", "event": "loop scored", "brier": 0.04, "prediction_hit": true, "pm_minutes": 7.3, "agent_cost_usd": 0.973}

@@ -29,6 +29,7 @@ Each entry records the options, the choice, and what would reverse it. The reaso
 | [D23](#d23-stopping-before-a-second-vendor-adapter-a-deliberate-line-not-a-gap) | Stopping before a second vendor adapter: a deliberate line, not a gap |
 | [D24](#d24-real-scheduling-not-just-documented-scheduling) | Real scheduling, not just documented scheduling |
 | [D25](#d25-scenario-3-the-sharing-step-breaks-and-a-dimension-both-prior-scenarios-taught-to-distrust-is-the-real-cause) | Scenario 3: the sharing step breaks, and a dimension both prior scenarios taught to distrust is the real cause |
+| [D26](#d26-retros-view-across-scenarios-the-same-real-historical-bug-found-in-both) | Retro's view across scenarios: the same real, historical bug found in both |
 
 ## D1. Who the repo is for
 
@@ -625,3 +626,40 @@ scenario 3 to the rest of the loop is a named next step, not a gap.
 **Would change if:** `meeting_platform` becomes a registered dimension for a metric that actually needs it
 (a real future need, not a hypothetical one), at which point the first-draft segment idea here would be worth
 revisiting on its own merits, not recycled just because it already has a name.
+
+## D26. Retro's view across scenarios: the same real, historical bug found in both
+
+`factory/retro.py`'s `week_stats` was already scenario-agnostic by construction: it reads every run folder in
+a given directory generically, with no scenario-specific logic at all. What hadn't been proven is that Retro's
+*pattern detection itself* genuinely spans scenario boundaries rather than just repeated runs of the same one.
+Both of Retro's existing eval tasks (`week-1`, `week-1-planted-instruction`) only ever fed it runs from
+`s01-calendar-gate`.
+
+**Built entirely from real, historical data, not fabricated.** `week-1`'s existing fixture already holds 3 real
+s01 runs where Signal's own packet failed the `numbers` check (the uncited-number bug fixed earlier this
+session). A search across every stored eval run for the same `(agent: signal, check: numbers)` pattern outside
+a deliberately-planted-defect fixture found exactly one real, organic match from a different scenario:
+`runs/evals/quality/20261002T015938Z/clean-packet-s02/trial-1`, the very first `clean-packet-s02` attempt from
+D18, which failed for the same underlying reason (a real p-value, correctly computed, left uncited). Both are
+frozen pre-fix snapshots of the same already-fixed bug, not new failures. `agents/retro/evals/fixtures/week-cross-scenario`
+mixes 3 of the s01 runs (renamed `loop-live-s01-*`) with the s02 run (`quality-live-s02-1`), trimmed to just its
+ledger. No synthetic or invented failure was needed.
+
+**Live-verified the pattern genuinely spans both, not a coincidental threshold.** `retro.week_stats` on the
+mixed folder confirms `recurring` includes `quality-live-s02-1` alongside two of the three s01 runs. More
+tellingly, the live-run patch's own `failure.summary` names each run's specific defect by content, not
+template: *"s01-4: ruled_out quoted the microsoft -22.25% figure without citing q_48b8a02dc5de. s01-6:
+voice_workspaces and evidence said 7 where the query gave 11. quality-live-s02-1: overall trial_to_paid_rate
+p=0.089815 had no evidence entry."* That is three different concrete defects, correctly attributed to the same
+underlying `(signal, numbers)` pattern, across two scenarios. `week-cross-scenario` passed 100% on 1 trial,
+then 100% on a 3-trial confirmation. Retro's red-team task (`week-1-planted-instruction`) was re-run afterward:
+still clean. Full suite: 291/291.
+
+**No grader code changed.** `retro_note`/`retro_patch` never actually read the `recurring.runs` count from the
+eval YAML's `key` (a close read of `factory/evals/graders.py` found this before writing the fixture, not
+after): they derive the real recurring set from `week_stats` itself and check against that. The existing
+graders already generalize to however many runs, and from however many scenarios, are actually in `week`.
+
+**Would change if:** a second cross-scenario pattern needs testing and no real historical failure exists to
+build it from. Fabricating one here would cross the same line D25's `meeting_platform` draft almost crossed:
+building the demo around something that isn't real, just because it would read cleaner.

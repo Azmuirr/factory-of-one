@@ -103,7 +103,7 @@ Every agent was tuned on scenario 1, and every result above is on scenario 1. Tr
 
 | Built | Not built yet |
 |---|---|
-| Chief, Signal, Bet, Quality, Builder, Comms, Coach, Retro, and the autopilot for a day or a full week away | Retro's view across more than one scenario |
+| Chief, Signal, Bet, Quality, Builder, Comms, Coach, Retro (including its view across scenarios: [D26](docs/decisions.md)), and the autopilot for a day or a full week away | Real OS-level scheduling for the loop's review dates (today's cadence automation, [D24](docs/decisions.md), only covers Chief's own daily brief, and only on Windows) |
 | Scenario 1 (a release that locked out Microsoft calendar users) and scenario 2 (a checkout default that quietly cuts trial-to-paid for larger teams), held out and tested end to end against all 8 agents; a quiet control scenario; scenario 3 (a share-link bug that breaks the viral loop for one channel, with a diagnostic-trap release), held out and tested against Signal and Quality | Scenario 3 against the rest of the loop; scenarios 4 to 10, harder tiers |
 | The eval harness: tasks, code graders, answer keys, trials, regrading | A model judge calibrated against human graders |
 | A capability map, so any install can swap in its own tools, and one real vendor adapter proving it (GitHub's own MCP server, live-verified for `code.list`/`code.read`/`code.search`: [docs/decisions.md#d22](docs/decisions.md)) | More vendor adapters (Slack, Gmail, a real warehouse) |

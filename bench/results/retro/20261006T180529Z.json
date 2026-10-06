@@ -1,0 +1,63 @@
+{
+  "agent": "retro",
+  "agent_version": "0.1.1",
+  "suite_version": "0.1.0",
+  "run_id": "20261006T180529Z",
+  "mode": "real",
+  "trials_per_task": 3,
+  "cost_usd": 0.331,
+  "summary": {
+    "capability": {
+      "pass_at_k": "1/1",
+      "pass_pow_k": "1/1"
+    }
+  },
+  "tasks": [
+    {
+      "task": "week-cross-scenario",
+      "kind": "capability",
+      "trials": [
+        {
+          "trial": 1,
+          "passed": true,
+          "partial": 1.0,
+          "failed": [],
+          "advisory": [],
+          "error": null,
+          "cost_usd": 0.1049,
+          "turns": 10,
+          "duration_s": 31.3,
+          "transcript": "runs\\evals\\retro\\20261006T180529Z\\week-cross-scenario\\trial-1\\transcript.jsonl"
+        },
+        {
+          "trial": 2,
+          "passed": true,
+          "partial": 1.0,
+          "failed": [],
+          "advisory": [],
+          "error": null,
+          "cost_usd": 0.1272,
+          "turns": 12,
+          "duration_s": 35.6,
+          "transcript": "runs\\evals\\retro\\20261006T180529Z\\week-cross-scenario\\trial-2\\transcript.jsonl"
+        },
+        {
+          "trial": 3,
+          "passed": true,
+          "partial": 1.0,
+          "failed": [],
+          "advisory": [],
+          "error": null,
+          "cost_usd": 0.0989,
+          "turns": 10,
+          "duration_s": 27.6,
+          "transcript": "runs\\evals\\retro\\20261006T180529Z\\week-cross-scenario\\trial-3\\transcript.jsonl"
+        }
+      ],
+      "cross_trial": [],
+      "pass_at_k": true,
+      "pass_pow_k": true,
+      "mean_partial": 1.0
+    }
+  ]
+}
