@@ -84,6 +84,8 @@ class Simulator:
                     merged["block_release"] = release.id
                 elif effect["kind"] == "paid_friction":
                     merged["friction_release"] = release.id
+                elif effect["kind"] == "share_block":
+                    merged["share_release"] = release.id
             if applied:
                 ws.releases_applied.append(release.id)
         return merged
@@ -218,8 +220,10 @@ class Simulator:
                 events.append((start + 30, "calendar_connect_completed", {"provider": provider}))
             meet_t = min(start + rng.lognormal(math.log(20 * 3600), 0.8), deadline - 4 * 3600)
             meet_t = max(meet_t, start + 60)
-            share_t = self.meeting(ws, rng, meet_t, events, share_within=deadline)
+            share_t = self.meeting(ws, rng, meet_t, events, share_within=deadline, share_prob=effects.get("share_retained", 1.0))
             ws.activated_at = share_t
+            if share_t is None and "share_release" in effects and self.ticket_theme and u_ticket < self.ticket_theme["file_rate"]:
+                self.planted_ticket(ws, rng, meet_t + rng.uniform(0.1, 1.0) * DAY)
             for _ in range(int(rng.poisson(2))):
                 self.meeting(ws, rng, t0 + rng.uniform(1, 14) * DAY, events, share_prob=0.6)
         else:

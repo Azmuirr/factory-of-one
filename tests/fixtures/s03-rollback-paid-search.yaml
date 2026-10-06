@@ -1,0 +1,6 @@
+- at: {week: 8, day: 7}
+  name: rollback
+  params:
+    release_id: rel_0612
+    segment: {channel: [paid_search]}
+  decided_by: pm

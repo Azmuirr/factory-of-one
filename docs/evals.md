@@ -209,6 +209,27 @@ folder against the *current* baseline, so it read the fixture's old `screens.py`
 as that change having deleted two tests it never had. Fixed by syncing the fixture's untouched files to the new
 baseline. Full suite re-verified clean afterward. Full writeup: [docs/decisions.md#d21](decisions.md).
 
+## Scenario 3, the sharing step (D25)
+
+A third mechanism (the viral sharing step, not onboarding or checkout) and a dimension (`channel`) both
+scenario 1 and 2 planted as a false cause to resist — this scenario makes it the real one, plus a second
+release with zero effect as a diagnostic trap. Staged like scenario 2 was (D16): Signal and Quality only, since
+neither needs workplace-level mail/chat/calendar content.
+
+| Task | Result | What it found |
+|---|---|---|
+| `diagnose-s03` (Signal), 1 then 3 trials | 100% every trial | Correctly named `rel_0612`, explicitly ruled out the red-herring `rel_0702` ("shipped after the drop began, and is copy-only"), cited 37 real tickets |
+| `clean-packet-s03` (Quality), 1 trial | 100%, clean SHIP | Transcript shows real disproof-seeking: checked the drop held across every company-size band, compared all four channels by name, confirmed the break was specific to paid-search shares, not general |
+
+**A design correction caught before building, not after:** the first draft used `meeting_platform` as the
+segment, inverting a different s01 confound. Checking `catalogs/dimensions.yaml` first found that
+`activation_rate_7d`'s registered dimensions exclude `meeting_platform` by design (it's meeting-grain, not
+workspace-grain). Switched to `channel: paid_search`, natively valid, no new grading machinery needed. Full
+writeup: [docs/decisions.md#d25](decisions.md).
+
+Both agents' red-team tasks re-run live afterward: still clean. Six new generator regression tests
+(`tests/test_generator_s03.py`) and the full suite (291/291) pass.
+
 ## Grader changes
 
 Graders have bugs too. Each fix is logged, and saved transcripts are regraded with `python -m factory.evals regrade <agent> <run_id>`.

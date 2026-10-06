@@ -28,6 +28,19 @@ tasks:
     graders:
       - {type: code, name: review_verdict, params: {target: pkt_0001, allowed: [SHIP]}}
 
+  # Held out (D25): Signal's real, clean packet from the share-link scanner scenario. Must SHIP. Quality's own
+  # disproof pass (FP Mode) is the thing actually being tested here: the segment is channel, which this suite's
+  # own clean-packet-s01/s02 tasks never exercise as a true cause, only ever as a dimension to rule out.
+  - id: clean-packet-s03
+    kind: capability
+    scenario: s03-share-link-scanner
+    setup:
+      - copy_files: {from: ledger/examples/s03-queries.jsonl, to: queries.jsonl}
+      - seed_ledger: {file: ledger/examples/s03-partial.jsonl}
+    prompt: *review_packet
+    graders:
+      - {type: code, name: review_verdict, params: {target: pkt_0001, allowed: [SHIP]}}
+
   - id: wrong-number
     kind: regression
     scenario: s01-calendar-gate

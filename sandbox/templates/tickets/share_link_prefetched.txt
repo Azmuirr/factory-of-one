@@ -1,0 +1,14 @@
+Share link says it's already been opened
+I sent a recap link to a teammate right after our call and they said it was already used. Nobody else had clicked it. Our IT team runs everything through a link scanner before delivery, might be related.
+---
+Recap link expired before anyone saw it
+Shared a recap the moment the meeting ended and the recipient got an "already viewed" error within a minute. We're on a corporate email gateway that pre-scans links.
+---
+Can't get a working recap link
+Every recap link I send comes back as expired or already opened. Our security team scans inbound email links automatically, so maybe that's eating the one-time link.
+---
+Recap link burned before I could share it twice
+Tried resending the same recap link after the first recipient said it didn't work, and the second person got the same "already used" message. Something is consuming the link before a person clicks it.
+---
+IT link scanner breaking our recap shares
+Our security gateway rewrites and prefetches every link in inbound mail for scanning. Ever since the new share links shipped, every recap we're sent reports as already used by the time we open it.

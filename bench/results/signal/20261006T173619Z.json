@@ -1,0 +1,63 @@
+{
+  "agent": "signal",
+  "agent_version": "0.3.10",
+  "suite_version": "0.1.0",
+  "run_id": "20261006T173619Z",
+  "mode": "real",
+  "trials_per_task": 3,
+  "cost_usd": 1.0481,
+  "summary": {
+    "capability": {
+      "pass_at_k": "1/1",
+      "pass_pow_k": "1/1"
+    }
+  },
+  "tasks": [
+    {
+      "task": "diagnose-s03",
+      "kind": "capability",
+      "trials": [
+        {
+          "trial": 1,
+          "passed": true,
+          "partial": 1.0,
+          "failed": [],
+          "advisory": [],
+          "error": null,
+          "cost_usd": 0.4004,
+          "turns": 6,
+          "duration_s": 118.6,
+          "transcript": "runs\\evals\\signal\\20261006T173619Z\\diagnose-s03\\trial-1\\transcript.jsonl"
+        },
+        {
+          "trial": 2,
+          "passed": true,
+          "partial": 1.0,
+          "failed": [],
+          "advisory": [],
+          "error": null,
+          "cost_usd": 0.2849,
+          "turns": 22,
+          "duration_s": 78.3,
+          "transcript": "runs\\evals\\signal\\20261006T173619Z\\diagnose-s03\\trial-2\\transcript.jsonl"
+        },
+        {
+          "trial": 3,
+          "passed": true,
+          "partial": 1.0,
+          "failed": [],
+          "advisory": [],
+          "error": null,
+          "cost_usd": 0.3628,
+          "turns": 25,
+          "duration_s": 86.3,
+          "transcript": "runs\\evals\\signal\\20261006T173619Z\\diagnose-s03\\trial-3\\transcript.jsonl"
+        }
+      ],
+      "cross_trial": [],
+      "pass_at_k": true,
+      "pass_pow_k": true,
+      "mean_partial": 1.0
+    }
+  ]
+}

@@ -28,6 +28,7 @@ Each entry records the options, the choice, and what would reverse it. The reaso
 | [D22](#d22-the-first-vendor-adapter-githubs-own-mcp-server-for-builders-read-capabilities) | The first vendor adapter: GitHub's own MCP server for Builder's read capabilities |
 | [D23](#d23-stopping-before-a-second-vendor-adapter-a-deliberate-line-not-a-gap) | Stopping before a second vendor adapter: a deliberate line, not a gap |
 | [D24](#d24-real-scheduling-not-just-documented-scheduling) | Real scheduling, not just documented scheduling |
+| [D25](#d25-scenario-3-the-sharing-step-breaks-and-a-dimension-both-prior-scenarios-taught-to-distrust-is-the-real-cause) | Scenario 3: the sharing step breaks, and a dimension both prior scenarios taught to distrust is the real cause |
 
 ## D1. Who the repo is for
 
@@ -564,3 +565,63 @@ committed for anyone who wants the real cadence running on their own install.
 **Would change if:** `factory.loop.advance_day` gets wired into a live install's daily trigger, at which point
 the sandbox demo above should be rebuilt around five real triggers each advancing the simulated day, not one
 fixed `--as-of` reused four times.
+
+## D25. Scenario 3: the sharing step breaks, and a dimension both prior scenarios taught to distrust is the real cause
+
+Scenarios 1 and 2 each taught a different funnel step and segment dimension; both also planted `channel` as a
+false cause to resist (s01's and s02's `false_causes` both list it). Scenario 3 makes `channel` the *real*
+cause, to find out whether resisting it so far generalized into genuine data-driven localization or into a
+memorized "channel is never it" shortcut — the sharpest generalization test built yet, and lower-risk to add
+than it sounds, because it needed no new infrastructure: `channel` is already a registered dimension for
+`activation_rate_7d`, unlike `meeting_platform` (the first segment considered and rejected below).
+
+**The mechanism, a third one:** the viral sharing step itself (`recap_shared`, the activation event, D3) breaks
+for `channel: paid_search` workspaces after `rel_0612` ships a single-use share link; paid-search-acquired
+workspaces' corporate email gateways prefetch and scan inbound links, burning the one-time token before a real
+person clicks it. Neither onboarding (s01) nor checkout (s02) touches this step. A second release, `rel_0702`
+(a copy-only subject-line change), ships later, closer to "now," with zero effect: a diagnostic trap scenario 1
+and 2 didn't have, since both had exactly one candidate release.
+
+**A real design correction, caught before building, not after:** the first draft used `meeting_platform`
+(the inverse of a different confound s01 already tests, "don't blame Teams, blame Microsoft's admin consent")
+as the segment. Checking the catalog first — the project's own discipline, not skipped here — found that
+`activation_rate_7d`'s registered `dimensions` list excludes `meeting_platform` entirely, by design
+(`catalogs/dimensions.yaml`'s own warning: it's meeting-grain, not workspace-grain, and slicing by it
+attributes a workspace's outcome to one meeting's platform). Building the scenario around it anyway would have
+meant either fighting a real, intentional guardrail or inventing a whole new "exploratory tool fallback"
+grading mechanism neither asked for nor scoped. Switched to `channel: paid_search`, which is natively valid,
+keeps the same inversion property (a dimension both prior scenarios taught to distrust), and needed zero new
+grading machinery.
+
+**The generator change, three small, generic edits to `sandbox/generator/model.py`:** a new effect kind,
+`share_block`, merges a `share_retained` multiplier the way `paid_friction`'s `paid_mult` already does; the
+activating meeting's `self.meeting()` call reads it (default `1.0`, so every existing scenario is
+unaffected); and a ticket gets planted when a share fails for an affected workspace, mirroring the two existing
+ticket-planting call sites. Calibrated against the real generated world, not invented: `paid_search`
+`activation_rate_7d` 0.3107 to 0.2033 (p≈0, z=-8.74), overall 0.4005 to 0.3782 (material but far smaller),
+`calendar_connect_rate_1d`/`first_meeting_rate_7d`/`trial_to_paid_rate` all unmaterial for the segment,
+confirming the break is isolated to the share step with no revenue impact — a measurement and
+user-experience problem, not a revenue one, which `truth.yaml` makes an explicit wrong-answer trap ("cite a
+revenue or ARR loss" is listed under `decision.wrong`).
+
+**Live-verified, both agents, clean on the first try:** `diagnose-s03` (Signal) passed 100% on 1 trial, then
+100% on a 3-trial confirmation. The transcript shows genuine reasoning, not a lucky grader match: it named
+`rel_0612`, correctly explained "`rel_0702` ... is ruled out. It shipped 2026-02-20, after the drop began, and
+is copy-only," and cited 37 real tickets. `clean-packet-s03` (Quality) SHIPped clean on the first trial, with
+the transcript showing real disproof-seeking: it checked whether the drop held across every company-size band,
+compared it against the three unaffected channels by name, and confirmed paid-search shares specifically (not
+generally) stopped succeeding at the prior rate. Both agents' `planted-instruction(s)` red-team tasks were
+re-run live afterward: still clean. Six new generator regression tests
+(`tests/test_generator_s03.py`) and the full suite (291/291) all pass.
+
+**Staged, like scenario 2 was (D16), and said so in `truth.yaml` itself:** only Signal and Quality are tested,
+because both run against the generator's world directly with no workplace-level mail/chat/calendar content
+needed (confirmed: `sandbox/generator/workplace.py` treats a missing `workplace.yaml` as empty, the same way
+`s00-quiet` already has none). Chief, Bet, and Comms need a full day's hand-authored workplace content to
+grade against, the way D18 built for scenario 2; re-proving their already-demonstrated generalization on a
+third full day of content is real work for low marginal evidence, given D18 already proved it once. Extending
+scenario 3 to the rest of the loop is a named next step, not a gap.
+
+**Would change if:** `meeting_platform` becomes a registered dimension for a metric that actually needs it
+(a real future need, not a hypothetical one), at which point the first-draft segment idea here would be worth
+revisiting on its own merits, not recycled just because it already has a name.

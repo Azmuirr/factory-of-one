@@ -1,0 +1,90 @@
+# Grading key for scenario 3. Only the bench reads this file.
+# Held out: built after every agent's instructions were already written. Nothing here was used to tune a skill.
+# Staged like scenario 2 was (D16): Signal and Quality first, since both run against the generator's world
+# directly with no workplace-level mail/chat/calendar content needed. No chief/bet/comms grading keys exist
+# yet; extending to the rest of the loop, the way D18 did for scenario 2, is a named next step, not a gap.
+scenario: s03-share-link-scanner
+version: 0.1.0
+
+cause:
+  release: rel_0612
+  mechanism: "The shortened share link is single-use: anything that requests the URL marks it used, including an automated prefetch. Paid-search-acquired workspaces skew toward larger companies whose corporate email gateways prefetch and scan inbound links before a person clicks them, which burns the token before the real recipient ever opens it."
+  affected:
+    segment: {channel: [paid_search]}
+    funnel_step: "calendar_connect_rate_1d and first_meeting_rate_7d are both unchanged for this segment; only the share step itself (and therefore activation_rate_7d, which activation is defined by) drops. The workspace reaches and records its first meeting normally, then the share silently fails"
+  onset: {week: 5, day: 3}
+  size:
+    paid_search_activation_7d: {before: 0.3107, after: 0.2033, relative_change: -0.3457}
+    overall_activation_7d: {before: 0.4005, after: 0.3782, relative_change: -0.0557}
+    trial_to_paid_rate: {before: 0.0904, after: 0.0925}  # unaffected: see secondary_effect
+  secondary_effect: "None on revenue. Because `trial_end` keys paid conversion off whether a workspace would activate, not off whether its share actually succeeded, trial_to_paid_rate is flat for the affected segment: these workspaces convert at the same rate, they just never get credited with activating by the strict definition (a real recap shared). This is a measurement and user-experience problem, not a revenue one, and a diagnosis that invents an ARR-loss number here is fabricating evidence the data doesn't support."
+
+expected_findings:
+  - id: F1
+    finding: "Localizes the drop to the paid_search channel, not to calendar_provider or company_size."
+  - id: F2
+    finding: "Ties the onset to rel_0612, not to rel_0702 (the shorter-subject-line release, which shipped later and has no effect)."
+  - id: F3
+    finding: "Names the single-use share link being consumed by an automated link-prefetch/scanner as the mechanism, and confirms calendar_connect_rate_1d and first_meeting_rate_7d are unchanged for the segment, so the break is isolated to the share step."
+  - id: F4
+    finding: "Cites tickets from 3 or more workspaces describing a share link that reports as already used or expired."
+  - id: F5
+    finding: "Computes activation_rate_7d on mature cohorts only (7 full days)."
+  - id: F6
+    finding: "Bonus: notes trial_to_paid_rate is unaffected for the segment, and does not invent a revenue-loss figure the data doesn't support."
+
+decision:
+  correct:
+    - "Roll back rel_0612 for the paid_search segment, then retest the share-link format behind a flag."
+    - "Roll back rel_0612 for everyone, then retest behind a flag."
+    - "Start an experiment that restores the long-form signed link for the affected segment, to validate the fix before fully committing."
+  partial:
+    - "Roll back without a retest plan."
+  wrong:
+    - "No action by the end of week 8."
+    - "Blame calendar_provider, company_size, or a change in meeting volume: none moved."
+    - "Blame rel_0702 (the subject-line copy change)."
+    - "Cite a revenue or ARR loss: trial_to_paid_rate did not move for this segment."
+
+outcome_if_correct:
+  leading: "New paid_search workspaces see a working, multi-open-safe share link within 1 day of the fix."
+  lagging: "paid_search activation_rate_7d within 2 points of its pre-onset level (0.3107) for cohorts that start after the fix."
+  observation_lag_days: 7  # activation_rate_7d's own window
+
+traps_in_data:
+  - "Cohorts from the last 7 days are immature for this metric; a naive read near 'now' looks worse than it is."
+  - "rel_0702 shipped more recently than rel_0612 and is the more tempting release to blame on recency alone; it has no effects at all."
+  - "Both scenario 1 and 2 list channel as a dimension to resist blaming by default. Here it is the real segment: a search that stops at 'channel is usually a false lead' without checking the data misses this."
+  - "calendar_connect_rate_1d and first_meeting_rate_7d are both unchanged. A search for 'what changed' that starts with the calendar step, scenario 1's muscle memory, finds nothing here."
+  - "trial_to_paid_rate does not move either: this is not a revenue story, and forcing one onto it is a false alarm."
+  - "Organic and direct channel activation are flat (noise-level): a segment-by-segment read must not stop at the first segment checked, and must not generalize from one channel's non-finding to all channels."
+
+bench_score:
+  - found_cause: "F1, F2, and F3 present"
+  - decided: "correct, partial, or wrong, per the lists above"
+  - detection_latency_days: "from onset to the first decision packet naming the cause"
+  - pm_minutes: "proxy from words read and decisions made at gates"
+  - agent_cost_usd: "from traces"
+  - false_alarms: "claims about causes not in this file, especially calendar_provider, company_size, or a revenue figure"
+
+# Machine-readable key for code graders.
+grading:
+  alarm_expected: true
+  diagnosis:
+    metric: activation_rate_7d
+    segment: {channel: [paid_search]}
+    segments_accepted:
+      - {channel: [paid_search]}
+    release_id: rel_0612
+    mechanism_metric: activation_rate_7d
+    voice_min_workspaces: 3
+  false_causes:
+    - {dimension: calendar_provider}
+    - {dimension: company_size}
+  recommended_action:
+    name: rollback
+    names_accepted: [rollback, start_experiment]
+    release_id: rel_0612
+    segments_accepted:
+      - {channel: [paid_search]}
+      - {}

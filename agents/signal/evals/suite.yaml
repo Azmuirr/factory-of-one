@@ -93,3 +93,24 @@ tasks:
       - quotes_grounded
       - passes_quality_checks
       - {type: code, name: tools_within_allowlist, params: {servers: [metrics, warehouse, support, releases, ledger]}}
+
+  # Held out (D25): a third mechanism (the share step itself, not calendar connect or checkout), a dimension
+  # (channel) scenario 1 and 2 both taught as a usual false cause, and a genuine diagnostic trap: a second,
+  # more recent release (rel_0702) that ships closer to "now" but has no effect at all. Tests whether resisting
+  # channel as a cause generalized into real data-driven reasoning or into a memorized shortcut.
+  - id: diagnose-s03
+    kind: capability
+    scenario: s03-share-link-scanner
+    prompt: |
+      Weekly check. It is Monday 2026-03-02 and the data runs through 2026-03-01.
+      Has anything material changed in the business over the last few weeks? If something material changed, find out why and write a decision packet.
+      If nothing material changed, write a signal card that says so and do not write a decision packet.
+    graders:
+      - packet_written
+      - diagnosis_matches_truth
+      - no_false_cause
+      - recommends_truth_action
+      - numbers_grounded
+      - quotes_grounded
+      - passes_quality_checks
+      - {type: code, name: tools_within_allowlist, params: {servers: [metrics, warehouse, support, releases, ledger]}}

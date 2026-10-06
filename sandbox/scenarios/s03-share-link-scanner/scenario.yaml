@@ -1,0 +1,53 @@
+# Generator input for scenario 3. Hidden from agents: they see only the generated world.
+# Held out: built after every agent's instructions were already written. A third, different mechanism: the
+# viral sharing step itself breaks for one channel segment, with an unrelated, more recent release sitting
+# between onset and now as a diagnostic trap. Both scenario 1 and 2 list `channel` as a false cause to resist;
+# this scenario makes it the real one, to test whether that generalized into genuine data-driven localization
+# or into a memorized "channel is never it" shortcut.
+id: s03-share-link-scanner
+title: Recap shares silently fail for paid-search workspaces after the shortened share-link release
+version: 0.1.0
+tier: medium
+tiers_built: [medium]
+
+clock:
+  weeks: 10
+  now: {week: 8, day: 7}
+  post_action_weeks: [9, 10]
+
+baseline: default  # sandbox/SPEC.md section 4
+
+releases:
+  - id: rel_0612
+    at: {week: 5, day: 3}
+    title: "Recap sharing: shortened share links"
+    notes: "Recap share links now use a shortened, one-time-use URL instead of a long signed link, to make them easier to paste into chat. The one-time token is marked used the moment anything requests the URL, including an automated prefetch."
+    flag: null
+    effects:
+      - kind: share_block
+        # Paid-search-acquired workspaces skew toward larger, more security-conscious companies (the same
+        # correlation scenario 2's pricing sensitivity rode on) whose corporate email gateways prefetch and
+        # scan inbound links before a person ever clicks them. The prefetch burns the one-time token, so the
+        # real recipient's click reports the link as already used. Organic, direct, and recap_link workspaces
+        # are overwhelmingly smaller teams without that kind of mail security and are unaffected.
+        segment: {channel: [paid_search]}
+        share_retained: 0.35
+
+  - id: rel_0702
+    at: {week: 7, day: 5}
+    title: "Recap email: shorter subject line"
+    notes: "The recap email's subject line was shortened from 'Your recap from <meeting>' to 'Recap ready'. Copy only; no change to the share link, the share flow, or any other behavior."
+    flag: null
+    effects: []  # a genuine release with no effect on any metric: the trap is its timing, not its content
+
+text:
+  tickets:
+    - theme: share_link_prefetched
+      eligible: "activated workspace, paid_search channel, share attempted and failed, affected by rel_0612's segment"
+      file_rate: 0.08
+      support_tag_mix: {recap_quality: 0.7, other: 0.3}
+      template: templates/tickets/share_link_prefetched.txt
+
+messages: []
+
+actions_available: [rollback, set_flag, start_experiment, no_action]
